@@ -78,6 +78,16 @@ npm start
 - 所有 OpenDota 请求携带自定义 `User-Agent`
 - 英雄头像：Steam CDN `cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/...`
 
+## 玻璃渲染
+
+霜化面板采用 **Authkit 式澄澈午夜玻璃**（教堂玻璃清晰度——冷色冰边，而非浑浊白雾），布局仍保持 Weather IoT：
+
+1. **共享 SVG filter defs**（`GlassFilters`）— `feSpecularLighting` 冰面高光（`#glass-specular` / `#glass-hero`）；可选极低振幅霜化/折射（`#glass-frost`、`#glass-premium`）仅用于装饰层。
+2. **CSS 玻璃叠层** — 冷色 `rgba(186,214,247,…)` 填充 + `backdrop-filter` 模糊/饱和 + Authkit 式内嵌霜影 + 渐变冰边；面板上 `filter: url(#…)`（小屏 / `prefers-reduced-motion` 时关闭）。
+3. **Hero canvas 高光**（`HeroGlassSheen`）— 轻量 2D canvas 镜面（soft-light），移动端 / 减动时静态。无 Three.js。
+
+参考偏向：[Refero Authkit — Frosted glass cathedral at midnight](https://styles.refero.design/style/e80231a2-e4d6-406a-a2c9-2e6109679690)。
+
 ## License
 
 MIT

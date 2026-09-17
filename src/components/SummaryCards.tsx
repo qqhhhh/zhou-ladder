@@ -2,6 +2,7 @@
 
 import type { SummaryStats } from "@/lib/types";
 import { formatNum } from "@/lib/stats";
+import { HeroGlassSheen } from "@/components/glass";
 
 export function SummaryCards({
   summary,
@@ -26,9 +27,10 @@ export function SummaryCards({
   return (
     <section
       id="overview"
-      className="hero-hub relative min-h-[300px] scroll-mt-24 p-5 md:min-h-[340px] md:p-6 lg:p-7"
+      className="hero-hub glass-svg-hero relative min-h-[300px] scroll-mt-24 overflow-hidden p-5 md:min-h-[340px] md:p-6 lg:p-7"
     >
-      <div className="relative z-[1] flex h-full flex-col justify-between gap-7">
+      <HeroGlassSheen />
+      <div className="relative z-[2] flex h-full flex-col justify-between gap-7">
         <div className="flex flex-wrap items-start justify-between gap-5">
           <div>
             <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-white/45">
