@@ -41,9 +41,9 @@ export function SummaryCards({
       ),
       tone:
         summary.netWins > 0
-          ? "text-[#05cd99]"
+          ? "text-[#ee5d50]"
           : summary.netWins < 0
-            ? "text-[#ee5d50]"
+            ? "text-[#a3aed0]"
             : "text-navy-700",
       delta:
         summary.netWins !== 0
@@ -71,7 +71,7 @@ export function SummaryCards({
           <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
         </svg>
       ),
-      tone: summary.winrate >= 50 ? "text-brand" : "text-orange-500",
+      tone: summary.winrate >= 50 ? "text-[#ee5d50]" : "text-[#a3aed0]",
       delta: {
         up: summary.winrate >= 50,
         text: `${summary.winrate.toFixed(1)}%`,
@@ -115,7 +115,7 @@ export function SummaryCards({
               {"delta" in item && item.delta ? (
                 <span
                   className={`text-xs font-bold tabular-nums ${
-                    item.delta.up ? "text-[#05cd99]" : "text-[#ee5d50]"
+                    item.delta.up ? "text-[#ee5d50]" : "text-[#a3aed0]"
                   }`}
                 >
                   {item.delta.up ? "↑" : "↓"}
