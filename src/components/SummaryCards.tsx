@@ -26,7 +26,7 @@ export function SummaryCards({
     },
     {
       key: "wl",
-      label: "W-L",
+      label: "胜负",
       value: `${summary.wins}-${summary.losses}`,
       hint:
         summary.netWins > 0

@@ -82,10 +82,11 @@ export function WinChart({
   const last = points[points.length - 1];
   // Range net wins = final cumulative (series starts at 0 within the filter)
   const netWins = summary?.netWins ?? last.cumulativeNetWins;
-  const wr =
+  const rollingWr =
     last.rollingWinrate != null
       ? last.rollingWinrate
       : (summary?.winrate ?? 0);
+  const overallWr = summary?.winrate ?? 0;
 
   return (
     <section
@@ -117,14 +118,28 @@ export function WinChart({
               <span className="text-sm font-medium text-ink-muted">滚动胜率</span>
               <span
                 className={`font-mono text-2xl font-bold tabular-nums ${
-                  wr > 50
+                  rollingWr > 50
                     ? "text-[#ee5d50]"
-                    : wr < 50
+                    : rollingWr < 50
                       ? "text-[#a3aed0]"
                       : "text-navy-700"
                 }`}
               >
-                {wr.toFixed(1)}%
+                {rollingWr.toFixed(1)}%
+              </span>
+            </div>
+            <div className="flex items-baseline gap-2">
+              <span className="text-sm font-medium text-ink-muted">胜率</span>
+              <span
+                className={`font-mono text-2xl font-bold tabular-nums ${
+                  overallWr > 50
+                    ? "text-[#ee5d50]"
+                    : overallWr < 50
+                      ? "text-[#a3aed0]"
+                      : "text-navy-700"
+                }`}
+              >
+                {overallWr.toFixed(1)}%
               </span>
             </div>
           </div>
@@ -256,7 +271,7 @@ export function WinChart({
             滚动胜率
           </p>
           <p className="mt-0.5 font-mono text-sm font-bold tabular-nums text-navy-700">
-            {wr.toFixed(1)}%
+            {rollingWr.toFixed(1)}%
           </p>
         </div>
       </div>
