@@ -4,64 +4,104 @@ import { motion } from "framer-motion";
 import type { SummaryStats } from "@/lib/types";
 import { formatNum, formatPct } from "@/lib/stats";
 
-const cards = (
-  s: SummaryStats,
-): { label: string; value: string; sub?: string; accent: string; glow: string }[] => [
-  {
-    label: "场次",
-    value: String(s.games),
-    accent: "from-cyan-500/35 to-blue-600/10",
-    glow: "group-hover:shadow-[0_0_32px_rgba(34,211,238,0.25)]",
-  },
-  {
-    label: "战绩 W-L",
-    value: `${s.wins}-${s.losses}`,
-    sub: `净胜 ${s.netWins >= 0 ? "+" : ""}${s.netWins}`,
-    accent: "from-emerald-500/35 to-teal-600/10",
-    glow: "group-hover:shadow-[0_0_32px_rgba(16,185,129,0.25)]",
-  },
-  {
-    label: "胜率",
-    value: formatPct(s.winrate),
-    accent: "from-violet-500/35 to-fuchsia-600/10",
-    glow: "group-hover:shadow-[0_0_32px_rgba(167,139,250,0.25)]",
-  },
-  {
-    label: "场均 KDA",
-    value: formatNum(s.avgKda, 2),
-    accent: "from-amber-500/40 to-orange-600/15",
-    glow: "group-hover:shadow-[0_0_36px_rgba(245,158,11,0.35)]",
-  },
-];
+export function SummaryCards({
+  summary,
+  rangeLabel,
+}: {
+  summary: SummaryStats;
+  rangeLabel: string;
+}) {
+  const metrics = [
+    {
+      label: "场次",
+      value: String(summary.games),
+      hint: rangeLabel,
+    },
+    {
+      label: "战绩 W-L",
+      value: `${summary.wins}-${summary.losses}`,
+      hint: `净胜 ${summary.netWins >= 0 ? "+" : ""}${summary.netWins}`,
+    },
+    {
+      label: "胜率",
+      value: formatPct(summary.winrate),
+      hint: "ranked only",
+    },
+    {
+      label: "场均 KDA",
+      value: formatNum(summary.avgKda, 2),
+      hint: "(K+A)/D",
+    },
+  ];
 
-export function SummaryCards({ summary }: { summary: SummaryStats }) {
   return (
-    <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-      {cards(summary).map((c, i) => (
-        <motion.div
-          key={c.label}
-          initial={{ opacity: 0, y: 16, scale: 0.97 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ delay: i * 0.07, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-          whileHover={{ y: -4, scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className={`group glass-card kpi-glow relative overflow-hidden bg-gradient-to-br ${c.accent} p-4 ${c.glow}`}
-        >
-          <div
-            className="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/5 blur-2xl transition group-hover:bg-amber-400/15"
-            aria-hidden
-          />
-          <div className="relative text-xs tracking-wider text-slate-400">
-            {c.label}
+    <motion.section
+      id="overview"
+      initial={{ opacity: 0, y: 16, scale: 0.98 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+      className="hero-hub relative scroll-mt-24 rounded-[1.35rem] p-5 md:p-7"
+    >
+      <div
+        className="hub-orb -left-10 -top-16 h-48 w-48 bg-teal-400/35"
+        aria-hidden
+      />
+      <div
+        className="hub-orb -bottom-16 -right-8 h-40 w-40 bg-amber-400/20"
+        aria-hidden
+      />
+      <div
+        className="hub-orb right-1/3 top-0 h-24 w-24 bg-cyan-300/25"
+        aria-hidden
+      />
+
+      <div className="relative z-[1]">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <p className="text-xs uppercase tracking-[0.2em] text-teal-300/80">
+              Overview Hub
+            </p>
+            <h2 className="mt-1 text-2xl font-semibold text-white md:text-3xl">
+              总览摘要
+            </h2>
+            <p className="mt-1.5 max-w-md text-sm text-slate-400">
+              lobby_type=7 天梯对局 · {rangeLabel}
+            </p>
           </div>
-          <div className="relative mt-1 font-mono text-2xl font-semibold text-white tabular-nums drop-shadow-[0_0_12px_rgba(255,255,255,0.15)]">
-            {c.value}
+          <div className="rounded-full bg-teal-400/10 px-3 py-1 text-xs text-teal-100 ring-1 ring-teal-400/30">
+            净胜{" "}
+            <span className="font-mono font-semibold tabular-nums">
+              {summary.netWins >= 0 ? "+" : ""}
+              {summary.netWins}
+            </span>
           </div>
-          {c.sub ? (
-            <div className="relative mt-1 text-xs text-slate-400">{c.sub}</div>
-          ) : null}
-        </motion.div>
-      ))}
-    </div>
+        </div>
+
+        <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+          {metrics.map((m, i) => (
+            <motion.div
+              key={m.label}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.08 + i * 0.06, duration: 0.35 }}
+              whileHover={{ y: -3 }}
+              className="glass-card kpi-glow relative overflow-hidden p-4"
+            >
+              <div
+                className="pointer-events-none absolute -right-4 -top-4 h-16 w-16 rounded-full bg-teal-400/10 blur-xl"
+                aria-hidden
+              />
+              <div className="relative text-[11px] tracking-wider text-slate-400">
+                {m.label}
+              </div>
+              <div className="relative mt-1.5 font-mono text-2xl font-semibold tabular-nums text-white drop-shadow-[0_0_14px_rgba(94,234,212,0.25)] md:text-3xl">
+                {m.value}
+              </div>
+              <div className="relative mt-1 text-xs text-slate-500">{m.hint}</div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </motion.section>
   );
 }

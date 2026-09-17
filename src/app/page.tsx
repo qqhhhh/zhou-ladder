@@ -1,7 +1,8 @@
 import { Suspense } from "react";
-import { DateRangeFilter } from "@/components/DateRangeFilter";
 import { HeroTable } from "@/components/HeroTable";
+import { MetaCards } from "@/components/MetaCards";
 import { PlayerHeader } from "@/components/PlayerHeader";
+import { Sidebar } from "@/components/Sidebar";
 import { SummaryCards } from "@/components/SummaryCards";
 import { WinChart } from "@/components/WinChart";
 import { fetchLadderData } from "@/lib/opendota";
@@ -51,7 +52,7 @@ export default async function HomePage({
 
   if (error || !payload) {
     return (
-      <main className="mx-auto max-w-6xl px-4 py-16">
+      <div className="dash-shell mx-auto max-w-6xl px-4 py-16">
         <div className="glass-card p-8 text-center">
           <h1 className="text-xl font-semibold text-white">数据暂时不可用</h1>
           <p className="mt-2 text-sm text-rose-300">{error}</p>
@@ -59,7 +60,7 @@ export default async function HomePage({
             请稍后刷新。本站通过 OpenDota 拉取 lobby_type=7 天梯对局。
           </p>
         </div>
-      </main>
+      </div>
     );
   }
 
@@ -69,40 +70,53 @@ export default async function HomePage({
   const chartPoints = buildChartPoints(filtered, payload.heroes);
 
   return (
-    <main className="mx-auto max-w-6xl space-y-5 px-4 py-8 md:py-10">
-      <PlayerHeader
-        player={payload.player}
-        fetchedAt={payload.fetchedAt}
-        rangeLabel={range.label}
-      />
+    <div className="dash-shell min-h-screen pb-24 md:pb-10">
+      <Sidebar />
 
-      <div className="glass-card flex flex-col gap-3 p-4 md:flex-row md:items-center md:justify-between">
-        <Suspense fallback={<div className="h-8 text-sm text-slate-500">加载筛选…</div>}>
-          <DateRangeFilter currentDays={range.key} />
+      <div className="dash-main mx-auto max-w-7xl space-y-4 px-4 py-6 md:space-y-5 md:py-8 md:pl-20 lg:pl-24">
+        <Suspense
+          fallback={
+            <div className="h-16 animate-pulse rounded-2xl bg-white/5" />
+          }
+        >
+          <PlayerHeader player={payload.player} rangeKey={range.key} />
         </Suspense>
-        <p className="text-xs text-slate-500">
-          仅统计 ranked（lobby_type=7）· 英雄图标来自 Steam CDN
-        </p>
+
+        {/* Bento: hero + chart */}
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-12 lg:gap-5">
+          <div className="lg:col-span-7">
+            <SummaryCards summary={summary} rangeLabel={range.label} />
+          </div>
+          <div className="lg:col-span-5 lg:min-h-[340px]">
+            <WinChart points={chartPoints} />
+          </div>
+        </div>
+
+        {/* Horizontal meta strip */}
+        <MetaCards
+          player={payload.player}
+          fetchedAt={payload.fetchedAt}
+          rangeLabel={range.label}
+        />
+
+        {/* Dense table */}
+        <HeroTable rows={heroRows} />
+
+        <footer className="pb-4 pt-2 text-center text-xs text-slate-500">
+          <p>
+            © oldboys.games · Zhou / 鲷哥 · 数据源{" "}
+            <a
+              className="text-teal-400/80 hover:text-teal-300"
+              href="https://www.opendota.com/players/90137663"
+              target="_blank"
+              rel="noreferrer"
+            >
+              OpenDota
+            </a>
+            。不上报、不展示 computed_mmr 作为天梯分。
+          </p>
+        </footer>
       </div>
-
-      <SummaryCards summary={summary} />
-      <WinChart points={chartPoints} />
-      <HeroTable rows={heroRows} />
-
-      <footer className="pb-8 pt-2 text-center text-xs text-slate-500">
-        <p>
-          © oldboys.games · Zhou / 鲷哥 · 数据源{" "}
-          <a
-            className="text-amber-400/80 hover:text-amber-300"
-            href="https://www.opendota.com/players/90137663"
-            target="_blank"
-            rel="noreferrer"
-          >
-            OpenDota
-          </a>
-          。不上报、不展示 computed_mmr 作为天梯分。
-        </p>
-      </footer>
-    </main>
+    </div>
   );
 }

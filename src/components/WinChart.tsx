@@ -26,7 +26,7 @@ function CustomTooltip({
   const p = payload[0]?.payload;
   return (
     <div className="chart-tooltip min-w-[180px] text-sm text-slate-100">
-      <div className="mb-1.5 border-b border-amber-400/20 pb-1.5 text-xs text-amber-200/90">
+      <div className="mb-1.5 border-b border-teal-400/20 pb-1.5 text-xs text-teal-200/90">
         {p
           ? `#${p.index} · ${p.dateLabel} · ${p.hero} · ${p.result}`
           : `#${label}`}
@@ -56,7 +56,10 @@ function CustomTooltip({
 export function WinChart({ points }: { points: ChartPoint[] }) {
   if (points.length === 0) {
     return (
-      <div className="glass-card flex h-72 items-center justify-center text-slate-400">
+      <div
+        id="trend"
+        className="glass-card flex h-full min-h-72 scroll-mt-24 items-center justify-center text-slate-400"
+      >
         所选范围内暂无天梯对局
       </div>
     );
@@ -64,32 +67,33 @@ export function WinChart({ points }: { points: ChartPoint[] }) {
 
   return (
     <motion.div
+      id="trend"
       initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.05, duration: 0.45 }}
-      className="glass-card p-4 md:p-5"
+      className="glass-card glass-card-glow flex h-full scroll-mt-24 flex-col p-4 md:p-5"
     >
       <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
         <div>
           <h2 className="text-lg font-semibold text-white">
             走势图
-            <span className="ml-2 inline-block h-1.5 w-1.5 rounded-full bg-amber-400 shadow-[0_0_10px_rgba(245,158,11,0.8)]" />
+            <span className="ml-2 inline-block h-1.5 w-1.5 rounded-full bg-teal-400 shadow-[0_0_10px_rgba(45,212,191,0.85)]" />
           </h2>
-          <p className="mt-1 text-xs text-amber-200/80">
+          <p className="mt-1 text-xs text-teal-200/75">
             累计净胜场 / 滚动胜率（近 20 场）·{" "}
-            <strong>不是真实 MMR 曲线</strong>
+            <strong className="text-amber-200/90">不是真实 MMR</strong>
             ，OpenDota 无法提供 GC 天梯分导出
           </p>
         </div>
       </div>
-      <div className="h-72 w-full">
+      <div className="h-64 w-full md:h-72 lg:h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={points} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
             <defs>
               <linearGradient id="netGlow" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor="#22d3ee" stopOpacity={0.85} />
-                <stop offset="50%" stopColor="#67e8f9" stopOpacity={1} />
-                <stop offset="100%" stopColor="#fbbf24" stopOpacity={0.9} />
+                <stop offset="0%" stopColor="#2dd4bf" stopOpacity={0.85} />
+                <stop offset="55%" stopColor="#5eead4" stopOpacity={1} />
+                <stop offset="100%" stopColor="#fbbf24" stopOpacity={0.85} />
               </linearGradient>
               <filter id="lineGlow" x="-20%" y="-20%" width="140%" height="140%">
                 <feGaussianBlur stdDeviation="2.5" result="blur" />
@@ -100,26 +104,26 @@ export function WinChart({ points }: { points: ChartPoint[] }) {
               </filter>
             </defs>
             <CartesianGrid
-              stroke="rgba(148,163,184,0.12)"
+              stroke="rgba(94,234,212,0.08)"
               strokeDasharray="3 3"
               vertical={false}
             />
             <XAxis
               dataKey="index"
-              tick={{ fill: "#94a3b8", fontSize: 11 }}
+              tick={{ fill: "#7a9a96", fontSize: 11 }}
               tickLine={false}
               axisLine={false}
               label={{
                 value: "场次序",
                 position: "insideBottomRight",
                 offset: -2,
-                fill: "#64748b",
+                fill: "#5a7874",
                 fontSize: 11,
               }}
             />
             <YAxis
               yAxisId="net"
-              tick={{ fill: "#94a3b8", fontSize: 11 }}
+              tick={{ fill: "#7a9a96", fontSize: 11 }}
               tickLine={false}
               axisLine={false}
               width={40}
@@ -128,13 +132,16 @@ export function WinChart({ points }: { points: ChartPoint[] }) {
               yAxisId="wr"
               orientation="right"
               domain={[0, 100]}
-              tick={{ fill: "#94a3b8", fontSize: 11 }}
+              tick={{ fill: "#7a9a96", fontSize: 11 }}
               tickLine={false}
               axisLine={false}
               width={40}
               unit="%"
             />
-            <Tooltip content={<CustomTooltip />} cursor={{ stroke: "rgba(251,191,36,0.35)", strokeWidth: 1 }} />
+            <Tooltip
+              content={<CustomTooltip />}
+              cursor={{ stroke: "rgba(94,234,212,0.35)", strokeWidth: 1 }}
+            />
             <Legend
               wrapperStyle={{ paddingTop: 8 }}
               formatter={(value) => (
@@ -152,10 +159,10 @@ export function WinChart({ points }: { points: ChartPoint[] }) {
               dot={false}
               activeDot={{
                 r: 5,
-                fill: "#fbbf24",
+                fill: "#5eead4",
                 stroke: "#fff",
                 strokeWidth: 1.5,
-                style: { filter: "drop-shadow(0 0 6px rgba(251,191,36,0.8))" },
+                style: { filter: "drop-shadow(0 0 6px rgba(45,212,191,0.85))" },
               }}
             />
             <Line
@@ -166,7 +173,7 @@ export function WinChart({ points }: { points: ChartPoint[] }) {
               stroke="#a78bfa"
               strokeWidth={2.2}
               strokeDasharray="5 4"
-              style={{ filter: "drop-shadow(0 0 4px rgba(167,139,250,0.55))" }}
+              style={{ filter: "drop-shadow(0 0 4px rgba(167,139,250,0.5))" }}
               dot={false}
               connectNulls
               activeDot={{ r: 4, fill: "#a78bfa" }}
