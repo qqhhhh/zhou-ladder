@@ -63,7 +63,6 @@ function CustomTooltip({
 export function WinChart({
   points,
   summary,
-  rangeLabel,
 }: {
   points: ChartPoint[];
   summary?: SummaryStats;
@@ -88,53 +87,17 @@ export function WinChart({
       ? last.rollingWinrate
       : (summary?.winrate ?? 0);
 
-  // Compare rolling winrate vs earlier in THIS series (not a % of net wins)
-  const earlierWr =
-    points.length > 10
-      ? points[Math.max(0, points.length - 11)]?.rollingWinrate
-      : points.length > 5
-        ? points[0]?.rollingWinrate
-        : null;
-  const wrDelta =
-    earlierWr != null && last.rollingWinrate != null
-      ? last.rollingWinrate - earlierWr
-      : null;
-
   return (
     <section
       id="trend"
       className="panel scroll-mt-24 flex flex-col p-5 md:p-6"
     >
-      <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
-        <button type="button" className="btn-ghost" tabIndex={-1}>
-          <svg
-            viewBox="0 0 24 24"
-            className="h-4 w-4"
-            fill="currentColor"
-            aria-hidden
-          >
-            <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z" />
-          </svg>
-          <span>{rangeLabel ?? "本周"}</span>
-        </button>
-        <div className="flex items-center gap-2">
-          <span className={netWins >= 0 ? "badge-ok" : "badge-warn"}>
-            {netWins > 0 ? "上行" : netWins < 0 ? "下行" : "持平"}
-          </span>
-          <span className="icon-btn pointer-events-none" aria-hidden>
-            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor">
-              <path d="M5 9.2h3V19H5V9.2zM10.6 5h2.8v14h-2.8V5zm5.6 8H19v6h-2.8v-6z" />
-            </svg>
-          </span>
-        </div>
-      </div>
-
       <div className="mb-1 flex flex-wrap items-end justify-between gap-3">
         <div className="min-w-0">
           <h2 className="text-lg font-bold tracking-tight text-navy-700">
             走势图
           </h2>
-          <div className="mt-3 flex flex-wrap items-baseline gap-x-6 gap-y-2">
+          <div className="mt-3 flex flex-col gap-1.5">
             <div className="flex items-baseline gap-2">
               <span className="text-sm font-medium text-ink-muted">累计净胜</span>
               <span
@@ -163,20 +126,6 @@ export function WinChart({
               >
                 {wr.toFixed(1)}%
               </span>
-              {wrDelta != null && Math.abs(wrDelta) >= 0.05 ? (
-                <span
-                  className={`text-xs font-bold tabular-nums ${
-                    wrDelta > 0
-                      ? "text-[#05cd99]"
-                      : wrDelta < 0
-                        ? "text-[#ee5d50]"
-                        : "text-ink-faint"
-                  }`}
-                >
-                  {wrDelta > 0 ? "↑" : "↓"}
-                  {Math.abs(wrDelta).toFixed(1)}%
-                </span>
-              ) : null}
             </div>
           </div>
         </div>
