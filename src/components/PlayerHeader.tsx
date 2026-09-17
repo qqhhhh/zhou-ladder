@@ -19,10 +19,20 @@ export function PlayerHeader({
   player,
   rangeKey,
   rangeLabel,
+  dataSpanDays,
+  minDate,
+  maxDate,
+  customFrom,
+  customTo,
 }: {
   player: OpenDotaPlayer;
   rangeKey: string;
   rangeLabel: string;
+  dataSpanDays: number;
+  minDate: string;
+  maxDate: string;
+  customFrom?: string;
+  customTo?: string;
 }) {
   const rank = formatRankTier(player.rank_tier, player.leaderboard_rank);
 
@@ -64,27 +74,16 @@ export function PlayerHeader({
         </div>
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-3">
-          <DateRangeFilter currentDays={rangeKey} variant="pills" />
+          <DateRangeFilter
+            currentDays={rangeKey}
+            dataSpanDays={dataSpanDays}
+            minDate={minDate}
+            maxDate={maxDate}
+            customFrom={customFrom}
+            customTo={customTo}
+            variant="pills"
+          />
           <div className="flex shrink-0 items-center gap-2">
-            <a
-              href="https://www.opendota.com/players/90137663"
-              target="_blank"
-              rel="noreferrer"
-              className="icon-btn"
-              title="对局数据源"
-              aria-label="对局数据源"
-            >
-              <svg
-                viewBox="0 0 24 24"
-                className="h-4 w-4"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.75"
-              >
-                <circle cx="11" cy="11" r="7" />
-                <path d="M20 20l-3.5-3.5" strokeLinecap="round" />
-              </svg>
-            </a>
             <a
               href="https://www.douyu.com/88660"
               target="_blank"

@@ -175,3 +175,51 @@ export function formatPct(n: number): string {
 export function formatNum(n: number, digits = 1): string {
   return n.toFixed(digits);
 }
+
+export function rankedMatches(matches: OpenDotaMatch[]): OpenDotaMatch[] {
+  return matches.filter((m) => m.lobby_type === 7);
+}
+
+/** Calendar days from oldest ranked match to now (floor). */
+export function dataSpanDays(matches: OpenDotaMatch[]): number {
+  const ranked = rankedMatches(matches);
+  if (ranked.length === 0) return 0;
+  const oldest = Math.min(...ranked.map((m) => m.start_time));
+  return Math.max(0, Math.floor((Date.now() / 1000 - oldest) / 86400));
+}
+
+/** YYYY-MM-DD in Asia/Shanghai for date inputs */
+export function shanghaiYmd(unixSec: number): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Shanghai",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date(unixSec * 1000));
+}
+
+export function matchDateBounds(matches: OpenDotaMatch[]): {
+  minDate: string;
+  maxDate: string;
+} {
+  const ranked = rankedMatches(matches);
+  const today = shanghaiYmd(Math.floor(Date.now() / 1000));
+  if (ranked.length === 0) {
+    return { minDate: today, maxDate: today };
+  }
+  const oldest = Math.min(...ranked.map((m) => m.start_time));
+  const newest = Math.max(...ranked.map((m) => m.start_time));
+  return {
+    minDate: shanghaiYmd(oldest),
+    maxDate: shanghaiYmd(newest),
+  };
+}
+
+/** Parse YYYY-MM-DD as Asia/Shanghai day bounds (unix seconds). */
+export function shanghaiDayStartUnix(ymd: string): number {
+  return Math.floor(new Date(`${ymd}T00:00:00+08:00`).getTime() / 1000);
+}
+
+export function shanghaiDayEndUnix(ymd: string): number {
+  return Math.floor(new Date(`${ymd}T23:59:59+08:00`).getTime() / 1000);
+}

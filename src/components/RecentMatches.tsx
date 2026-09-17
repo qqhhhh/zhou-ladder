@@ -45,13 +45,6 @@ export function RecentMatches({ points }: { points: ChartPoint[] }) {
                     #{p.index} · {p.dateLabel}
                   </p>
                 </div>
-                <span
-                  className={`font-mono text-sm font-bold tabular-nums ${
-                    win ? "text-navy-700" : "text-ink-muted"
-                  }`}
-                >
-                  {win ? "W" : "L"}
-                </span>
               </li>
             );
           })

@@ -19,9 +19,7 @@ export function HeroTable({ rows }: { rows: HeroStat[] }) {
           <h2 className="text-xl font-bold tracking-tight text-navy-700">
             英雄统计
           </h2>
-          <p className="mt-1 text-[11px] text-ink-muted">
-            官方中文名 · 「上分」固定为 —（真实天梯分需协调器导出）
-          </p>
+          <p className="mt-1 text-[11px] text-ink-muted">官方中文名</p>
         </div>
         <span className="rounded-full bg-light-primary px-3 py-1 text-[11px] font-bold text-ink-faint">
           {sorted.length} 名英雄
@@ -29,15 +27,16 @@ export function HeroTable({ rows }: { rows: HeroStat[] }) {
       </div>
 
       <div className="hero-table-scroll mt-2 max-h-[min(70vh,640px)] overflow-auto px-2 md:px-3">
-        <table className="w-full min-w-[720px] border-collapse text-sm">
+        <table className="w-full min-w-[760px] border-collapse text-sm">
           <thead className="sticky top-0 z-10 bg-white/95 backdrop-blur-sm">
             <tr>
               <th className="hz-th px-4 py-3 text-left md:px-5">英雄</th>
-              <th className="hz-th px-3 py-3 text-right">上分</th>
               <th className="hz-th px-3 py-3 text-right">场次</th>
               <th className="hz-th px-3 py-3 text-right">胜-负</th>
               <th className="hz-th px-3 py-3 text-right">净胜</th>
-              <th className="hz-th px-3 py-3 text-right">场均 K/D/A</th>
+              <th className="hz-th px-3 py-3 text-right">场均击杀</th>
+              <th className="hz-th px-3 py-3 text-right">场均死亡</th>
+              <th className="hz-th px-3 py-3 text-right">场均助攻</th>
               <th className="hz-th px-3 py-3 text-right">KDA</th>
               <th className="hz-th px-4 py-3 text-right md:px-5">胜率</th>
             </tr>
@@ -46,7 +45,7 @@ export function HeroTable({ rows }: { rows: HeroStat[] }) {
             {sorted.length === 0 ? (
               <tr>
                 <td
-                  colSpan={8}
+                  colSpan={9}
                   className="px-4 py-10 text-center text-ink-muted"
                 >
                   无英雄数据
@@ -78,12 +77,6 @@ export function HeroTable({ rows }: { rows: HeroStat[] }) {
                       </span>
                     </div>
                   </td>
-                  <td
-                    className="hz-td px-3 py-3 text-right text-ink-muted"
-                    title="需官方协调器导出"
-                  >
-                    —
-                  </td>
                   <td className="hz-td px-3 py-3 text-right font-mono font-bold tabular-nums text-navy-700">
                     {r.games}
                   </td>
@@ -103,8 +96,13 @@ export function HeroTable({ rows }: { rows: HeroStat[] }) {
                   >
                     {r.netWins > 0 ? `+${r.netWins}` : r.netWins}
                   </td>
-                  <td className="hz-td px-3 py-3 text-right font-mono tabular-nums text-ink-faint">
-                    {formatNum(r.avgKills, 1)}/{formatNum(r.avgDeaths, 1)}/
+                  <td className="hz-td px-3 py-3 text-right font-mono tabular-nums text-navy-700">
+                    {formatNum(r.avgKills, 1)}
+                  </td>
+                  <td className="hz-td px-3 py-3 text-right font-mono tabular-nums text-navy-700">
+                    {formatNum(r.avgDeaths, 1)}
+                  </td>
+                  <td className="hz-td px-3 py-3 text-right font-mono tabular-nums text-navy-700">
                     {formatNum(r.avgAssists, 1)}
                   </td>
                   <td className="hz-td px-3 py-3 text-right font-mono font-bold tabular-nums text-navy-700">

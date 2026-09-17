@@ -141,10 +141,7 @@ export function WinChart({
             )}
           </div>
           <p className="mt-1 text-[11px] leading-snug text-ink-muted">
-            累计净胜 + 滚动胜率 ·{" "}
-            <span className="font-semibold text-orange-500">
-              不是真实天梯分
-            </span>
+            累计净胜 + 滚动胜率
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3 text-xs text-ink-muted">
