@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import type { OpenDotaPlayer } from "@/lib/types";
 import { formatRankTier } from "@/lib/opendota";
 
@@ -18,11 +17,11 @@ export function MetaCards({
     timeZone: "Asia/Shanghai",
   });
 
-  const cards = [
+  const items = [
     {
       title: "段位",
       value: rank,
-      sub: "OpenDota rank_tier",
+      sub: "奖牌段位（对局数据源）",
     },
     {
       title: "数据新鲜度",
@@ -30,55 +29,51 @@ export function MetaCards({
       sub: `缓存约 3 分钟 · ${rangeLabel}`,
     },
     {
-      title: "OpenDota 账号",
+      title: "账号编号",
       value: "90137663",
-      sub: "account_id · ranked only",
+      sub: "仅天梯对局",
       mono: true,
       href: "https://www.opendota.com/players/90137663",
     },
   ];
 
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-      {cards.map((c, i) => {
-        const inner = (
-          <>
-            <p className="text-[11px] uppercase tracking-wider text-teal-300/70">
-              {c.title}
-            </p>
-            <p
-              className={`mt-1.5 text-sm font-medium text-white ${
-                c.mono ? "font-mono tabular-nums" : ""
-              }`}
-            >
-              {c.value}
-            </p>
-            <p className="mt-1 text-xs text-slate-500">{c.sub}</p>
-          </>
-        );
-        return (
-          <motion.div
-            key={c.title}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.12 + i * 0.05, duration: 0.35 }}
-            className="glass-card p-4"
-          >
-            {c.href ? (
-              <a
-                href={c.href}
-                target="_blank"
-                rel="noreferrer"
-                className="block transition hover:text-teal-200"
+    <div className="panel overflow-hidden">
+      <div className="grid grid-cols-1 divide-y divide-stone-100 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+        {items.map((c) => {
+          const inner = (
+            <>
+              <p className="text-[11px] font-medium tracking-wide text-amber-700/80">
+                {c.title}
+              </p>
+              <p
+                className={`mt-1.5 text-sm font-medium text-stone-900 ${
+                  c.mono ? "font-mono tabular-nums" : ""
+                }`}
               >
-                {inner}
-              </a>
-            ) : (
-              inner
-            )}
-          </motion.div>
-        );
-      })}
+                {c.value}
+              </p>
+              <p className="mt-1 text-xs text-stone-400">{c.sub}</p>
+            </>
+          );
+          return (
+            <div key={c.title} className="px-4 py-3.5 md:px-5">
+              {c.href ? (
+                <a
+                  href={c.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="block transition hover:text-amber-800"
+                >
+                  {inner}
+                </a>
+              ) : (
+                inner
+              )}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

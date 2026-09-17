@@ -1,5 +1,6 @@
 import { format, fromUnixTime, subDays } from "date-fns";
 import { zhCN } from "date-fns/locale";
+import { heroNameCn } from "./heroNamesCn";
 import { heroIconUrl } from "./opendota";
 import type {
   ChartPoint,
@@ -106,7 +107,11 @@ export function buildHeroStats(
     rows.push({
       heroId,
       heroName: hero?.name ?? `hero_${heroId}`,
-      localizedName: hero?.localized_name ?? `Hero ${heroId}`,
+      localizedName: heroNameCn(
+        heroId,
+        hero?.name,
+        hero?.localized_name,
+      ),
       iconUrl: hero ? heroIconUrl(hero.name) : "",
       games: s.games,
       wins: s.wins,
@@ -148,14 +153,15 @@ export function buildChartPoints(
         ? (winsInWindow / recent.length) * 100
         : null;
     const d = fromUnixTime(m.start_time);
+    const hero = byId.get(m.hero_id);
     points.push({
       index: i + 1,
       date: d.toISOString(),
       dateLabel: format(d, "M/d HH:mm", { locale: zhCN }),
       cumulativeNetWins: net,
       rollingWinrate: rolling,
-      result: win ? "W" : "L",
-      hero: byId.get(m.hero_id)?.localized_name ?? `#${m.hero_id}`,
+      result: win ? "胜" : "负",
+      hero: heroNameCn(m.hero_id, hero?.name, hero?.localized_name),
     });
   });
 

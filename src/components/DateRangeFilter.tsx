@@ -43,8 +43,8 @@ export function DateRangeFilter({ currentDays }: { currentDays: string }) {
             onClick={() => setDays(p.days)}
             className={`rounded-full px-3 py-1 text-xs transition md:text-sm ${
               active
-                ? "bg-teal-400/20 text-teal-50 ring-1 ring-teal-400/50 shadow-[0_0_20px_rgba(45,212,191,0.3)]"
-                : "bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white"
+                ? "bg-amber-400/20 text-amber-100 ring-1 ring-amber-300/50"
+                : "bg-white/10 text-stone-300 hover:bg-white/15 hover:text-white"
             } ${pending ? "opacity-60" : ""}`}
           >
             {p.label}

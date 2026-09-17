@@ -47,17 +47,17 @@ export default async function HomePage({
   try {
     payload = await fetchLadderData();
   } catch (e) {
-    error = e instanceof Error ? e.message : "OpenDota 请求失败";
+    error = e instanceof Error ? e.message : "对局数据请求失败";
   }
 
   if (error || !payload) {
     return (
       <div className="dash-shell mx-auto max-w-6xl px-4 py-16">
-        <div className="glass-card p-8 text-center">
-          <h1 className="text-xl font-semibold text-white">数据暂时不可用</h1>
-          <p className="mt-2 text-sm text-rose-300">{error}</p>
-          <p className="mt-4 text-xs text-slate-500">
-            请稍后刷新。本站通过 OpenDota 拉取 lobby_type=7 天梯对局。
+        <div className="panel p-8 text-center">
+          <h1 className="text-xl font-semibold text-stone-900">数据暂时不可用</h1>
+          <p className="mt-2 text-sm text-rose-600">{error}</p>
+          <p className="mt-4 text-xs text-stone-500">
+            请稍后刷新。本站拉取天梯匹配对局（大厅类型 7）。
           </p>
         </div>
       </div>
@@ -76,13 +76,12 @@ export default async function HomePage({
       <div className="dash-main mx-auto max-w-7xl space-y-4 px-4 py-6 md:space-y-5 md:py-8 md:pl-20 lg:pl-24">
         <Suspense
           fallback={
-            <div className="h-16 animate-pulse rounded-2xl bg-white/5" />
+            <div className="h-16 animate-pulse rounded-2xl bg-white/10" />
           }
         >
           <PlayerHeader player={payload.player} rangeKey={range.key} />
         </Suspense>
 
-        {/* Bento: hero + chart */}
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-12 lg:gap-5">
           <div className="lg:col-span-7">
             <SummaryCards summary={summary} rangeLabel={range.label} />
@@ -92,28 +91,26 @@ export default async function HomePage({
           </div>
         </div>
 
-        {/* Horizontal meta strip */}
         <MetaCards
           player={payload.player}
           fetchedAt={payload.fetchedAt}
           rangeLabel={range.label}
         />
 
-        {/* Dense table */}
         <HeroTable rows={heroRows} />
 
-        <footer className="pb-4 pt-2 text-center text-xs text-slate-500">
+        <footer className="pb-4 pt-2 text-center text-xs text-stone-500">
           <p>
-            © oldboys.games · Zhou / 鲷哥 · 数据源{" "}
+            © oldboys.games · Zhou / 鲷哥 · 数据来自{" "}
             <a
-              className="text-teal-400/80 hover:text-teal-300"
+              className="text-amber-600/90 hover:text-amber-500"
               href="https://www.opendota.com/players/90137663"
               target="_blank"
               rel="noreferrer"
             >
-              OpenDota
+              对局开放数据平台
             </a>
-            。不上报、不展示 computed_mmr 作为天梯分。
+            。不上报、不展示估算分作为天梯分。
           </p>
         </footer>
       </div>

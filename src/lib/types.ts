@@ -72,7 +72,7 @@ export type ChartPoint = {
   dateLabel: string;
   cumulativeNetWins: number;
   rollingWinrate: number | null;
-  result: "W" | "L";
+  result: "胜" | "负";
   hero: string;
 };
 

@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import type { ReactNode } from "react";
 
 const DOUYU = "https://www.douyu.com/88660";
@@ -64,15 +63,11 @@ const items: {
 export function Sidebar() {
   return (
     <>
-      {/* Desktop rail */}
-      <motion.aside
-        initial={{ opacity: 0, x: -12 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.4 }}
+      <aside
         className="sidebar-rail fixed left-3 top-1/2 z-40 hidden w-14 -translate-y-1/2 flex-col items-center gap-2 rounded-2xl px-2 py-4 md:flex lg:left-4"
         aria-label="主导航"
       >
-        <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-full bg-teal-400/10 text-xs font-bold text-teal-200 ring-1 ring-teal-400/30">
+        <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-full bg-amber-100 text-xs font-bold text-amber-800 ring-1 ring-amber-200">
           Z
         </div>
         <nav className="flex flex-col items-center gap-1.5">
@@ -91,9 +86,8 @@ export function Sidebar() {
             </a>
           ))}
         </nav>
-      </motion.aside>
+      </aside>
 
-      {/* Mobile bottom icon bar */}
       <nav
         className="sidebar-rail fixed inset-x-3 bottom-3 z-40 flex items-center justify-around rounded-2xl px-2 py-2 md:hidden"
         aria-label="移动导航"
