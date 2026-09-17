@@ -75,7 +75,7 @@ export default async function HomePage({
     <div className="dash-shell min-h-screen pb-24 md:pb-10">
       <Sidebar />
 
-      <div className="dash-main mx-auto max-w-7xl space-y-4 px-4 py-6 md:space-y-5 md:py-8 md:pl-24 lg:pl-28">
+      <div className="dash-main mx-auto max-w-7xl space-y-5 px-4 py-6 md:space-y-6 md:py-8 md:pl-24 lg:pl-28">
         <Suspense
           fallback={
             <div className="h-16 animate-pulse rounded-2xl bg-white/5" />
@@ -89,7 +89,7 @@ export default async function HomePage({
         </Suspense>
 
         {/* Top row: hero weather card + live conditions chart */}
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-12 lg:gap-5">
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-12 lg:gap-5">
           <div className="lg:col-span-7">
             <SummaryCards summary={summary} rangeLabel={range.label} />
           </div>
@@ -108,12 +108,12 @@ export default async function HomePage({
         </Suspense>
 
         {/* Bottom: day cards (heroes) + recent / info */}
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-12 lg:gap-5">
-          <div className="space-y-4 lg:col-span-7">
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-12 lg:gap-5">
+          <div className="space-y-5 lg:col-span-7">
             <HeroDayCards rows={heroRows} />
             <HeroTable rows={heroRows} />
           </div>
-          <div className="space-y-4 lg:col-span-5">
+          <div className="space-y-5 lg:col-span-5">
             <RecentMatches points={chartPoints} />
             <MetaCards
               player={payload.player}

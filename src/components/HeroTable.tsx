@@ -24,7 +24,7 @@ export function HeroDayCards({ rows }: { rows: HeroStat[] }) {
 
   return (
     <section id="heroes" className="scroll-mt-24">
-      <div className="mb-3 flex items-end justify-between gap-2 px-0.5">
+      <div className="mb-4 flex items-end justify-between gap-2 px-0.5">
         <div>
           <h2 className="text-base font-semibold text-white">常用英雄</h2>
           <p className="mt-0.5 text-[11px] text-white/40">
@@ -32,11 +32,11 @@ export function HeroDayCards({ rows }: { rows: HeroStat[] }) {
           </p>
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4 lg:grid-cols-7">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
         {top.map((r) => (
           <article
             key={r.heroId}
-            className="day-card flex flex-col items-center gap-2.5 px-2.5 py-4 text-center"
+            className="day-card flex flex-col items-center gap-2.5 px-2.5 py-5 text-center"
           >
             <p className="truncate text-[11px] text-white/45 w-full">
               {r.games} 场
@@ -81,7 +81,7 @@ export function HeroTable({ rows }: { rows: HeroStat[] }) {
 
   return (
     <div className="panel overflow-hidden">
-      <div className="px-4 py-3 md:px-5">
+      <div className="px-5 py-4">
         <h2 className="text-sm font-semibold text-white/90">英雄明细</h2>
         <p className="mt-1 text-[11px] text-white/35">
           「上分」固定为 —：真实天梯分变动需官方协调器导出。

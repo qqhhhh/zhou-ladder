@@ -33,7 +33,7 @@ export function DateRangeFilter({ currentDays }: { currentDays: string }) {
 
   return (
     <div
-      className="flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      className="flex gap-2.5 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       role="group"
       aria-label="时间范围"
     >
@@ -45,12 +45,12 @@ export function DateRangeFilter({ currentDays }: { currentDays: string }) {
             type="button"
             disabled={pending}
             onClick={() => setDays(p.days)}
-            className={`hourly-chip flex shrink-0 flex-col items-center justify-center gap-1.5 px-4 py-3 transition ${
+            className={`hourly-chip flex shrink-0 flex-col items-center justify-center gap-1.5 px-5 py-3.5 transition ${
               active ? "hourly-chip-active" : ""
             } ${pending ? "opacity-60" : ""}`}
           >
             <span
-              className={`text-[11px] tracking-wide ${
+              className={`text-[10px] tracking-wide ${
                 active ? "text-sky-300" : "text-white/40"
               }`}
             >
