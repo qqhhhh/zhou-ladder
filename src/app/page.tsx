@@ -17,7 +17,8 @@ import {
   shanghaiDayStartUnix,
 } from "@/lib/stats";
 
-export const revalidate = 180;
+export const revalidate = 3600;
+export const maxDuration = 60;
 
 type SearchParams = Promise<{
   days?: string;
@@ -65,7 +66,7 @@ function parseRange(sp: {
     return {
       days: null,
       key: "all",
-      label: "全部已拉取场次",
+      label: "全部场次",
       customFrom: null,
       customTo: null,
     };
@@ -131,7 +132,7 @@ export default async function HomePage({
     range = {
       days: null,
       key: "all",
-      label: "全部已拉取场次",
+      label: "全部场次",
       customFrom: null,
       customTo: null,
     };
