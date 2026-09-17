@@ -130,30 +130,42 @@ export function WinChart({
       </div>
 
       <div className="mb-1 flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <p
-            className={`text-3xl font-bold tabular-nums ${
-              netWins > 0
-                ? "text-[#05cd99]"
-                : netWins < 0
-                  ? "text-[#ee5d50]"
-                  : "text-navy-700"
-            }`}
-          >
-            {netWins > 0 ? "+" : ""}
-            {netWins}
-          </p>
-          <p className="mt-1 text-sm font-medium text-ink-muted">
-            走势图 · 累计净胜（胜−负）
-          </p>
-          <p className="mt-1 text-[11px] leading-snug text-ink-muted">
-            紫色实线：累计净胜 · 灰色虚线：近 20 场滚动胜率
-            {wrDelta != null ? (
-              <>
-                {" "}
-                · 滚动胜率{" "}
+        <div className="min-w-0">
+          <h2 className="text-lg font-bold tracking-tight text-navy-700">
+            走势图
+          </h2>
+          <div className="mt-3 flex flex-wrap items-baseline gap-x-6 gap-y-2">
+            <div className="flex items-baseline gap-2">
+              <span className="text-sm font-medium text-ink-muted">累计净胜</span>
+              <span
+                className={`font-mono text-2xl font-bold tabular-nums ${
+                  netWins > 0
+                    ? "text-[#05cd99]"
+                    : netWins < 0
+                      ? "text-[#ee5d50]"
+                      : "text-navy-700"
+                }`}
+              >
+                {netWins > 0 ? "+" : ""}
+                {netWins}
+              </span>
+            </div>
+            <div className="flex items-baseline gap-2">
+              <span className="text-sm font-medium text-ink-muted">滚动胜率</span>
+              <span
+                className={`font-mono text-2xl font-bold tabular-nums ${
+                  wr > 50
+                    ? "text-[#05cd99]"
+                    : wr < 50
+                      ? "text-[#ee5d50]"
+                      : "text-navy-700"
+                }`}
+              >
+                {wr.toFixed(1)}%
+              </span>
+              {wrDelta != null && Math.abs(wrDelta) >= 0.05 ? (
                 <span
-                  className={`font-bold tabular-nums ${
+                  className={`text-xs font-bold tabular-nums ${
                     wrDelta > 0
                       ? "text-[#05cd99]"
                       : wrDelta < 0
@@ -161,12 +173,12 @@ export function WinChart({
                         : "text-ink-faint"
                   }`}
                 >
-                  {wrDelta > 0 ? "↑" : wrDelta < 0 ? "↓" : "→"}{" "}
+                  {wrDelta > 0 ? "↑" : "↓"}
                   {Math.abs(wrDelta).toFixed(1)}%
                 </span>
-              </>
-            ) : null}
-          </p>
+              ) : null}
+            </div>
+          </div>
         </div>
         <div className="flex flex-wrap items-center gap-3 text-xs text-ink-muted">
           <span className="inline-flex items-center gap-1.5">
