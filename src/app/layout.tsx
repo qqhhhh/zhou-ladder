@@ -35,7 +35,6 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} bg-grid antialiased`}
       >
-        <div className="dash-grain" aria-hidden />
         {children}
       </body>
     </html>

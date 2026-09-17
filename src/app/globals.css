@@ -1,13 +1,13 @@
 @import "tailwindcss";
 
 :root {
-  /* Cool dark glass — weather IoT dashboard */
-  --background: #0a0c10;
+  /* Cool dark glass — calm weather IoT */
+  --background: #0b0e14;
   --foreground: #e8eaef;
-  --canvas: #0a0c10;
-  --glass: rgba(255, 255, 255, 0.07);
-  --glass-strong: rgba(255, 255, 255, 0.11);
-  --glass-soft: rgba(255, 255, 255, 0.05);
+  --canvas: #0b0e14;
+  --glass: rgba(255, 255, 255, 0.055);
+  --glass-strong: rgba(255, 255, 255, 0.09);
+  --glass-soft: rgba(255, 255, 255, 0.04);
   --ink: #f2f4f8;
   --ink-soft: #a8b0c0;
   --ink-faint: #6b7385;
@@ -18,8 +18,8 @@
   --line-strong: rgba(255, 255, 255, 0.16);
   --win: #5eead4;
   --loss: #fb7185;
-  --glass-blur: 24px;
-  --glass-saturate: 1.55;
+  --glass-blur: 14px;
+  --glass-saturate: 1.25;
 }
 
 @theme inline {
@@ -37,57 +37,41 @@ body {
   overflow-x: hidden;
 }
 
-/* ── Scene depth: atmospheric photo + blur orbs + noise ── */
+/* ── Clean soft multi-stop gradient (no photo, no grain) ── */
 .bg-grid {
   position: relative;
   isolation: isolate;
-  background-color: #07090d;
+  background-color: #0a0d12;
   background-image:
-    radial-gradient(ellipse 100% 80% at 12% 8%, rgba(70, 100, 160, 0.22), transparent 55%),
-    radial-gradient(ellipse 80% 60% at 90% 18%, rgba(90, 60, 120, 0.16), transparent 50%),
-    radial-gradient(ellipse 60% 50% at 55% 95%, rgba(40, 55, 90, 0.2), transparent 55%),
-    linear-gradient(165deg, #080a0f 0%, #0e121a 42%, #07090d 100%);
+    radial-gradient(ellipse 90% 70% at 15% 10%, rgba(55, 85, 140, 0.12), transparent 58%),
+    radial-gradient(ellipse 70% 55% at 88% 20%, rgba(45, 70, 110, 0.08), transparent 52%),
+    radial-gradient(ellipse 55% 45% at 50% 92%, rgba(35, 50, 80, 0.1), transparent 55%),
+    linear-gradient(
+      165deg,
+      #0c1018 0%,
+      #101520 28%,
+      #0b1018 55%,
+      #090c12 78%,
+      #0a0d13 100%
+    );
 }
 
-/* Soft blurred environmental photo under the UI */
+/* Soft ambient orbs only — low opacity, no photo layer */
 .bg-grid::before {
   content: "";
   pointer-events: none;
   position: fixed;
-  inset: -8%;
-  z-index: 0;
-  background-image: url("/scene-bg.jpg");
-  background-size: cover;
-  background-position: center 40%;
-  background-repeat: no-repeat;
-  filter: blur(48px) saturate(0.85) brightness(0.38);
-  opacity: 0.55;
-  transform: scale(1.08);
-}
-
-/* Large blur orbs + subtle grain over the photo */
-.bg-grid::after {
-  content: "";
-  pointer-events: none;
-  position: fixed;
   inset: 0;
   z-index: 0;
   background-image:
-    radial-gradient(ellipse 55% 45% at 18% 22%, rgba(100, 140, 210, 0.14), transparent 60%),
-    radial-gradient(ellipse 45% 40% at 82% 28%, rgba(180, 100, 70, 0.07), transparent 55%),
-    radial-gradient(ellipse 50% 40% at 60% 78%, rgba(60, 90, 150, 0.1), transparent 60%);
+    radial-gradient(ellipse 50% 42% at 22% 28%, rgba(90, 130, 190, 0.07), transparent 62%),
+    radial-gradient(ellipse 40% 36% at 78% 35%, rgba(70, 100, 160, 0.05), transparent 58%);
   opacity: 1;
 }
 
-/* Separate fixed grain so opacity stays readable */
-.dash-grain {
-  pointer-events: none;
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  opacity: 0.04;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size: 180px 180px;
+.bg-grid::after {
+  display: none;
+  content: none;
 }
 
 .dash-shell,
@@ -99,96 +83,88 @@ footer {
 
 /* Specular 1px top/left glass edge */
 .glass-edge {
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-top-color: rgba(255, 255, 255, 0.18);
-  border-left-color: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-top-color: rgba(255, 255, 255, 0.22);
+  border-left-color: rgba(255, 255, 255, 0.16);
 }
 
-/* Frosted glass panels */
+/* Frosted glass panels — thinner, clearer */
 .panel {
   position: relative;
   border-radius: 1.4rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-top-color: rgba(255, 255, 255, 0.18);
-  border-left-color: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-top-color: rgba(255, 255, 255, 0.22);
+  border-left-color: rgba(255, 255, 255, 0.16);
   background: var(--glass);
   backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
   -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.06) inset,
-    0 -1px 0 rgba(0, 0, 0, 0.2) inset,
-    inset 0 0 40px rgba(255, 255, 255, 0.02),
-    0 16px 48px rgba(0, 0, 0, 0.32);
+    0 1px 0 rgba(255, 255, 255, 0.07) inset,
+    0 12px 36px rgba(0, 0, 0, 0.22);
 }
 
 .panel-soft {
   position: relative;
   border-radius: 1.25rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-top-color: rgba(255, 255, 255, 0.14);
-  border-left-color: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-top-color: rgba(255, 255, 255, 0.18);
+  border-left-color: rgba(255, 255, 255, 0.14);
   background: var(--glass-soft);
-  backdrop-filter: blur(18px) saturate(1.4);
-  -webkit-backdrop-filter: blur(18px) saturate(1.4);
+  backdrop-filter: blur(12px) saturate(1.2);
+  -webkit-backdrop-filter: blur(12px) saturate(1.2);
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.05) inset,
-    0 8px 28px rgba(0, 0, 0, 0.22);
+    0 8px 24px rgba(0, 0, 0, 0.16);
 }
 
-/* Hero weather card — storm photo + vignette scrim */
+/* Hero / summary card — soft elegant gradient, no photo */
 .hero-hub {
   position: relative;
   overflow: hidden;
   border-radius: 1.6rem;
   border: 1px solid rgba(255, 255, 255, 0.12);
-  border-top-color: rgba(255, 255, 255, 0.22);
-  border-left-color: rgba(255, 255, 255, 0.16);
-  background-color: #0c1018;
+  border-top-color: rgba(255, 255, 255, 0.24);
+  border-left-color: rgba(255, 255, 255, 0.18);
+  background-color: #0e1420;
   background-image:
+    radial-gradient(ellipse 70% 55% at 85% 15%, rgba(120, 160, 220, 0.14), transparent 55%),
+    radial-gradient(ellipse 55% 50% at 12% 85%, rgba(60, 90, 140, 0.12), transparent 55%),
     linear-gradient(
-      155deg,
-      rgba(8, 10, 16, 0.55) 0%,
-      rgba(8, 10, 16, 0.35) 40%,
-      rgba(4, 6, 12, 0.72) 100%
-    ),
-    url("/hero-storm.jpg");
-  background-size: cover, cover;
-  background-position: center, center 35%;
-  background-repeat: no-repeat;
+      145deg,
+      #141c2a 0%,
+      #101822 38%,
+      #0c121c 72%,
+      #0a1018 100%
+    );
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.08) inset,
-    0 -40px 80px rgba(0, 0, 0, 0.45) inset,
-    0 20px 56px rgba(0, 0, 0, 0.4);
+    0 16px 48px rgba(0, 0, 0, 0.28);
 }
 
+/* Optional very subtle abstract shape — not a photo */
 .hero-hub::before {
   content: "";
   position: absolute;
   inset: 0;
-  background:
-    radial-gradient(ellipse 55% 50% at 78% 18%, rgba(255, 255, 255, 0.08), transparent 55%),
-    radial-gradient(ellipse 70% 60% at 20% 80%, rgba(0, 0, 0, 0.35), transparent 60%),
-    linear-gradient(180deg, rgba(0, 0, 0, 0.15) 0%, transparent 35%, rgba(0, 0, 0, 0.55) 100%);
   pointer-events: none;
+  background:
+    radial-gradient(ellipse 45% 40% at 78% 22%, rgba(180, 210, 255, 0.08), transparent 60%),
+    radial-gradient(ellipse 35% 30% at 30% 70%, rgba(100, 140, 200, 0.06), transparent 55%);
+  opacity: 1;
 }
 
 .hero-hub::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.04;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size: 160px 160px;
+  display: none;
+  content: none;
 }
 
 .hero-note {
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-top-color: rgba(255, 255, 255, 0.2);
   border-left-color: rgba(255, 255, 255, 0.16);
-  background: rgba(0, 0, 0, 0.32);
-  backdrop-filter: blur(16px) saturate(1.3);
-  -webkit-backdrop-filter: blur(16px) saturate(1.3);
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(12px) saturate(1.2);
+  -webkit-backdrop-filter: blur(12px) saturate(1.2);
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06) inset;
 }
 
@@ -197,12 +173,12 @@ footer {
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-top-color: rgba(255, 255, 255, 0.2);
   border-left-color: rgba(255, 255, 255, 0.14);
-  background: rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(28px) saturate(1.5);
-  -webkit-backdrop-filter: blur(28px) saturate(1.5);
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(16px) saturate(1.25);
+  -webkit-backdrop-filter: blur(16px) saturate(1.25);
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.06) inset,
-    0 16px 40px rgba(0, 0, 0, 0.38);
+    0 12px 32px rgba(0, 0, 0, 0.28);
 }
 
 .nav-icon {
@@ -230,7 +206,7 @@ footer {
   border-radius: 9999px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-top-color: rgba(255, 255, 255, 0.18);
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.055);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   color: rgba(255, 255, 255, 0.7);
@@ -247,17 +223,17 @@ footer {
 }
 
 .chart-tooltip {
-  background: rgba(18, 22, 30, 0.72) !important;
+  background: rgba(16, 20, 28, 0.55) !important;
   border: 1px solid rgba(255, 255, 255, 0.14) !important;
   border-top-color: rgba(255, 255, 255, 0.22) !important;
   border-radius: 14px !important;
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.06) inset,
-    0 16px 40px rgba(0, 0, 0, 0.45) !important;
+    0 12px 32px rgba(0, 0, 0, 0.35) !important;
   color: var(--ink) !important;
   padding: 10px 14px !important;
-  backdrop-filter: blur(20px) saturate(1.4) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(1.4) !important;
+  backdrop-filter: blur(14px) saturate(1.2) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(1.2) !important;
 }
 
 .chip-active {
@@ -303,41 +279,41 @@ footer {
 }
 
 .day-card {
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-top-color: rgba(255, 255, 255, 0.14);
-  border-left-color: rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(16px) saturate(1.35);
-  -webkit-backdrop-filter: blur(16px) saturate(1.35);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-top-color: rgba(255, 255, 255, 0.18);
+  border-left-color: rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px) saturate(1.2);
+  -webkit-backdrop-filter: blur(12px) saturate(1.2);
   border-radius: 1.2rem;
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.05) inset;
   transition: background 0.15s ease, border-color 0.15s ease;
 }
 
 .day-card:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.09);
   border-color: rgba(255, 255, 255, 0.16);
 }
 
 .hourly-chip {
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-top-color: rgba(255, 255, 255, 0.14);
-  border-left-color: rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(14px) saturate(1.3);
-  -webkit-backdrop-filter: blur(14px) saturate(1.3);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-top-color: rgba(255, 255, 255, 0.16);
+  border-left-color: rgba(255, 255, 255, 0.13);
+  background: rgba(255, 255, 255, 0.045);
+  backdrop-filter: blur(12px) saturate(1.15);
+  -webkit-backdrop-filter: blur(12px) saturate(1.15);
   border-radius: 1.15rem;
   min-width: 4.75rem;
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset;
 }
 
 .hourly-chip-active {
-  background: rgba(255, 255, 255, 0.13);
+  background: rgba(255, 255, 255, 0.12);
   border-color: rgba(255, 255, 255, 0.2);
   border-top-color: rgba(255, 255, 255, 0.28);
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.08) inset,
-    0 8px 24px rgba(0, 0, 0, 0.2);
+    0 8px 24px rgba(0, 0, 0, 0.16);
 }
 
 .stat-pill {
@@ -347,7 +323,7 @@ footer {
   border-radius: 9999px;
   padding: 0.3rem 0.75rem;
   font-size: 0.75rem;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.09);
   color: rgba(255, 255, 255, 0.88);
   border: 1px solid rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(8px);
@@ -379,6 +355,6 @@ footer {
 .rank-chip {
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-top-color: rgba(255, 255, 255, 0.16);
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.055);
   backdrop-filter: blur(10px);
 }
