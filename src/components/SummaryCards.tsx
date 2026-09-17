@@ -2,7 +2,6 @@
 
 import type { SummaryStats } from "@/lib/types";
 import { formatNum } from "@/lib/stats";
-import { HeroGlassSheen } from "@/components/glass";
 
 export function SummaryCards({
   summary,
@@ -11,81 +10,77 @@ export function SummaryCards({
   summary: SummaryStats;
   rangeLabel: string;
 }) {
-  const form =
-    summary.winrate >= 55
-      ? "手感火热"
-      : summary.winrate >= 48
-        ? "平稳输出"
-        : "需要调整";
-  const formSub =
-    summary.netWins > 0
-      ? `净胜 +${summary.netWins} · 继续保持`
-      : summary.netWins < 0
-        ? `净胜 ${summary.netWins} · 稳住节奏`
-        : "净胜持平 · 细磨细节";
+  const items = [
+    {
+      key: "games",
+      label: "场次",
+      value: String(summary.games),
+      hint: rangeLabel,
+    },
+    {
+      key: "wl",
+      label: "W-L",
+      value: `${summary.wins}-${summary.losses}`,
+      hint:
+        summary.netWins > 0
+          ? `净胜 +${summary.netWins}`
+          : summary.netWins < 0
+            ? `净胜 ${summary.netWins}`
+            : "净胜 0",
+      valueClass:
+        summary.netWins > 0
+          ? "text-teal-300"
+          : summary.netWins < 0
+            ? "text-rose-300"
+            : "text-white",
+    },
+    {
+      key: "wr",
+      label: "胜率",
+      value: `${summary.winrate.toFixed(1)}%`,
+      hint:
+        summary.winrate >= 55
+          ? "手感火热"
+          : summary.winrate >= 48
+            ? "平稳输出"
+            : "需要调整",
+      valueClass:
+        summary.winrate >= 50 ? "text-sky-300" : "text-orange-300",
+    },
+    {
+      key: "kda",
+      label: "场均 KDA",
+      value: formatNum(summary.avgKda, 2),
+      hint: "K+A / D",
+    },
+  ];
 
   return (
     <section
-      id="overview"
-      className="hero-hub glass-svg-hero relative min-h-[300px] scroll-mt-24 overflow-hidden p-5 md:min-h-[340px] md:p-6 lg:p-7"
+      aria-label="关键指标"
+      className="panel overflow-hidden"
     >
-      <HeroGlassSheen />
-      <div className="relative z-[2] flex h-full flex-col justify-between gap-7">
-        <div className="flex flex-wrap items-start justify-between gap-5">
-          <div>
-            <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-white/45">
-              天梯摘要 · {rangeLabel}
+      <div className="grid grid-cols-2 divide-y divide-white/[0.06] sm:grid-cols-4 sm:divide-x sm:divide-y-0 sm:divide-white/[0.06]">
+        {items.map((item) => (
+          <div
+            key={item.key}
+            className="kpi-cell px-4 py-4 md:px-5 md:py-5"
+          >
+            <p className="text-[11px] font-medium tracking-wide text-white/40">
+              {item.label}
             </p>
-            <div className="mt-4 flex items-end gap-1">
-              <span className="font-mono text-7xl font-semibold leading-none tracking-tighter text-white drop-shadow-[0_2px_24px_rgba(0,0,0,0.45)] md:text-8xl">
-                {summary.winrate.toFixed(0)}
-              </span>
-              <span className="mb-2 text-3xl font-medium text-white/45 md:mb-3.5 md:text-4xl">
-                %
-              </span>
-            </div>
-            <p className="mt-4 text-xl font-medium tracking-tight text-white/92">
-              {form}
+            <p
+              className={`mt-1.5 font-mono text-2xl font-semibold tabular-nums tracking-tight md:text-[1.75rem] ${
+                item.valueClass ?? "text-white"
+              }`}
+            >
+              {item.value}
             </p>
-            <p className="mt-1.5 text-sm leading-snug text-white/45">{formSub}</p>
-            <div className="mt-5 flex flex-wrap gap-2">
-              <span className="stat-pill">
-                胜{" "}
-                <strong className="font-mono text-teal-300">{summary.wins}</strong>
-              </span>
-              <span className="stat-pill">
-                负{" "}
-                <strong className="font-mono text-rose-300">{summary.losses}</strong>
-              </span>
-            </div>
-          </div>
-
-          <div className="hero-note max-w-[12rem] p-3.5 text-[11px] leading-relaxed text-white/55">
-            仅统计天梯匹配（大厅类型 7）。胜率对标天气「气温」；胜/负对标
-            H/L。不上报伪天梯分。
-          </div>
-        </div>
-
-        <div className="grid grid-cols-3 gap-4 border-t border-white/10 pt-5">
-          <div>
-            <p className="text-[10px] tracking-wide text-white/40">场次</p>
-            <p className="mt-1 font-mono text-xl font-semibold tabular-nums text-white">
-              {summary.games}
+            <p className="mt-1 truncate text-[11px] text-white/35">
+              {item.hint}
             </p>
           </div>
-          <div>
-            <p className="text-[10px] tracking-wide text-white/40">净胜</p>
-            <p className="mt-1 font-mono text-xl font-semibold tabular-nums text-white">
-              {summary.netWins >= 0 ? `+${summary.netWins}` : summary.netWins}
-            </p>
-          </div>
-          <div>
-            <p className="text-[10px] tracking-wide text-white/40">场均 KDA</p>
-            <p className="mt-1 font-mono text-xl font-semibold tabular-nums text-white">
-              {formatNum(summary.avgKda, 2)}
-            </p>
-          </div>
-        </div>
+        ))}
       </div>
     </section>
   );

@@ -11,7 +11,13 @@ const PRESETS: { label: string; days: string }[] = [
   { label: "全部", days: "all" },
 ];
 
-export function DateRangeFilter({ currentDays }: { currentDays: string }) {
+export function DateRangeFilter({
+  currentDays,
+  variant = "pills",
+}: {
+  currentDays: string;
+  variant?: "pills" | "hourly";
+}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [pending, startTransition] = useTransition();
@@ -31,9 +37,49 @@ export function DateRangeFilter({ currentDays }: { currentDays: string }) {
     [router, searchParams],
   );
 
+  if (variant === "hourly") {
+    return (
+      <div
+        className="flex gap-3 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        role="group"
+        aria-label="时间范围"
+      >
+        {PRESETS.map((p) => {
+          const active = currentDays === p.days;
+          return (
+            <button
+              key={p.days}
+              type="button"
+              disabled={pending}
+              onClick={() => setDays(p.days)}
+              className={`hourly-chip flex shrink-0 flex-col items-center justify-center gap-1.5 px-5 py-3.5 transition ${
+                active ? "hourly-chip-active" : ""
+              } ${pending ? "opacity-60" : ""}`}
+            >
+              <span
+                className={`text-[10px] tracking-wide ${
+                  active ? "text-sky-300" : "text-white/40"
+                }`}
+              >
+                {active ? "当前" : "范围"}
+              </span>
+              <span
+                className={`text-sm font-semibold tabular-nums ${
+                  active ? "text-white" : "text-white/60"
+                }`}
+              >
+                {p.label}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    );
+  }
+
   return (
     <div
-      className="flex gap-3 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      className="flex flex-wrap gap-1.5"
       role="group"
       aria-label="时间范围"
     >
@@ -45,24 +91,11 @@ export function DateRangeFilter({ currentDays }: { currentDays: string }) {
             type="button"
             disabled={pending}
             onClick={() => setDays(p.days)}
-            className={`hourly-chip flex shrink-0 flex-col items-center justify-center gap-1.5 px-5 py-3.5 transition ${
-              active ? "hourly-chip-active" : ""
+            className={`rounded-full px-3 py-1.5 text-xs font-medium transition ${
+              active ? "chip-active" : "chip-idle"
             } ${pending ? "opacity-60" : ""}`}
           >
-            <span
-              className={`text-[10px] tracking-wide ${
-                active ? "text-sky-300" : "text-white/40"
-              }`}
-            >
-              {active ? "当前" : "范围"}
-            </span>
-            <span
-              className={`text-sm font-semibold tabular-nums ${
-                active ? "text-white" : "text-white/60"
-              }`}
-            >
-              {p.label}
-            </span>
+            {p.label}
           </button>
         );
       })}

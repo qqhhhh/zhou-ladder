@@ -1,10 +1,8 @@
 import { Suspense } from "react";
-import { DateRangeFilter } from "@/components/DateRangeFilter";
-import { HeroDayCards, HeroTable } from "@/components/HeroTable";
+import { HeroTable } from "@/components/HeroTable";
 import { MetaCards } from "@/components/MetaCards";
 import { PlayerHeader } from "@/components/PlayerHeader";
 import { RecentMatches } from "@/components/RecentMatches";
-import { Sidebar } from "@/components/Sidebar";
 import { SummaryCards } from "@/components/SummaryCards";
 import { WinChart } from "@/components/WinChart";
 import { fetchLadderData } from "@/lib/opendota";
@@ -72,13 +70,12 @@ export default async function HomePage({
   const chartPoints = buildChartPoints(filtered, payload.heroes);
 
   return (
-    <div className="dash-shell min-h-screen pb-24 md:pb-10">
-      <Sidebar />
-
-      <div className="dash-main mx-auto max-w-7xl space-y-4 px-4 py-6 md:space-y-[1.125rem] md:py-8 md:pl-24 lg:pl-28">
+    <div className="dash-shell min-h-screen pb-10">
+      <div className="dash-main mx-auto max-w-6xl space-y-4 px-4 py-6 md:space-y-5 md:px-6 md:py-8">
+        {/* 1. Top header: avatar / name / rank / live / date pills */}
         <Suspense
           fallback={
-            <div className="h-16 animate-pulse rounded-2xl bg-white/5" />
+            <div className="h-20 animate-pulse rounded-2xl bg-white/5" />
           }
         >
           <PlayerHeader
@@ -88,42 +85,26 @@ export default async function HomePage({
           />
         </Suspense>
 
-        {/* Top row: hero weather card + live conditions chart */}
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-12 lg:gap-[1.125rem]">
-          <div className="lg:col-span-7">
-            <SummaryCards summary={summary} rangeLabel={range.label} />
-          </div>
-          <div className="lg:col-span-5 lg:min-h-[320px]">
-            <WinChart points={chartPoints} summary={summary} />
-          </div>
+        {/* 2. KPI row */}
+        <SummaryCards summary={summary} rangeLabel={range.label} />
+
+        {/* 3. Wide main chart */}
+        <WinChart points={chartPoints} summary={summary} />
+
+        {/* 4. Full-width hero stats table */}
+        <HeroTable rows={heroRows} />
+
+        {/* Slim secondary: recent + meta */}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5">
+          <RecentMatches points={chartPoints} />
+          <MetaCards
+            player={payload.player}
+            fetchedAt={payload.fetchedAt}
+            rangeLabel={range.label}
+          />
         </div>
 
-        {/* Hourly-style date range strip */}
-        <Suspense
-          fallback={
-            <div className="h-16 animate-pulse rounded-2xl bg-white/5" />
-          }
-        >
-          <DateRangeFilter currentDays={range.key} />
-        </Suspense>
-
-        {/* Bottom: day cards (heroes) + recent / info */}
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-12 lg:gap-[1.125rem]">
-          <div className="space-y-4 lg:col-span-7">
-            <HeroDayCards rows={heroRows} />
-            <HeroTable rows={heroRows} />
-          </div>
-          <div className="space-y-4 lg:col-span-5">
-            <RecentMatches points={chartPoints} />
-            <MetaCards
-              player={payload.player}
-              fetchedAt={payload.fetchedAt}
-              rangeLabel={range.label}
-            />
-          </div>
-        </div>
-
-        <footer className="pb-4 pt-2 text-center text-xs text-white/30">
+        <footer className="pb-2 pt-1 text-center text-xs text-white/30">
           <p>
             © oldboys.games · Zhou / 鲷哥 · 数据来自{" "}
             <a

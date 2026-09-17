@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  /* Weather IoT layout + Authkit-like frosted midnight glass clarity */
+  /* Analytics dashboard + Authkit-like frosted midnight glass clarity */
   --background: #05060f;
   --foreground: #d1e4fa;
   --canvas: #05060f;
@@ -24,15 +24,15 @@
   --ice: #d8ecf8;
   --frost-edge: rgba(186, 215, 247, 0.12);
   --frost-inset: rgba(216, 236, 248, 0.2);
-  /* Chrome rhythm — match Weather IoT sample */
-  --radius-card: 1.625rem;   /* ~26px outer cards */
-  --radius-card-lg: 1.75rem; /* ~28px hero */
-  --radius-inner: 1rem;      /* ~16px inner modules */
-  --radius-chip: 1rem;       /* ~16px forecast chips */
+  /* Chrome rhythm — conventional data-stats cards */
+  --radius-card: 1.25rem;
+  --radius-card-lg: 1.375rem;
+  --radius-inner: 0.875rem;
+  --radius-chip: 0.875rem;
   --radius-pill: 9999px;
-  --radius-rail: 2rem;       /* heavily rounded sidebar */
-  --gap-bento: 1rem;         /* 16px between cells */
-  --pad-card: 1.375rem;      /* ~22px */
+  --radius-rail: 1.5rem;
+  --gap-bento: 1rem;
+  --pad-card: 1.25rem;
 }
 
 @theme inline {
@@ -200,7 +200,7 @@ footer {
     0 8px 24px rgba(6, 6, 14, 0.35);
 }
 
-/* Hero — deep glass plate lit from below (Weather IoT shape, Authkit clarity) */
+/* Hero plate — deep glass lit from below (Authkit clarity; optional) */
 .hero-hub {
   position: relative;
   overflow: hidden;
@@ -496,4 +496,44 @@ footer {
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.14),
     0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+
+/* ── Analytics dashboard motion (subtle; Refero-inspired chart/table) ── */
+
+.kpi-cell {
+  transition: background 0.15s ease;
+}
+.kpi-cell:hover {
+  background: rgba(186, 214, 247, 0.035);
+}
+
+@keyframes hero-row-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hero-row {
+  animation: hero-row-in 0.45s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-row {
+    animation: none;
+  }
+}
+
+.hero-table-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(186, 215, 247, 0.2) transparent;
+}
+
+.chart-active-dot {
+  transition: r 0.15s ease;
 }

@@ -3,11 +3,11 @@
 import type { ChartPoint } from "@/lib/types";
 
 export function RecentMatches({ points }: { points: ChartPoint[] }) {
-  const recent = [...points].reverse().slice(0, 6);
+  const recent = [...points].reverse().slice(0, 8);
 
   return (
     <div id="recent" className="panel scroll-mt-24 overflow-hidden">
-      <div className="flex items-center justify-between px-5 py-[1.125rem]">
+      <div className="flex items-center justify-between border-b border-white/[0.06] px-5 py-4">
         <h2 className="text-sm font-semibold tracking-tight text-white">
           近期对局
         </h2>
@@ -22,13 +22,13 @@ export function RecentMatches({ points }: { points: ChartPoint[] }) {
             return (
               <li
                 key={`${p.index}-${p.date}`}
-                className="recent-row flex items-center gap-3 px-5 py-3"
+                className="recent-row flex items-center gap-3 px-5 py-2.5"
               >
                 <span
-                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl text-xs font-bold ${
+                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[11px] font-bold ${
                     win
-                      ? "border border-teal-400/20 bg-teal-400/12 text-teal-300"
-                      : "border border-rose-400/20 bg-rose-400/12 text-rose-300"
+                      ? "bg-teal-400/12 text-teal-300 ring-1 ring-teal-400/20"
+                      : "bg-rose-400/12 text-rose-300 ring-1 ring-rose-400/20"
                   }`}
                 >
                   {p.result}
@@ -42,8 +42,8 @@ export function RecentMatches({ points }: { points: ChartPoint[] }) {
                   </p>
                 </div>
                 <span
-                  className={`font-mono text-lg font-semibold tabular-nums ${
-                    win ? "text-white" : "text-white/45"
+                  className={`font-mono text-sm font-semibold tabular-nums ${
+                    win ? "text-white/80" : "text-white/40"
                   }`}
                 >
                   {win ? "W" : "L"}

@@ -1,15 +1,15 @@
 # Zhou · 鲷哥天梯看板 (oldboys.games)
 
-Next.js App Router + TypeScript + Tailwind 的 Dota 2 天梯统计看板，展示 Zhou（鲷哥，OpenDota `account_id=90137663`）的 ranked（`lobby_type=7`）表现。
+Next.js App Router + TypeScript + Tailwind 的 Dota 2 天梯**数据统计看板**，展示 Zhou（鲷哥，OpenDota `account_id=90137663`）的 ranked（`lobby_type=7`）表现。
 
 **重要：** 本站**不会**把 OpenDota 的 `computed_mmr` 当作「天梯分」展示。「上分」列固定为 `—`，真实 MMR 变动需要 Steam Game Coordinator 导出。
 
 ## 功能
 
-- 深色玻璃拟态电竞仪表盘（zh-CN）
-- 摘要：场次、W-L、胜率、场均 KDA
-- 走势图：累计净胜 + 滚动胜率（**不是真实 MMR 曲线**）
-- 英雄表：英雄、上分(—)、计数、W-L、净胜、场均 K/D/A、KDA、胜率
+- 常规数据统计站布局：顶栏 → KPI → 宽走势图 → 全宽英雄表（zh-CN）
+- KPI：场次、W-L、胜率、场均 KDA
+- 走势图：累计净胜 + 滚动胜率（**不是真实 MMR 曲线**），带轻量折线入场动画
+- 英雄表：官方中文名、上分(—)、场次、W-L、净胜、场均 K/D/A、KDA、胜率；粘性表头 + 行悬停
 - 时间范围筛选（默认近 40 天）
 - 服务端拉取，`revalidate` ≈ 180s；OpenDota 请求带 `User-Agent`
 
@@ -80,13 +80,13 @@ npm start
 
 ## 玻璃渲染
 
-霜化面板采用 **Authkit 式澄澈午夜玻璃**（教堂玻璃清晰度——冷色冰边，而非浑浊白雾），布局仍保持 Weather IoT：
+霜化面板采用 **Authkit 式澄澈午夜玻璃**（教堂玻璃清晰度——冷色冰边，而非浑浊白雾）。布局为常规数据统计站，玻璃材质与布局解耦：
 
 1. **共享 SVG filter defs**（`GlassFilters`）— `feSpecularLighting` 冰面高光（`#glass-specular` / `#glass-hero`）；可选极低振幅霜化/折射（`#glass-frost`、`#glass-premium`）仅用于装饰层。
 2. **CSS 玻璃叠层** — 冷色 `rgba(186,214,247,…)` 填充 + `backdrop-filter` 模糊/饱和 + Authkit 式内嵌霜影 + 渐变冰边；面板上 `filter: url(#…)`（小屏 / `prefers-reduced-motion` 时关闭）。
 3. **Hero canvas 高光**（`HeroGlassSheen`）— 轻量 2D canvas 镜面（soft-light），移动端 / 减动时静态。无 Three.js。
 
-参考偏向：[Refero Authkit — Frosted glass cathedral at midnight](https://styles.refero.design/style/e80231a2-e4d6-406a-a2c9-2e6109679690)。
+图表 / 表格入场动效可参考 [Refero Styles](https://styles.refero.design/) 的表格与折线示例（材质与动效参考，非整页皮肤拷贝）。
 
 ## License
 
