@@ -81,16 +81,16 @@ export function HeroTable({ rows }: { rows: HeroStat[] }) {
                     {r.games}
                   </td>
                   <td className="hz-td px-3 py-3 text-right font-mono tabular-nums">
-                    <span className="font-bold text-[#ee5d50]">{r.wins}</span>
+                    <span className="font-bold text-[#05cd99]">{r.wins}</span>
                     <span className="text-[#c3cae7]">-</span>
-                    <span className="font-bold text-[#a3aed0]">{r.losses}</span>
+                    <span className="font-bold text-[#ee5d50]">{r.losses}</span>
                   </td>
                   <td
                     className={`hz-td px-3 py-3 text-right font-mono font-bold tabular-nums ${
                       r.netWins > 0
-                        ? "text-[#ee5d50]"
+                        ? "text-[#05cd99]"
                         : r.netWins < 0
-                          ? "text-[#a3aed0]"
+                          ? "text-[#ee5d50]"
                           : "text-ink-muted"
                     }`}
                   >

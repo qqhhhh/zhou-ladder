@@ -104,9 +104,9 @@ export function WinChart({
               <span
                 className={`font-mono text-2xl font-bold tabular-nums ${
                   netWins > 0
-                    ? "text-[#ee5d50]"
+                    ? "text-[#05cd99]"
                     : netWins < 0
-                      ? "text-[#a3aed0]"
+                      ? "text-[#ee5d50]"
                       : "text-navy-700"
                 }`}
               >
@@ -119,9 +119,9 @@ export function WinChart({
               <span
                 className={`font-mono text-2xl font-bold tabular-nums ${
                   rollingWr > 50
-                    ? "text-[#ee5d50]"
+                    ? "text-[#05cd99]"
                     : rollingWr < 50
-                      ? "text-[#a3aed0]"
+                      ? "text-[#ee5d50]"
                       : "text-navy-700"
                 }`}
               >
@@ -133,9 +133,9 @@ export function WinChart({
               <span
                 className={`font-mono text-2xl font-bold tabular-nums ${
                   overallWr > 50
-                    ? "text-[#ee5d50]"
+                    ? "text-[#05cd99]"
                     : overallWr < 50
-                      ? "text-[#a3aed0]"
+                      ? "text-[#ee5d50]"
                       : "text-navy-700"
                 }`}
               >
