@@ -18,7 +18,7 @@ export function MetaCards({
   });
 
   return (
-    <div className="panel p-5 md:p-6">
+    <div className="panel panel-lift p-5 md:p-6">
       <p className="text-sm font-medium text-ink-muted">段位</p>
       <p className="mt-2 text-xl font-bold tracking-tight text-navy-700">
         {rank}

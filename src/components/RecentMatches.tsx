@@ -6,7 +6,7 @@ export function RecentMatches({ points }: { points: ChartPoint[] }) {
   const recent = [...points].reverse().slice(0, 8);
 
   return (
-    <div id="recent" className="panel scroll-mt-24 overflow-hidden">
+    <div id="recent" className="panel panel-lift scroll-mt-24 overflow-hidden">
       <div className="flex items-center justify-between px-5 pb-2 pt-5">
         <h2 className="text-lg font-bold tracking-tight text-navy-700">
           近期对局

@@ -91,7 +91,7 @@ export function WinChart({
   return (
     <section
       id="trend"
-      className="panel scroll-mt-24 flex flex-col p-5 md:p-6"
+      className="panel panel-lift scroll-mt-24 flex flex-col p-5 md:p-6"
     >
       <div className="mb-1 flex flex-wrap items-end justify-between gap-3">
         <div className="min-w-0">

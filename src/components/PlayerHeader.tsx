@@ -34,7 +34,7 @@ export function PlayerHeader({
   return (
     <header
       id="overview"
-      className="panel scroll-mt-6 px-4 py-4 md:px-6 md:py-5"
+      className="panel panel-lift scroll-mt-6 px-4 py-4 md:px-6 md:py-5"
     >
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex min-w-0 items-center gap-3.5">

@@ -97,6 +97,7 @@ footer {
   background: var(--brand-tint);
   color: var(--brand);
   flex-shrink: 0;
+  transition: transform 0.22s ease;
 }
 
 .avatar-ring {
@@ -116,17 +117,24 @@ footer {
   background: var(--brand);
   color: #fff;
   box-shadow: 0 4px 12px rgba(66, 42, 251, 0.28);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.chip-active:hover {
+  transform: translateY(-1px);
 }
 
 .chip-idle {
   background: var(--light-primary);
   color: var(--ink-faint);
   border: none;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
 }
 
 .chip-idle:hover {
   background: #e9edf7;
   color: var(--navy-700);
+  transform: translateY(-1px);
 }
 
 .btn-live {
@@ -141,6 +149,7 @@ footer {
 .btn-live:hover {
   background: var(--brand-soft);
   box-shadow: 0 8px 22px rgba(66, 42, 251, 0.34);
+  transform: translateY(-1px);
 }
 
 .btn-ghost {
@@ -206,7 +215,7 @@ footer {
 
 .recent-row {
   border-bottom: 1px solid var(--line);
-  transition: background 0.12s ease;
+  transition: background 0.15s ease, transform 0.15s ease;
 }
 
 .recent-row:last-child {
@@ -215,15 +224,30 @@ footer {
 
 .recent-row:hover {
   background: var(--light-primary);
+  transform: translateX(2px);
 }
 
-/* Flowbite-dense KPI hover */
+/* Flowbite-dense KPI hover + panel lift */
+.panel-lift {
+  transition: box-shadow 0.22s ease, transform 0.22s ease;
+}
+
+.panel-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 14px 20px 44px 6px rgba(112, 144, 176, 0.16);
+}
+
 .kpi-card {
-  transition: box-shadow 0.15s ease, transform 0.15s ease;
+  transition: box-shadow 0.22s ease, transform 0.22s ease;
 }
 
 .kpi-card:hover {
-  box-shadow: 14px 17px 40px 4px rgba(112, 144, 176, 0.14);
+  transform: translateY(-3px);
+  box-shadow: 14px 20px 44px 6px rgba(112, 144, 176, 0.18);
+}
+
+.kpi-card:hover .stat-icon {
+  transform: scale(1.06);
 }
 
 @keyframes hero-row-in {
@@ -239,11 +263,37 @@ footer {
 
 .hero-row {
   animation: hero-row-in 0.4s ease-out both;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.hero-row:hover {
+  transform: translateX(2px);
 }
 
 @media (prefers-reduced-motion: reduce) {
   .hero-row {
     animation: none;
+  }
+  .panel-lift,
+  .kpi-card,
+  .chip-idle,
+  .chip-active,
+  .hero-row,
+  .recent-row,
+  .btn-live,
+  .stat-icon {
+    transition: none !important;
+  }
+  .panel-lift:hover,
+  .kpi-card:hover,
+  .chip-idle:hover,
+  .chip-active:hover,
+  .hero-row:hover,
+  .recent-row:hover {
+    transform: none !important;
+  }
+  .kpi-card:hover .stat-icon {
+    transform: none !important;
   }
 }
 

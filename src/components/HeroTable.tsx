@@ -13,7 +13,7 @@ export function HeroTable({ rows }: { rows: HeroStat[] }) {
   );
 
   return (
-    <section id="heroes" className="panel scroll-mt-24 overflow-hidden">
+    <section id="heroes" className="panel panel-lift scroll-mt-24 overflow-hidden">
       <div className="flex flex-wrap items-end justify-between gap-2 px-5 pb-2 pt-5 md:px-6 md:pt-6">
         <div>
           <h2 className="text-xl font-bold tracking-tight text-navy-700">
