@@ -65,12 +65,12 @@ export function PlayerHeader({
         </div>
       </div>
       <a
-        href={player.profile.profileurl}
+        href="https://www.douyu.com/88660"
         target="_blank"
         rel="noreferrer"
         className="self-start rounded-full bg-gradient-to-r from-amber-500/15 to-orange-500/10 px-4 py-2 text-sm text-amber-100 ring-1 ring-amber-400/30 transition hover:from-amber-500/25 hover:to-orange-500/20 hover:text-white hover:shadow-[0_0_24px_rgba(245,158,11,0.3)] md:self-center"
       >
-        Steam 主页 →
+        直播间 →
       </a>
     </motion.header>
   );
