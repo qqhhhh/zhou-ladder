@@ -29,7 +29,7 @@ export function PlayerHeader({
   return (
     <header
       id="overview"
-      className="panel scroll-mt-6 px-4 py-4 md:px-5 md:py-4"
+      className="panel scroll-mt-6 px-4 py-4 md:px-6 md:py-5"
     >
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex min-w-0 items-center gap-3.5">
@@ -37,27 +37,27 @@ export function PlayerHeader({
             <Image
               src="/zhou-avatar.jpg"
               alt="Zhou"
-              width={48}
-              height={48}
-              className="h-12 w-12 object-cover"
+              width={52}
+              height={52}
+              className="h-[52px] w-[52px] object-cover"
               priority
             />
           </div>
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <h1 className="truncate text-lg font-semibold tracking-tight text-white md:text-xl">
+              <h1 className="truncate text-lg font-bold tracking-tight text-navy-700 md:text-xl">
                 Zhou
-                <span className="ml-2 font-medium text-white/65">鲷哥</span>
+                <span className="ml-2 font-medium text-ink-faint">鲷哥</span>
               </h1>
-              <span className="rank-chip rounded-full px-2.5 py-0.5 text-[11px] text-white/65">
+              <span className="rank-chip rounded-full px-2.5 py-0.5 text-[11px] font-bold">
                 {rank}
               </span>
             </div>
-            <p className="mt-0.5 truncate text-xs text-white/40">
+            <p className="mt-0.5 truncate text-xs text-ink-muted">
               {todayLabel()}
-              <span className="mx-1.5 text-white/20">·</span>
+              <span className="mx-1.5 text-[#c3cae7]">·</span>
               {rangeLabel}
-              <span className="mx-1.5 text-white/20">·</span>
+              <span className="mx-1.5 text-[#c3cae7]">·</span>
               {player.profile.personaname}
             </p>
           </div>
@@ -89,7 +89,7 @@ export function PlayerHeader({
               href="https://www.douyu.com/88660"
               target="_blank"
               rel="noreferrer"
-              className="btn-live inline-flex items-center justify-center rounded-full px-5 py-2.5 text-sm font-semibold"
+              className="btn-live inline-flex items-center justify-center rounded-full px-5 py-2.5 text-sm font-bold"
             >
               直播间
             </a>

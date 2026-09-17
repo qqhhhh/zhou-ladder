@@ -78,15 +78,16 @@ npm start
 - 所有 OpenDota 请求携带自定义 `User-Agent`
 - 英雄头像：Steam CDN `cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/...`
 
-## 玻璃渲染
+## UI 风格
 
-霜化面板采用 **Authkit 式澄澈午夜玻璃**（教堂玻璃清晰度——冷色冰边，而非浑浊白雾）。布局为常规数据统计站，玻璃材质与布局解耦：
+主骨架参考 [Horizon UI Tailwind](https://github.com/horizon-ui/horizon-tailwind-react) Main Dashboard：
 
-1. **共享 SVG filter defs**（`GlassFilters`）— `feSpecularLighting` 冰面高光（`#glass-specular` / `#glass-hero`）；可选极低振幅霜化/折射（`#glass-frost`、`#glass-premium`）仅用于装饰层。
-2. **CSS 玻璃叠层** — 冷色 `rgba(186,214,247,…)` 填充 + `backdrop-filter` 模糊/饱和 + Authkit 式内嵌霜影 + 渐变冰边；面板上 `filter: url(#…)`（小屏 / `prefers-reduced-motion` 时关闭）。
-3. **Hero canvas 高光**（`HeroGlassSheen`）— 轻量 2D canvas 镜面（soft-light），移动端 / 减动时静态。无 Three.js。
+- 浅色 `lightPrimary` 画布、`rounded-[20px]` 白卡片、品牌 indigo（`#422AFB`）、柔和阴影
+- KPI：Horizon MiniStatistics / Widget 四卡横排，吸收 Flowbite 信息密度
+- 走势图：Total Spent 式大卡 + 折线入场动画（标注「不是真实天梯分」）
+- 英雄表：Complex Table / Mantine 细分割线与清晰表头
 
-图表 / 表格入场动效可参考 [Refero Styles](https://styles.refero.design/) 的表格与折线示例（材质与动效参考，非整页皮肤拷贝）。
+非天气 IoT、非浑浊玻璃材质。
 
 ## License
 

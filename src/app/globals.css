@@ -1,89 +1,67 @@
 @import "tailwindcss";
 
 :root {
-  /* Analytics dashboard + Authkit-like frosted midnight glass clarity */
-  --background: #05060f;
-  --foreground: #d1e4fa;
-  --canvas: #05060f;
-  /* Clear frost tint — glass plate, not muddy wash */
-  --glass: rgba(186, 214, 247, 0.045);
-  --glass-strong: rgba(186, 214, 247, 0.08);
-  --glass-soft: rgba(186, 214, 247, 0.03);
-  --ink: #e8f0fa;
-  --ink-soft: #c7d3ea;
-  --ink-faint: #9da7ba;
-  --accent-blue: #5b9dff;
-  --accent-orange: #ff8a4c;
-  --accent-sky: #7ec8ff;
-  --line: rgba(186, 215, 247, 0.12);
-  --line-strong: rgba(186, 215, 247, 0.2);
-  --win: #5eead4;
-  --loss: #fb7185;
-  --glass-blur: 18px;
-  --glass-saturate: 1.35;
-  --ice: #d8ecf8;
-  --frost-edge: rgba(186, 215, 247, 0.12);
-  --frost-inset: rgba(216, 236, 248, 0.2);
-  /* Chrome rhythm — conventional data-stats cards */
-  --radius-card: 1.25rem;
-  --radius-card-lg: 1.375rem;
-  --radius-inner: 0.875rem;
-  --radius-chip: 0.875rem;
+  /* Horizon UI Tailwind — Main Dashboard skeleton */
+  --background: #f4f7fe;
+  --foreground: #1b254b;
+  --canvas: #f4f7fe;
+  --card: #ffffff;
+  --ink: #1b254b;
+  --ink-soft: #2b3674;
+  --ink-muted: #a3aed0;
+  --ink-faint: #707eae;
+  --brand: #422afb;
+  --brand-soft: #7551ff;
+  --brand-tint: #e9e3ff;
+  --light-primary: #f4f7fe;
+  --navy-700: #1b254b;
+  --navy-800: #111c44;
+  --navy-900: #0b1437;
+  --line: #e9edf7;
+  --line-strong: #e0e5f2;
+  --win: #05cd99;
+  --loss: #ee5d50;
+  --shadow-card: 14px 17px 40px 4px rgba(112, 144, 176, 0.08);
+  --radius-card: 1.25rem; /* 20px — Horizon rounded-[20px] */
+  --radius-inner: 0.75rem;
   --radius-pill: 9999px;
-  --radius-rail: 1.5rem;
-  --gap-bento: 1rem;
-  --pad-card: 1.25rem;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --color-brand: var(--brand);
+  --color-brand-soft: var(--brand-soft);
+  --color-brand-tint: var(--brand-tint);
+  --color-navy-700: var(--navy-700);
+  --color-navy-800: var(--navy-800);
+  --color-navy-900: var(--navy-900);
+  --color-light-primary: var(--light-primary);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-faint: var(--ink-faint);
+  --font-sans: var(--font-dm-sans);
   --font-mono: var(--font-geist-mono);
+  --shadow-horizon: var(--shadow-card);
 }
 
 body {
   background: var(--canvas);
   color: var(--ink);
   min-height: 100vh;
-  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-family: var(--font-dm-sans), "DM Sans", system-ui, sans-serif;
   overflow-x: hidden;
 }
 
-/* ── Midnight canvas + cool cathedral spotlight (no photo, no grain) ── */
-.bg-grid {
+/* Soft Horizon canvas — airy, not flat empty strip */
+.bg-horizon {
   position: relative;
   isolation: isolate;
-  background-color: #05060f;
+  min-height: 100vh;
+  background-color: var(--light-primary);
   background-image:
-    radial-gradient(ellipse 80% 55% at 50% -5%, rgba(124, 145, 182, 0.28), transparent 55%),
-    radial-gradient(ellipse 70% 50% at 12% 18%, rgba(90, 130, 190, 0.08), transparent 58%),
-    radial-gradient(ellipse 55% 40% at 88% 25%, rgba(100, 140, 200, 0.06), transparent 52%),
-    linear-gradient(
-      168deg,
-      #070914 0%,
-      #05060f 40%,
-      #060812 70%,
-      #05060f 100%
-    );
-}
-
-/* Soft cool ambient wash — cathedral clarity */
-.bg-grid::before {
-  content: "";
-  pointer-events: none;
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  background-image:
-    radial-gradient(ellipse 48% 40% at 50% 0%, rgba(168, 216, 245, 0.07), transparent 60%),
-    radial-gradient(ellipse 40% 34% at 20% 40%, rgba(186, 215, 247, 0.04), transparent 62%);
-  opacity: 1;
-}
-
-.bg-grid::after {
-  display: none;
-  content: none;
+    radial-gradient(ellipse 70% 45% at 12% -5%, rgba(66, 42, 251, 0.07), transparent 55%),
+    radial-gradient(ellipse 55% 40% at 92% 8%, rgba(134, 140, 255, 0.08), transparent 50%),
+    linear-gradient(180deg, #f4f7fe 0%, #eef2fb 48%, #f4f7fe 100%);
 }
 
 .dash-shell,
@@ -93,223 +71,95 @@ footer {
   z-index: 1;
 }
 
-/* ── Authkit-clear frosted midnight glass + SVG specular filters ── */
-
-/* SVG filter hooks (defs in GlassFilters) — specular only on text panels */
-.glass-svg {
-  filter: url(#glass-specular);
-}
-.glass-svg-soft {
-  filter: url(#glass-specular);
-}
-.glass-svg-hero {
-  filter: url(#glass-hero);
-}
-.glass-frost-layer {
-  filter: url(#glass-frost);
-}
-.glass-premium-layer {
-  filter: url(#glass-premium);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .panel,
-  .sidebar-rail,
-  .glass-svg,
-  .glass-svg-soft,
-  .glass-svg-hero {
-    filter: none;
-  }
-}
-
-@media (max-width: 640px) {
-  /* Keep backdrop blur; skip SVG specular cost on small screens */
-  .panel,
-  .sidebar-rail,
-  .glass-svg,
-  .glass-svg-soft,
-  .glass-svg-hero {
-    filter: none;
-  }
-}
-
-/* Specular edge helper — cool ice hairline */
-.glass-edge {
-  border: none;
-  box-shadow:
-    inset 0 1px 1px rgba(216, 236, 248, 0.2),
-    inset 0 0 0 1px rgba(186, 215, 247, 0.12),
-    0 10px 28px rgba(6, 6, 14, 0.45);
-}
-
-/* Frosted glass panels — clear cathedral glass, not muddy */
+/* Horizon Card — solid white, rounded-20, soft shadow (no glass) */
 .panel {
   position: relative;
   border-radius: var(--radius-card);
+  background: var(--card);
+  box-shadow: var(--shadow-card);
   border: none;
-  background: var(--glass);
-  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-  filter: url(#glass-specular);
-  box-shadow:
-    /* Authkit inset frost highlight + soft inner glow */
-    inset 0 1px 1px rgba(216, 236, 248, 0.2),
-    inset 0 24px 48px rgba(168, 216, 245, 0.045),
-    inset 1px 0 0 rgba(186, 215, 247, 0.1),
-    inset 0 -1px 0 rgba(5, 6, 15, 0.35),
-    inset 0 0 0 1px rgba(186, 215, 247, 0.08),
-    0 16px 32px rgba(6, 6, 14, 0.45),
-    0 0 0 1px rgba(186, 215, 247, 0.1);
-}
-
-/* Cool ice gradient border ring */
-.panel::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  padding: 1px;
-  pointer-events: none;
-  background: linear-gradient(
-    145deg,
-    rgba(216, 236, 248, 0.42) 0%,
-    rgba(186, 215, 247, 0.16) 28%,
-    rgba(186, 215, 247, 0.05) 55%,
-    rgba(5, 6, 15, 0.35) 100%
-  );
-  -webkit-mask:
-    linear-gradient(#fff 0 0) content-box,
-    linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  opacity: 0.95;
-  z-index: 0;
 }
 
 .panel-soft {
-  position: relative;
   border-radius: var(--radius-inner);
-  border: none;
-  background: var(--glass-soft);
-  backdrop-filter: blur(14px) saturate(1.3);
-  -webkit-backdrop-filter: blur(14px) saturate(1.3);
-  box-shadow:
-    inset 0 1px 1px rgba(216, 236, 248, 0.16),
-    inset 0 16px 32px rgba(199, 211, 234, 0.04),
-    inset 0 0 0 1px rgba(186, 215, 247, 0.08),
-    0 8px 24px rgba(6, 6, 14, 0.35);
+  background: var(--light-primary);
+  box-shadow: none;
 }
 
-/* Hero plate — deep glass lit from below (Authkit clarity; optional) */
-.hero-hub {
-  position: relative;
-  overflow: hidden;
-  border-radius: var(--radius-card-lg);
-  border: none;
-  background-color: rgba(5, 6, 15, 0.72);
-  background-image:
-    radial-gradient(ellipse 65% 50% at 82% 12%, rgba(186, 215, 247, 0.12), transparent 55%),
-    radial-gradient(ellipse 55% 45% at 50% 110%, rgba(168, 216, 245, 0.08), transparent 55%),
-    radial-gradient(ellipse 50% 45% at 15% 80%, rgba(90, 130, 190, 0.1), transparent 55%),
-    linear-gradient(
-      155deg,
-      rgba(20, 28, 42, 0.92) 0%,
-      rgba(10, 14, 24, 0.88) 42%,
-      rgba(5, 6, 15, 0.94) 100%
-    );
-  backdrop-filter: blur(22px) saturate(1.4);
-  -webkit-backdrop-filter: blur(22px) saturate(1.4);
-  box-shadow:
-    inset 0 1px 1px rgba(216, 236, 248, 0.22),
-    inset 0 28px 56px rgba(168, 216, 245, 0.06),
-    inset 1px 0 0 rgba(186, 215, 247, 0.12),
-    inset 0 -1px 0 rgba(5, 6, 15, 0.4),
-    inset 0 0 0 1px rgba(186, 215, 247, 0.1),
-    0 16px 40px rgba(0, 0, 0, 0.35),
-    0 0 0 1px rgba(186, 215, 247, 0.12);
+/* MiniStatistics / Widget icon well */
+.stat-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 9999px;
+  background: var(--brand-tint);
+  color: var(--brand);
+  flex-shrink: 0;
 }
 
-/* Cool ambient shapes — not a photo */
-.hero-hub::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(ellipse 42% 36% at 78% 18%, rgba(216, 236, 248, 0.1), transparent 60%),
-    radial-gradient(ellipse 36% 30% at 28% 75%, rgba(152, 192, 239, 0.06), transparent 55%);
-  opacity: 1;
-  z-index: 0;
+.avatar-ring {
+  box-shadow: 0 0 0 3px #fff, 0 0 0 5px rgba(66, 42, 251, 0.35);
 }
 
-/* Hero ice border ring */
-.hero-hub::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  padding: 1px;
-  pointer-events: none;
-  background: linear-gradient(
-    145deg,
-    rgba(216, 236, 248, 0.48) 0%,
-    rgba(186, 215, 247, 0.18) 30%,
-    rgba(186, 215, 247, 0.05) 58%,
-    rgba(5, 6, 15, 0.4) 100%
-  );
-  -webkit-mask:
-    linear-gradient(#fff 0 0) content-box,
-    linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  opacity: 0.98;
-  z-index: 3;
+.chart-tooltip {
+  background: #fff !important;
+  border: none !important;
+  border-radius: 12px !important;
+  box-shadow: var(--shadow-card) !important;
+  color: var(--ink) !important;
+  padding: 10px 14px !important;
 }
 
-.hero-note {
-  border: none;
-  border-radius: var(--radius-inner);
-  background: rgba(186, 214, 247, 0.06);
-  backdrop-filter: blur(14px) saturate(1.25);
-  -webkit-backdrop-filter: blur(14px) saturate(1.25);
-  box-shadow:
-    inset 0 1px 1px rgba(216, 236, 248, 0.18),
-    inset 0 0 0 1px rgba(186, 215, 247, 0.12);
+.chip-active {
+  background: var(--brand);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(66, 42, 251, 0.28);
 }
 
-/* Sidebar — frosted heavily-rounded rail */
-.sidebar-rail {
-  border: none;
-  border-radius: var(--radius-rail);
-  background: rgba(186, 214, 247, 0.04);
-  backdrop-filter: blur(18px) saturate(1.35);
-  -webkit-backdrop-filter: blur(18px) saturate(1.35);
-  filter: url(#glass-specular);
-  box-shadow:
-    inset 0 1px 1px rgba(216, 236, 248, 0.2),
-    inset 0 24px 48px rgba(168, 216, 245, 0.04),
-    inset 0 0 0 1px rgba(186, 215, 247, 0.1),
-    0 12px 36px rgba(6, 6, 14, 0.5),
-    0 0 0 1px rgba(186, 215, 247, 0.1);
-}
-
-.nav-icon {
+.chip-idle {
+  background: var(--light-primary);
   color: var(--ink-faint);
-  border-radius: 0.875rem; /* ~14px rounded-square like sample */
-  transition: color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+  border: none;
 }
 
-.nav-icon:hover {
-  color: var(--ink);
-  background: rgba(255, 255, 255, 0.08);
+.chip-idle:hover {
+  background: #e9edf7;
+  color: var(--navy-700);
 }
 
-.nav-icon[aria-current="true"] {
-  color: #0c0e12;
-  background: #f2f4f8;
-  box-shadow:
-    0 4px 16px rgba(255, 255, 255, 0.18),
-    inset 0 1px 0 rgba(255, 255, 255, 0.55);
+.btn-live {
+  background: var(--brand);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-pill);
+  box-shadow: 0 6px 18px rgba(66, 42, 251, 0.28);
+  transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn-live:hover {
+  background: var(--brand-soft);
+  box-shadow: 0 8px 22px rgba(66, 42, 251, 0.34);
+}
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  border-radius: 0.5rem;
+  background: var(--light-primary);
+  color: var(--ink-faint);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.btn-ghost:hover {
+  background: #e9edf7;
+  color: var(--navy-700);
 }
 
 .icon-btn {
@@ -318,166 +168,44 @@ footer {
   justify-content: center;
   width: 2.5rem;
   height: 2.5rem;
-  border-radius: var(--radius-pill);
-  border: none;
-  background: rgba(186, 214, 247, 0.06);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  color: rgba(209, 228, 250, 0.75);
-  box-shadow:
-    inset 0 1px 1px rgba(216, 236, 248, 0.18),
-    inset 0 0 0 1px rgba(186, 215, 247, 0.12);
-  transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+  border-radius: 0.75rem;
+  background: var(--light-primary);
+  color: var(--brand);
+  transition: background 0.15s ease;
 }
 
 .icon-btn:hover {
-  background: rgba(255, 255, 255, 0.12);
-  color: #fff;
+  background: var(--brand-tint);
 }
 
-.avatar-ring {
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.14), 0 0 0 3px rgba(91, 157, 255, 0.3);
-}
-
-.chart-tooltip {
-  background: rgba(5, 6, 15, 0.72) !important;
-  border: none !important;
-  border-radius: var(--radius-inner) !important;
-  box-shadow:
-    inset 0 1px 1px rgba(216, 236, 248, 0.18),
-    inset 0 16px 32px rgba(168, 216, 245, 0.04),
-    0 12px 32px rgba(6, 6, 14, 0.45),
-    0 0 0 1px rgba(186, 215, 247, 0.12) !important;
-  color: var(--ink) !important;
-  padding: 10px 14px !important;
-  backdrop-filter: blur(16px) saturate(1.3) !important;
-  -webkit-backdrop-filter: blur(16px) saturate(1.3) !important;
-}
-
-.chip-active {
-  background: rgba(255, 255, 255, 0.14);
-  color: #fff;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.22),
-    0 0 0 1px rgba(255, 255, 255, 0.18);
-}
-
-.chip-idle {
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--ink-soft);
+.rank-chip {
+  background: var(--brand-tint);
+  color: var(--brand);
   border: none;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.1),
-    0 0 0 1px var(--line);
-}
-
-.chip-idle:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
-}
-
-.btn-live {
-  background: rgba(255, 255, 255, 0.95);
-  color: #0c0e12;
-  border: none;
-  border-radius: var(--radius-pill);
-  box-shadow:
-    0 4px 20px rgba(255, 255, 255, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.7);
-  transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
-}
-
-.btn-live:hover {
-  background: #fff;
-  box-shadow: 0 6px 24px rgba(255, 255, 255, 0.18);
-}
-
-.btn-live-outline {
-  background: transparent;
-  color: #f2f4f8;
-  border: none;
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.35);
-  transition: background 0.15s ease, box-shadow 0.15s ease;
-}
-
-.btn-live-outline:hover {
-  background: rgba(255, 255, 255, 0.08);
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.55);
-}
-
-.day-card {
-  border: none;
-  background: rgba(186, 214, 247, 0.045);
-  backdrop-filter: blur(14px) saturate(1.3);
-  -webkit-backdrop-filter: blur(14px) saturate(1.3);
-  border-radius: var(--radius-chip);
-  box-shadow:
-    inset 0 1px 1px rgba(216, 236, 248, 0.16),
-    inset 0 12px 28px rgba(168, 216, 245, 0.035),
-    0 4px 16px rgba(6, 6, 14, 0.28),
-    0 0 0 1px rgba(186, 215, 247, 0.1);
-  transition: background 0.15s ease, box-shadow 0.15s ease;
-}
-
-.day-card:hover {
-  background: rgba(186, 214, 247, 0.08);
-  box-shadow:
-    inset 0 1px 1px rgba(216, 236, 248, 0.22),
-    inset 0 12px 28px rgba(168, 216, 245, 0.05),
-    0 6px 20px rgba(6, 6, 14, 0.32),
-    0 0 0 1px rgba(186, 215, 247, 0.16);
-}
-
-.hourly-chip {
-  border: none;
-  background: rgba(186, 214, 247, 0.04);
-  backdrop-filter: blur(12px) saturate(1.25);
-  -webkit-backdrop-filter: blur(12px) saturate(1.25);
-  border-radius: var(--radius-chip);
-  min-width: 4.75rem;
-  box-shadow:
-    inset 0 1px 1px rgba(216, 236, 248, 0.14),
-    inset 0 0 0 1px rgba(186, 215, 247, 0.1);
-}
-
-.hourly-chip-active {
-  background: rgba(186, 214, 247, 0.1);
-  box-shadow:
-    inset 0 1px 1px rgba(216, 236, 248, 0.24),
-    inset 0 12px 28px rgba(168, 216, 245, 0.05),
-    0 8px 24px rgba(6, 6, 14, 0.28),
-    0 0 0 1px rgba(186, 215, 247, 0.18);
-}
-
-.stat-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  border-radius: var(--radius-pill);
-  padding: 0.3rem 0.75rem;
-  font-size: 0.75rem;
-  background: rgba(199, 211, 234, 0.1);
-  color: rgba(209, 228, 250, 0.92);
-  border: none;
-  backdrop-filter: blur(8px);
-  box-shadow:
-    inset 0 1px 1px rgba(216, 236, 248, 0.14),
-    inset 0 0 0 1px rgba(186, 215, 247, 0.12);
 }
 
 .badge-warn {
-  background: rgba(255, 138, 76, 0.18);
-  color: #ffb088;
+  background: rgba(238, 93, 80, 0.1);
+  color: #ee5d50;
   border: none;
   border-radius: var(--radius-pill);
   padding: 0.2rem 0.65rem;
   font-size: 0.7rem;
-  font-weight: 600;
-  box-shadow: 0 0 0 1px rgba(255, 138, 76, 0.35);
+  font-weight: 700;
+}
+
+.badge-ok {
+  background: rgba(5, 205, 153, 0.12);
+  color: #05cd99;
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 0.2rem 0.65rem;
+  font-size: 0.7rem;
+  font-weight: 700;
 }
 
 .recent-row {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid var(--line);
   transition: background 0.12s ease;
 }
 
@@ -486,32 +214,22 @@ footer {
 }
 
 .recent-row:hover {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--light-primary);
 }
 
-.rank-chip {
-  border: none;
-  background: rgba(255, 255, 255, 0.055);
-  backdrop-filter: blur(10px);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.14),
-    0 0 0 1px rgba(255, 255, 255, 0.1);
+/* Flowbite-dense KPI hover */
+.kpi-card {
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
 }
 
-
-/* ── Analytics dashboard motion (subtle; Refero-inspired chart/table) ── */
-
-.kpi-cell {
-  transition: background 0.15s ease;
-}
-.kpi-cell:hover {
-  background: rgba(186, 214, 247, 0.035);
+.kpi-card:hover {
+  box-shadow: 14px 17px 40px 4px rgba(112, 144, 176, 0.14);
 }
 
 @keyframes hero-row-in {
   from {
     opacity: 0;
-    transform: translateY(6px);
+    transform: translateY(4px);
   }
   to {
     opacity: 1;
@@ -520,7 +238,7 @@ footer {
 }
 
 .hero-row {
-  animation: hero-row-in 0.45s ease-out both;
+  animation: hero-row-in 0.4s ease-out both;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -531,9 +249,23 @@ footer {
 
 .hero-table-scroll {
   scrollbar-width: thin;
-  scrollbar-color: rgba(186, 215, 247, 0.2) transparent;
+  scrollbar-color: rgba(163, 174, 208, 0.45) transparent;
 }
 
 .chart-active-dot {
   transition: r 0.15s ease;
+}
+
+/* Mantine-like thin table dividers */
+.hz-th {
+  border-bottom: 1px solid var(--line-strong);
+  color: var(--ink-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.hz-td {
+  border-bottom: 1px solid var(--line);
 }

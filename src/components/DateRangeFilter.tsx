@@ -40,7 +40,7 @@ export function DateRangeFilter({
   if (variant === "hourly") {
     return (
       <div
-        className="flex gap-3 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         role="group"
         aria-label="时间范围"
       >
@@ -52,24 +52,16 @@ export function DateRangeFilter({
               type="button"
               disabled={pending}
               onClick={() => setDays(p.days)}
-              className={`hourly-chip flex shrink-0 flex-col items-center justify-center gap-1.5 px-5 py-3.5 transition ${
-                active ? "hourly-chip-active" : ""
+              className={`flex shrink-0 flex-col items-center justify-center gap-1 rounded-xl px-4 py-3 transition ${
+                active
+                  ? "bg-brand-tint text-brand"
+                  : "bg-light-primary text-ink-muted"
               } ${pending ? "opacity-60" : ""}`}
             >
-              <span
-                className={`text-[10px] tracking-wide ${
-                  active ? "text-sky-300" : "text-white/40"
-                }`}
-              >
+              <span className="text-[10px] tracking-wide">
                 {active ? "当前" : "范围"}
               </span>
-              <span
-                className={`text-sm font-semibold tabular-nums ${
-                  active ? "text-white" : "text-white/60"
-                }`}
-              >
-                {p.label}
-              </span>
+              <span className="text-sm font-bold tabular-nums">{p.label}</span>
             </button>
           );
         })}
@@ -91,7 +83,7 @@ export function DateRangeFilter({
             type="button"
             disabled={pending}
             onClick={() => setDays(p.days)}
-            className={`rounded-full px-3 py-1.5 text-xs font-medium transition ${
+            className={`rounded-full px-3 py-1.5 text-xs font-bold transition ${
               active ? "chip-active" : "chip-idle"
             } ${pending ? "opacity-60" : ""}`}
           >

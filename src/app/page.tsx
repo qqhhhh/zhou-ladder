@@ -52,11 +52,11 @@ export default async function HomePage({
 
   if (error || !payload) {
     return (
-      <div className="dash-shell mx-auto max-w-6xl px-4 py-16">
+      <div className="dash-shell mx-auto max-w-7xl px-4 py-16">
         <div className="panel p-8 text-center">
-          <h1 className="text-xl font-semibold text-white">数据暂时不可用</h1>
-          <p className="mt-2 text-sm text-rose-300">{error}</p>
-          <p className="mt-4 text-xs text-white/40">
+          <h1 className="text-xl font-bold text-navy-700">数据暂时不可用</h1>
+          <p className="mt-2 text-sm text-rose-500">{error}</p>
+          <p className="mt-4 text-xs text-ink-muted">
             请稍后刷新。本站拉取天梯匹配对局（大厅类型 7）。
           </p>
         </div>
@@ -70,12 +70,12 @@ export default async function HomePage({
   const chartPoints = buildChartPoints(filtered, payload.heroes);
 
   return (
-    <div className="dash-shell min-h-screen pb-10">
-      <div className="dash-main mx-auto max-w-6xl space-y-4 px-4 py-6 md:space-y-5 md:px-6 md:py-8">
-        {/* 1. Top header: avatar / name / rank / live / date pills */}
+    <div className="dash-shell min-h-screen pb-12">
+      <div className="dash-main mx-auto max-w-7xl space-y-5 px-3 py-5 sm:px-4 md:space-y-5 md:px-6 md:py-7">
+        {/* 1. Header: avatar / name / rank / date pills / 直播间 */}
         <Suspense
           fallback={
-            <div className="h-20 animate-pulse rounded-2xl bg-white/5" />
+            <div className="h-20 animate-pulse rounded-[20px] bg-white/70 shadow-horizon" />
           }
         >
           <PlayerHeader
@@ -85,17 +85,17 @@ export default async function HomePage({
           />
         </Suspense>
 
-        {/* 2. KPI row */}
+        {/* 2. Dense 4 KPI MiniStatistics row */}
         <SummaryCards summary={summary} rangeLabel={range.label} />
 
-        {/* 3. Wide main chart */}
-        <WinChart points={chartPoints} summary={summary} />
+        {/* 3. Wide trend chart (Horizon Total Spent / Mantine polish) */}
+        <WinChart points={chartPoints} summary={summary} rangeLabel={range.label} />
 
-        {/* 4. Full-width hero stats table */}
+        {/* 4. Full-width hero table */}
         <HeroTable rows={heroRows} />
 
-        {/* Slim secondary: recent + meta */}
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5">
+        {/* Secondary: recent + meta */}
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
           <RecentMatches points={chartPoints} />
           <MetaCards
             player={payload.player}
@@ -104,11 +104,11 @@ export default async function HomePage({
           />
         </div>
 
-        <footer className="pb-2 pt-1 text-center text-xs text-white/30">
+        <footer className="pb-2 pt-1 text-center text-xs text-ink-muted">
           <p>
             © oldboys.games · Zhou / 鲷哥 · 数据来自{" "}
             <a
-              className="text-sky-400/80 hover:text-sky-300"
+              className="font-medium text-brand hover:text-brand-soft"
               href="https://www.opendota.com/players/90137663"
               target="_blank"
               rel="noreferrer"
