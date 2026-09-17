@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import type { OpenDotaPlayer } from "@/lib/types";
+import type { RangeState } from "@/lib/range";
 import { formatRankTier } from "@/lib/opendota";
 import { DateRangeFilter } from "@/components/DateRangeFilter";
 
@@ -24,6 +25,7 @@ export function PlayerHeader({
   maxDate,
   customFrom,
   customTo,
+  onRangeChange,
 }: {
   player: OpenDotaPlayer;
   rangeKey: string;
@@ -33,6 +35,7 @@ export function PlayerHeader({
   maxDate: string;
   customFrom?: string;
   customTo?: string;
+  onRangeChange: (range: RangeState) => void;
 }) {
   const rank = formatRankTier(player.rank_tier, player.leaderboard_rank);
 
@@ -81,7 +84,7 @@ export function PlayerHeader({
             maxDate={maxDate}
             customFrom={customFrom}
             customTo={customTo}
-            variant="pills"
+            onRangeChange={onRangeChange}
           />
           <div className="flex shrink-0 items-center gap-2">
             <a
