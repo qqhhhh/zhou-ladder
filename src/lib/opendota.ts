@@ -6,26 +6,43 @@ export const OPENDOTA_UA =
 
 const BASE = "https://api.opendota.com/api";
 const MATCH_PAGE_SIZE = 200;
-/** Hard stop so a bad API loop can't hang the deploy forever (~40k matches). */
+/** Hard stop so a bad API loop can't hang forever (~40k matches). */
 const MATCH_MAX_PAGES = 200;
-const MATCH_FETCH_CONCURRENCY = 10;
 /** Full history is expensive; cache aggressively after the first warm pull. */
 const MATCH_REVALIDATE = 3600;
+const PAGE_GAP_MS = 120;
+const RETRY_MAX = 6;
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 async function opendotaFetch<T>(path: string, revalidate = 180): Promise<T> {
-  const res = await fetch(`${BASE}${path}`, {
-    headers: {
-      "User-Agent": OPENDOTA_UA,
-      Accept: "application/json",
-    },
-    next: { revalidate },
-  });
-
-  if (!res.ok) {
-    throw new Error(`OpenDota ${path} failed: ${res.status} ${res.statusText}`);
+  let lastStatus = 0;
+  for (let attempt = 0; attempt < RETRY_MAX; attempt += 1) {
+    const res = await fetch(`${BASE}${path}`, {
+      headers: {
+        "User-Agent": OPENDOTA_UA,
+        Accept: "application/json",
+      },
+      next: { revalidate },
+    });
+    lastStatus = res.status;
+    if (res.ok) {
+      return res.json() as Promise<T>;
+    }
+    // Rate limited — back off and retry
+    if (res.status === 429 || res.status === 503) {
+      const retryAfter = Number(res.headers.get("retry-after"));
+      const waitMs = Number.isFinite(retryAfter) && retryAfter > 0
+        ? retryAfter * 1000
+        : 500 * 2 ** attempt;
+      await sleep(waitMs);
+      continue;
+    }
+    throw new Error(`对局数据请求失败（${res.status}）`);
   }
-
-  return res.json() as Promise<T>;
+  throw new Error(`对局数据请求过于频繁（${lastStatus}），请稍后刷新`);
 }
 
 export async function fetchPlayer(revalidate = 180): Promise<OpenDotaPlayer> {
@@ -43,49 +60,32 @@ export async function fetchPlayer(revalidate = 180): Promise<OpenDotaPlayer> {
 
 /**
  * Paginate OpenDota ranked matches (lobby_type=7) until a short/empty page.
- * Uses offset + limit; each URL is cached independently by Next.js.
+ * Sequential + 429 backoff to stay under OpenDota rate limits (~10k matches).
  */
 export async function fetchRankedMatches(
   revalidate = MATCH_REVALIDATE,
 ): Promise<OpenDotaMatch[]> {
   const all: OpenDotaMatch[] = [];
   const seen = new Set<number>();
-  let offset = 0;
-  let exhausted = false;
 
-  while (!exhausted && offset / MATCH_PAGE_SIZE < MATCH_MAX_PAGES) {
-    const batchOffsets: number[] = [];
-    for (let i = 0; i < MATCH_FETCH_CONCURRENCY; i += 1) {
-      const off = offset + i * MATCH_PAGE_SIZE;
-      if (off / MATCH_PAGE_SIZE >= MATCH_MAX_PAGES) break;
-      batchOffsets.push(off);
-    }
+  for (let page = 0; page < MATCH_MAX_PAGES; page += 1) {
+    const offset = page * MATCH_PAGE_SIZE;
+    if (page > 0) await sleep(PAGE_GAP_MS);
 
-    const pages = await Promise.all(
-      batchOffsets.map((off) =>
-        opendotaFetch<OpenDotaMatch[]>(
-          `/players/${ACCOUNT_ID}/matches?lobby_type=7&limit=${MATCH_PAGE_SIZE}&offset=${off}`,
-          revalidate,
-        ),
-      ),
+    const batch = await opendotaFetch<OpenDotaMatch[]>(
+      `/players/${ACCOUNT_ID}/matches?lobby_type=7&limit=${MATCH_PAGE_SIZE}&offset=${offset}`,
+      revalidate,
     );
 
-    for (const page of pages) {
-      if (page.length === 0) {
-        exhausted = true;
-        continue;
-      }
-      for (const m of page) {
-        if (seen.has(m.match_id)) continue;
-        seen.add(m.match_id);
-        all.push(m);
-      }
-      if (page.length < MATCH_PAGE_SIZE) {
-        exhausted = true;
-      }
+    if (batch.length === 0) break;
+
+    for (const m of batch) {
+      if (seen.has(m.match_id)) continue;
+      seen.add(m.match_id);
+      all.push(m);
     }
 
-    offset += batchOffsets.length * MATCH_PAGE_SIZE;
+    if (batch.length < MATCH_PAGE_SIZE) break;
   }
 
   return all;
