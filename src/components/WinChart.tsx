@@ -11,6 +11,7 @@ import {
   YAxis,
 } from "recharts";
 import type { ChartPoint, SummaryStats } from "@/lib/types";
+import { WaveLabel } from "@/components/WaveLabel";
 
 function CustomTooltip({
   active,
@@ -91,7 +92,7 @@ export function WinChart({
   return (
     <section
       id="trend"
-      className="panel panel-lift scroll-mt-24 flex flex-col p-5 md:p-6"
+      className="panel scroll-mt-24 flex flex-col p-5 md:p-6"
     >
       <div className="mb-1 flex flex-wrap items-end justify-between gap-3">
         <div className="min-w-0">
@@ -249,26 +250,26 @@ export function WinChart({
       </div>
 
       <div className="mt-4 grid grid-cols-3 gap-3 border-t border-[#e9edf7] pt-4">
-        <div>
-          <p className="text-[10px] font-medium uppercase tracking-wide text-ink-muted">
-            场次
+        <div className="wave-stat">
+          <p className="text-[10px] font-medium tracking-wide text-ink-muted">
+            <WaveLabel text="场次" />
           </p>
           <p className="mt-0.5 font-mono text-sm font-bold tabular-nums text-navy-700">
             {summary?.games ?? points.length}
           </p>
         </div>
-        <div>
-          <p className="text-[10px] font-medium uppercase tracking-wide text-ink-muted">
-            累计净胜
+        <div className="wave-stat">
+          <p className="text-[10px] font-medium tracking-wide text-ink-muted">
+            <WaveLabel text="累计净胜" />
           </p>
           <p className="mt-0.5 font-mono text-sm font-bold tabular-nums text-navy-700">
             {netWins > 0 ? "+" : ""}
             {netWins}
           </p>
         </div>
-        <div>
-          <p className="text-[10px] font-medium uppercase tracking-wide text-ink-muted">
-            滚动胜率
+        <div className="wave-stat">
+          <p className="text-[10px] font-medium tracking-wide text-ink-muted">
+            <WaveLabel text="滚动胜率" />
           </p>
           <p className="mt-0.5 font-mono text-sm font-bold tabular-nums text-navy-700">
             {rollingWr.toFixed(1)}%

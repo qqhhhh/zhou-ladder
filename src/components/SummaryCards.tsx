@@ -2,6 +2,7 @@
 
 import type { SummaryStats } from "@/lib/types";
 import { formatNum } from "@/lib/stats";
+import { WaveLabel } from "@/components/WaveLabel";
 
 /** Horizon MiniStatistics / Widget row — Flowbite KPI density */
 export function SummaryCards({
@@ -104,7 +105,7 @@ export function SummaryCards({
           <div className="stat-icon">{item.icon}</div>
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-medium text-ink-muted">
-              {item.label}
+              <WaveLabel text={item.label} />
             </p>
             <div className="mt-0.5 flex flex-wrap items-baseline gap-1.5">
               <p
