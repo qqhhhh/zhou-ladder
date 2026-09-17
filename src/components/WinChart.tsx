@@ -103,9 +103,9 @@ export function WinChart({
               <span
                 className={`font-mono text-2xl font-bold tabular-nums ${
                   netWins > 0
-                    ? "text-[#05cd99]"
+                    ? "text-[#ee5d50]"
                     : netWins < 0
-                      ? "text-[#ee5d50]"
+                      ? "text-[#a3aed0]"
                       : "text-navy-700"
                 }`}
               >
@@ -118,9 +118,9 @@ export function WinChart({
               <span
                 className={`font-mono text-2xl font-bold tabular-nums ${
                   wr > 50
-                    ? "text-[#05cd99]"
+                    ? "text-[#ee5d50]"
                     : wr < 50
-                      ? "text-[#ee5d50]"
+                      ? "text-[#a3aed0]"
                       : "text-navy-700"
                 }`}
               >

@@ -31,8 +31,8 @@ export function RecentMatches({ points }: { points: ChartPoint[] }) {
                 <span
                   className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-[11px] font-bold ${
                     win
-                      ? "bg-[rgba(5,205,153,0.12)] text-[#05cd99]"
-                      : "bg-[rgba(238,93,80,0.1)] text-[#ee5d50]"
+                      ? "bg-[rgba(238,93,80,0.12)] text-[#ee5d50]"
+                      : "bg-[rgba(163,174,208,0.18)] text-[#a3aed0]"
                   }`}
                 >
                   {p.result}
