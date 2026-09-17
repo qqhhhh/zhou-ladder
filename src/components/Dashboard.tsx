@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { usePathname } from "next/navigation";
 import { HeroTable } from "@/components/HeroTable";
 import { MetaCards } from "@/components/MetaCards";
@@ -14,51 +14,69 @@ import {
   buildChartPointsFromCompact,
   buildHeroStatsFromCompact,
   buildSummaryFromCompact,
-  compactDataSpanDays,
-  compactMatchDateBounds,
   downsampleChartPoints,
   filterCompactByRange,
 } from "@/lib/stats";
-import {
-  clampRangeToSpan,
-  parseRange,
-  replaceRangeQuery,
-  type RangeState,
-} from "@/lib/range";
+import { parseRange, replaceRangeQuery, type RangeState } from "@/lib/range";
 
 export function Dashboard({
   player,
-  matches,
+  matches: bootstrapMatches,
   heroes,
-  fetchedAt,
+  fetchedAt: bootstrapFetchedAt,
   initialDays,
-  initialFrom,
-  initialTo,
 }: {
   player: OpenDotaPlayer;
   matches: CompactMatch[];
   heroes: OpenDotaHero[];
   fetchedAt: string;
   initialDays?: string;
-  initialFrom?: string;
-  initialTo?: string;
 }) {
   const pathname = usePathname();
   const basePath = pathname.startsWith("/zhou") ? "/zhou" : "/";
-  const span = useMemo(() => compactDataSpanDays(matches), [matches]);
-  const bounds = useMemo(() => compactMatchDateBounds(matches), [matches]);
+
+  const [matches, setMatches] = useState(bootstrapMatches);
+  const [fetchedAt, setFetchedAt] = useState(bootstrapFetchedAt);
+  const [historyReady, setHistoryReady] = useState(false);
+  const [historyError, setHistoryError] = useState<string | null>(null);
 
   const [range, setRange] = useState<RangeState>(() =>
-    clampRangeToSpan(
-      parseRange({
-        days: initialDays,
-        from: initialFrom,
-        to: initialTo,
-      }),
-      span,
-    ),
+    parseRange({ days: initialDays }),
   );
   const [, startTransition] = useTransition();
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/matches", { cache: "force-cache" });
+        if (!res.ok) {
+          const body = (await res.json().catch(() => null)) as {
+            error?: string;
+          } | null;
+          throw new Error(body?.error ?? `加载失败 ${res.status}`);
+        }
+        const body = (await res.json()) as {
+          matches: CompactMatch[];
+          fetchedAt: string;
+          count: number;
+        };
+        if (cancelled) return;
+        if (body.matches?.length) {
+          setMatches(body.matches);
+          setFetchedAt(body.fetchedAt);
+          setHistoryReady(true);
+        }
+      } catch (e) {
+        if (!cancelled) {
+          setHistoryError(e instanceof Error ? e.message : "全量历史加载失败");
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const filtered = useMemo(
     () =>
@@ -89,11 +107,8 @@ export function Dashboard({
   );
 
   const applyRange = (next: RangeState) => {
-    const clamped = clampRangeToSpan(next, span);
-    startTransition(() => {
-      setRange(clamped);
-    });
-    replaceRangeQuery(clamped, basePath);
+    startTransition(() => setRange(next));
+    replaceRangeQuery(next, basePath);
   };
 
   return (
@@ -103,12 +118,14 @@ export function Dashboard({
           player={player}
           rangeKey={range.key}
           rangeLabel={range.label}
-          dataSpanDays={span}
-          minDate={bounds.minDate}
-          maxDate={bounds.maxDate}
-          customFrom={range.fromYmd}
-          customTo={range.toYmd}
           onRangeChange={applyRange}
+          historyHint={
+            historyReady
+              ? `全量 ${matches.length} 场已就绪`
+              : historyError
+                ? `近况模式 · ${historyError}`
+                : "正在后台加载全量历史…"
+          }
         />
 
         <SummaryCards summary={summary} rangeLabel={range.label} />

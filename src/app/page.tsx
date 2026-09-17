@@ -1,15 +1,13 @@
 import { Dashboard } from "@/components/Dashboard";
-import { fetchLadderData } from "@/lib/opendota";
+import { fetchLadderBootstrap } from "@/lib/opendota";
 import { toCompactMatches } from "@/lib/stats";
 import type { OpenDotaHero, OpenDotaPlayer } from "@/lib/types";
 
-export const revalidate = 3600;
+export const revalidate = 300;
 export const maxDuration = 60;
 
 type SearchParams = Promise<{
   days?: string;
-  from?: string;
-  to?: string;
 }>;
 
 function slimPlayer(player: OpenDotaPlayer): OpenDotaPlayer {
@@ -46,10 +44,10 @@ export default async function HomePage({
   const sp = await searchParams;
 
   let error: string | null = null;
-  let payload: Awaited<ReturnType<typeof fetchLadderData>> | null = null;
+  let payload: Awaited<ReturnType<typeof fetchLadderBootstrap>> | null = null;
 
   try {
-    payload = await fetchLadderData();
+    payload = await fetchLadderBootstrap();
   } catch (e) {
     error = e instanceof Error ? e.message : "对局数据请求失败";
   }
@@ -66,17 +64,13 @@ export default async function HomePage({
     );
   }
 
-  const matches = toCompactMatches(payload.matches);
-
   return (
     <Dashboard
       player={slimPlayer(payload.player)}
-      matches={matches}
+      matches={toCompactMatches(payload.matches)}
       heroes={slimHeroes(payload.heroes)}
       fetchedAt={payload.fetchedAt}
       initialDays={sp.days}
-      initialFrom={sp.from}
-      initialTo={sp.to}
     />
   );
 }

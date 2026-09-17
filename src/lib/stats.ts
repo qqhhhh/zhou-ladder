@@ -225,6 +225,7 @@ export function shanghaiDayEndUnix(ymd: string): number {
 }
 
 export type CompactMatch = {
+  match_id: number;
   start_time: number;
   hero_id: number;
   kills: number;
@@ -236,6 +237,7 @@ export type CompactMatch = {
 
 export function toCompactMatches(matches: OpenDotaMatch[]): CompactMatch[] {
   return rankedMatches(matches).map((m) => ({
+    match_id: m.match_id,
     start_time: m.start_time,
     hero_id: m.hero_id,
     kills: m.kills,

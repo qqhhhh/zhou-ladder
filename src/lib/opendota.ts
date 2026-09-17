@@ -91,6 +91,54 @@ export async function fetchRankedMatches(
   return all;
 }
 
+
+/** Fast path: only pages until matches fall outside the window (for first paint). */
+export async function fetchRecentRankedMatches(
+  withinDays = 45,
+  revalidate = 300,
+): Promise<OpenDotaMatch[]> {
+  const cutoff = Math.floor(Date.now() / 1000) - withinDays * 86400;
+  const all: OpenDotaMatch[] = [];
+  const seen = new Set<number>();
+
+  for (let page = 0; page < MATCH_MAX_PAGES; page += 1) {
+    const offset = page * MATCH_PAGE_SIZE;
+    if (page > 0) await sleep(PAGE_GAP_MS);
+    const batch = await opendotaFetch<OpenDotaMatch[]>(
+      `/players/${ACCOUNT_ID}/matches?lobby_type=7&limit=${MATCH_PAGE_SIZE}&offset=${offset}`,
+      revalidate,
+    );
+    if (batch.length === 0) break;
+    let anyInWindow = false;
+    for (const m of batch) {
+      if (seen.has(m.match_id)) continue;
+      seen.add(m.match_id);
+      if (m.start_time >= cutoff) {
+        all.push(m);
+        anyInWindow = true;
+      }
+    }
+    if (!anyInWindow || batch.length < MATCH_PAGE_SIZE) break;
+    const oldest = Math.min(...batch.map((m) => m.start_time));
+    if (oldest < cutoff) break;
+  }
+  return all;
+}
+
+export async function fetchLadderBootstrap(): Promise<LadderPayload> {
+  const [player, matches, heroes] = await Promise.all([
+    fetchPlayer(180),
+    fetchRecentRankedMatches(45, 300),
+    fetchHeroes(86400),
+  ]);
+  return {
+    player,
+    matches,
+    heroes,
+    fetchedAt: new Date().toISOString(),
+  };
+}
+
 export async function fetchHeroes(revalidate = 86400): Promise<OpenDotaHero[]> {
   return opendotaFetch<OpenDotaHero[]>("/heroes", revalidate);
 }
