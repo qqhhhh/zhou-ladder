@@ -20,6 +20,15 @@
   --loss: #fb7185;
   --glass-blur: 14px;
   --glass-saturate: 1.25;
+  /* Chrome rhythm — match Weather IoT sample */
+  --radius-card: 1.625rem;   /* ~26px outer cards */
+  --radius-card-lg: 1.75rem; /* ~28px hero */
+  --radius-inner: 1rem;      /* ~16px inner modules */
+  --radius-chip: 1rem;       /* ~16px forecast chips */
+  --radius-pill: 9999px;
+  --radius-rail: 2rem;       /* heavily rounded sidebar */
+  --gap-bento: 1rem;         /* 16px between cells */
+  --pad-card: 1.375rem;      /* ~22px */
 }
 
 @theme inline {
@@ -81,50 +90,91 @@ footer {
   z-index: 1;
 }
 
-/* Specular 1px top/left glass edge */
+/* ── Multi-layer glass chrome (specular + depth, sample-matched) ── */
+
+/* Specular edge helper */
 .glass-edge {
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-top-color: rgba(255, 255, 255, 0.22);
-  border-left-color: rgba(255, 255, 255, 0.16);
+  border: none;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 1px 0 0 rgba(255, 255, 255, 0.14),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.28),
+    inset -1px 0 0 rgba(0, 0, 0, 0.14),
+    0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 10px 28px rgba(0, 0, 0, 0.28);
 }
 
-/* Frosted glass panels — thinner, clearer */
+/* Frosted glass panels — multi-layer border, not flat 1px */
 .panel {
   position: relative;
-  border-radius: 1.4rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-top-color: rgba(255, 255, 255, 0.22);
-  border-left-color: rgba(255, 255, 255, 0.16);
+  border-radius: var(--radius-card);
+  border: none;
   background: var(--glass);
   backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
   -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.07) inset,
-    0 12px 36px rgba(0, 0, 0, 0.22);
+    /* brighter top / left specular */
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 1px 0 0 rgba(255, 255, 255, 0.12),
+    /* darker bottom / right edge */
+    inset 0 -1px 0 rgba(0, 0, 0, 0.32),
+    inset -1px 0 0 rgba(0, 0, 0, 0.16),
+    /* fine inner highlight ring */
+    inset 0 0 0 1px rgba(255, 255, 255, 0.04),
+    /* soft outer shadow */
+    0 1px 2px rgba(0, 0, 0, 0.18),
+    0 12px 36px rgba(0, 0, 0, 0.26),
+    /* outer hairline */
+    0 0 0 1px rgba(255, 255, 255, 0.055);
+}
+
+/* Gradient border ring via pseudo (top-left bright → bottom-right dim) */
+.panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  pointer-events: none;
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.32) 0%,
+    rgba(255, 255, 255, 0.1) 28%,
+    rgba(255, 255, 255, 0.03) 55%,
+    rgba(0, 0, 0, 0.22) 100%
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0.9;
+  z-index: 0;
 }
 
 .panel-soft {
   position: relative;
-  border-radius: 1.25rem;
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  border-top-color: rgba(255, 255, 255, 0.18);
-  border-left-color: rgba(255, 255, 255, 0.14);
+  border-radius: var(--radius-inner);
+  border: none;
   background: var(--glass-soft);
   backdrop-filter: blur(12px) saturate(1.2);
   -webkit-backdrop-filter: blur(12px) saturate(1.2);
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.05) inset,
-    0 8px 24px rgba(0, 0, 0, 0.16);
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    inset 1px 0 0 rgba(255, 255, 255, 0.1),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.26),
+    inset -1px 0 0 rgba(0, 0, 0, 0.12),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.03),
+    0 8px 24px rgba(0, 0, 0, 0.18),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
 }
 
-/* Hero / summary card — soft elegant gradient, no photo */
+/* Hero / summary card — soft elegant gradient, multi-layer chrome */
 .hero-hub {
   position: relative;
   overflow: hidden;
-  border-radius: 1.6rem;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-top-color: rgba(255, 255, 255, 0.24);
-  border-left-color: rgba(255, 255, 255, 0.18);
+  border-radius: var(--radius-card-lg);
+  border: none;
   background-color: #0e1420;
   background-image:
     radial-gradient(ellipse 70% 55% at 85% 15%, rgba(120, 160, 220, 0.14), transparent 55%),
@@ -137,8 +187,14 @@ footer {
       #0a1018 100%
     );
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.08) inset,
-    0 16px 48px rgba(0, 0, 0, 0.28);
+    inset 0 1px 0 rgba(255, 255, 255, 0.24),
+    inset 1px 0 0 rgba(255, 255, 255, 0.14),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.38),
+    inset -1px 0 0 rgba(0, 0, 0, 0.2),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05),
+    0 2px 4px rgba(0, 0, 0, 0.2),
+    0 16px 48px rgba(0, 0, 0, 0.32),
+    0 0 0 1px rgba(255, 255, 255, 0.07);
 }
 
 /* Optional very subtle abstract shape — not a photo */
@@ -151,38 +207,67 @@ footer {
     radial-gradient(ellipse 45% 40% at 78% 22%, rgba(180, 210, 255, 0.08), transparent 60%),
     radial-gradient(ellipse 35% 30% at 30% 70%, rgba(100, 140, 200, 0.06), transparent 55%);
   opacity: 1;
+  z-index: 0;
 }
 
+/* Hero gradient border ring (after ambient shapes) */
 .hero-hub::after {
-  display: none;
-  content: none;
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  pointer-events: none;
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.38) 0%,
+    rgba(255, 255, 255, 0.12) 30%,
+    rgba(255, 255, 255, 0.04) 58%,
+    rgba(0, 0, 0, 0.28) 100%
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0.95;
+  z-index: 2;
 }
 
 .hero-note {
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-top-color: rgba(255, 255, 255, 0.2);
-  border-left-color: rgba(255, 255, 255, 0.16);
+  border: none;
+  border-radius: var(--radius-inner);
   background: rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(12px) saturate(1.2);
   -webkit-backdrop-filter: blur(12px) saturate(1.2);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06) inset;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    inset 1px 0 0 rgba(255, 255, 255, 0.1),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.22),
+    inset -1px 0 0 rgba(0, 0, 0, 0.1),
+    0 0 0 1px rgba(255, 255, 255, 0.06);
 }
 
-/* Sidebar — frosted pill rail */
+/* Sidebar — frosted heavily-rounded rail */
 .sidebar-rail {
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-top-color: rgba(255, 255, 255, 0.2);
-  border-left-color: rgba(255, 255, 255, 0.14);
+  border: none;
+  border-radius: var(--radius-rail);
   background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(16px) saturate(1.25);
   -webkit-backdrop-filter: blur(16px) saturate(1.25);
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.06) inset,
-    0 12px 32px rgba(0, 0, 0, 0.28);
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 1px 0 0 rgba(255, 255, 255, 0.12),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.34),
+    inset -1px 0 0 rgba(0, 0, 0, 0.16),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.04),
+    0 12px 36px rgba(0, 0, 0, 0.32),
+    0 0 0 1px rgba(255, 255, 255, 0.06);
 }
 
 .nav-icon {
   color: var(--ink-faint);
+  border-radius: 0.875rem; /* ~14px rounded-square like sample */
   transition: color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
 }
 
@@ -194,7 +279,9 @@ footer {
 .nav-icon[aria-current="true"] {
   color: #0c0e12;
   background: #f2f4f8;
-  box-shadow: 0 4px 16px rgba(255, 255, 255, 0.18);
+  box-shadow:
+    0 4px 16px rgba(255, 255, 255, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55);
 }
 
 .icon-btn {
@@ -203,14 +290,18 @@ footer {
   justify-content: center;
   width: 2.5rem;
   height: 2.5rem;
-  border-radius: 9999px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-top-color: rgba(255, 255, 255, 0.18);
+  border-radius: var(--radius-pill);
+  border: none;
   background: rgba(255, 255, 255, 0.055);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   color: rgba(255, 255, 255, 0.7);
-  transition: background 0.15s ease, color 0.15s ease;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    inset 1px 0 0 rgba(255, 255, 255, 0.1),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.22),
+    0 0 0 1px rgba(255, 255, 255, 0.08);
+  transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .icon-btn:hover {
@@ -224,12 +315,14 @@ footer {
 
 .chart-tooltip {
   background: rgba(16, 20, 28, 0.55) !important;
-  border: 1px solid rgba(255, 255, 255, 0.14) !important;
-  border-top-color: rgba(255, 255, 255, 0.22) !important;
-  border-radius: 14px !important;
+  border: none !important;
+  border-radius: var(--radius-inner) !important;
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.06) inset,
-    0 12px 32px rgba(0, 0, 0, 0.35) !important;
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    inset 1px 0 0 rgba(255, 255, 255, 0.08),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.28),
+    0 12px 32px rgba(0, 0, 0, 0.35),
+    0 0 0 1px rgba(255, 255, 255, 0.1) !important;
   color: var(--ink) !important;
   padding: 10px 14px !important;
   backdrop-filter: blur(14px) saturate(1.2) !important;
@@ -239,13 +332,18 @@ footer {
 .chip-active {
   background: rgba(255, 255, 255, 0.14);
   color: #fff;
-  border-color: rgba(255, 255, 255, 0.22);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 0 0 1px rgba(255, 255, 255, 0.18);
 }
 
 .chip-idle {
   background: rgba(255, 255, 255, 0.05);
   color: var(--ink-soft);
-  border: 1px solid var(--line);
+  border: none;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 0 0 1px var(--line);
 }
 
 .chip-idle:hover {
@@ -256,8 +354,11 @@ footer {
 .btn-live {
   background: rgba(255, 255, 255, 0.95);
   color: #0c0e12;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 4px 20px rgba(255, 255, 255, 0.12);
+  border: none;
+  border-radius: var(--radius-pill);
+  box-shadow:
+    0 4px 20px rgba(255, 255, 255, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
   transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
 }
 
@@ -269,74 +370,92 @@ footer {
 .btn-live-outline {
   background: transparent;
   color: #f2f4f8;
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  transition: background 0.15s ease, border-color 0.15s ease;
+  border: none;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.35);
+  transition: background 0.15s ease, box-shadow 0.15s ease;
 }
 
 .btn-live-outline:hover {
   background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.55);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.55);
 }
 
 .day-card {
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  border-top-color: rgba(255, 255, 255, 0.18);
-  border-left-color: rgba(255, 255, 255, 0.14);
+  border: none;
   background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(12px) saturate(1.2);
   -webkit-backdrop-filter: blur(12px) saturate(1.2);
-  border-radius: 1.2rem;
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.05) inset;
-  transition: background 0.15s ease, border-color 0.15s ease;
+  border-radius: var(--radius-chip);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    inset 1px 0 0 rgba(255, 255, 255, 0.1),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.26),
+    inset -1px 0 0 rgba(0, 0, 0, 0.12),
+    0 4px 16px rgba(0, 0, 0, 0.12),
+    0 0 0 1px rgba(255, 255, 255, 0.055);
+  transition: background 0.15s ease, box-shadow 0.15s ease;
 }
 
 .day-card:hover {
   background: rgba(255, 255, 255, 0.09);
-  border-color: rgba(255, 255, 255, 0.16);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 1px 0 0 rgba(255, 255, 255, 0.12),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.22),
+    0 6px 20px rgba(0, 0, 0, 0.16),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
 }
 
 .hourly-chip {
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  border-top-color: rgba(255, 255, 255, 0.16);
-  border-left-color: rgba(255, 255, 255, 0.13);
+  border: none;
   background: rgba(255, 255, 255, 0.045);
   backdrop-filter: blur(12px) saturate(1.15);
   -webkit-backdrop-filter: blur(12px) saturate(1.15);
-  border-radius: 1.15rem;
+  border-radius: var(--radius-chip);
   min-width: 4.75rem;
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    inset 1px 0 0 rgba(255, 255, 255, 0.08),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.22),
+    inset -1px 0 0 rgba(0, 0, 0, 0.1),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
 }
 
 .hourly-chip-active {
   background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.2);
-  border-top-color: rgba(255, 255, 255, 0.28);
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.08) inset,
-    0 8px 24px rgba(0, 0, 0, 0.16);
+    inset 0 1px 0 rgba(255, 255, 255, 0.24),
+    inset 1px 0 0 rgba(255, 255, 255, 0.12),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.2),
+    0 8px 24px rgba(0, 0, 0, 0.16),
+    0 0 0 1px rgba(255, 255, 255, 0.14);
 }
 
 .stat-pill {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  border-radius: 9999px;
+  border-radius: var(--radius-pill);
   padding: 0.3rem 0.75rem;
   font-size: 0.75rem;
   background: rgba(255, 255, 255, 0.09);
   color: rgba(255, 255, 255, 0.88);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: none;
   backdrop-filter: blur(8px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
 }
 
 .badge-warn {
   background: rgba(255, 138, 76, 0.18);
   color: #ffb088;
-  border: 1px solid rgba(255, 138, 76, 0.35);
-  border-radius: 9999px;
+  border: none;
+  border-radius: var(--radius-pill);
   padding: 0.2rem 0.65rem;
   font-size: 0.7rem;
   font-weight: 600;
+  box-shadow: 0 0 0 1px rgba(255, 138, 76, 0.35);
 }
 
 .recent-row {
@@ -353,8 +472,10 @@ footer {
 }
 
 .rank-chip {
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-top-color: rgba(255, 255, 255, 0.16);
+  border: none;
   background: rgba(255, 255, 255, 0.055);
   backdrop-filter: blur(10px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
 }

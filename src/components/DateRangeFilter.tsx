@@ -33,7 +33,7 @@ export function DateRangeFilter({ currentDays }: { currentDays: string }) {
 
   return (
     <div
-      className="flex gap-2.5 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      className="flex gap-3 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       role="group"
       aria-label="时间范围"
     >

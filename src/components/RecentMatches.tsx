@@ -7,7 +7,7 @@ export function RecentMatches({ points }: { points: ChartPoint[] }) {
 
   return (
     <div id="recent" className="panel scroll-mt-24 overflow-hidden">
-      <div className="flex items-center justify-between px-5 py-4">
+      <div className="flex items-center justify-between px-5 py-[1.125rem]">
         <h2 className="text-sm font-semibold tracking-tight text-white">
           近期对局
         </h2>
@@ -22,7 +22,7 @@ export function RecentMatches({ points }: { points: ChartPoint[] }) {
             return (
               <li
                 key={`${p.index}-${p.date}`}
-                className="recent-row flex items-center gap-3 px-5 py-3.5"
+                className="recent-row flex items-center gap-3 px-5 py-3"
               >
                 <span
                   className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl text-xs font-bold ${

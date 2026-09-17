@@ -26,7 +26,7 @@ export function SummaryCards({
   return (
     <section
       id="overview"
-      className="hero-hub relative min-h-[300px] scroll-mt-24 p-6 md:min-h-[340px] md:p-8"
+      className="hero-hub relative min-h-[300px] scroll-mt-24 p-5 md:min-h-[340px] md:p-6 lg:p-7"
     >
       <div className="relative z-[1] flex h-full flex-col justify-between gap-7">
         <div className="flex flex-wrap items-start justify-between gap-5">
@@ -58,7 +58,7 @@ export function SummaryCards({
             </div>
           </div>
 
-          <div className="hero-note max-w-[12rem] rounded-2xl p-3.5 text-[11px] leading-relaxed text-white/55">
+          <div className="hero-note max-w-[12rem] p-3.5 text-[11px] leading-relaxed text-white/55">
             仅统计天梯匹配（大厅类型 7）。胜率对标天气「气温」；胜/负对标
             H/L。不上报伪天梯分。
           </div>

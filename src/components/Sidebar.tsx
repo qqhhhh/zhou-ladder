@@ -73,10 +73,10 @@ export function Sidebar() {
   return (
     <>
       <aside
-        className="sidebar-rail fixed left-3 top-1/2 z-40 hidden w-[4.35rem] -translate-y-1/2 flex-col items-center rounded-[1.85rem] px-2.5 py-5 md:flex lg:left-5"
+        className="sidebar-rail fixed left-3 top-1/2 z-40 hidden w-[4.5rem] -translate-y-1/2 flex-col items-center rounded-[2rem] px-2.5 py-6 md:flex lg:left-5"
         aria-label="主导航"
       >
-        <div className="avatar-ring mb-5 overflow-hidden rounded-full">
+        <div className="avatar-ring mb-6 overflow-hidden rounded-full">
           <Image
             src="/zhou-avatar.jpg"
             alt="Zhou"
@@ -87,7 +87,7 @@ export function Sidebar() {
           />
         </div>
 
-        <nav className="flex flex-1 flex-col items-center gap-2.5">
+        <nav className="flex flex-1 flex-col items-center gap-3.5">
           {items.map((item) => (
             <a
               key={item.id}
@@ -96,14 +96,14 @@ export function Sidebar() {
               title={item.label}
               aria-label={item.label}
               aria-current={item.current ? "true" : undefined}
-              className="nav-icon flex h-10 w-10 items-center justify-center rounded-2xl"
+              className="nav-icon flex h-10 w-10 items-center justify-center rounded-[0.875rem]"
             >
               {item.icon}
             </a>
           ))}
         </nav>
 
-        <div className="mt-5 flex flex-col items-center gap-2.5 pt-2">
+        <div className="mt-6 flex flex-col items-center gap-3 pt-2">
           <div className="flex h-9 w-9 items-center justify-center rounded-full border border-white/12 bg-white/[0.04] text-white/50">
             <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.75">
               <path d="M21 12a9 9 0 11-3-6.7" strokeLinecap="round" />
@@ -120,7 +120,7 @@ export function Sidebar() {
       </aside>
 
       <nav
-        className="sidebar-rail fixed inset-x-3 bottom-3 z-40 flex items-center justify-around rounded-2xl px-2 py-2.5 md:hidden"
+        className="sidebar-rail fixed inset-x-3 bottom-3 z-40 flex items-center justify-around rounded-[1.5rem] px-2 py-2.5 md:hidden"
         aria-label="移动导航"
       >
         {items.map((item) => (

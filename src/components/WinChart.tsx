@@ -92,7 +92,7 @@ export function WinChart({
   return (
     <div
       id="trend"
-      className="panel flex h-full scroll-mt-24 flex-col p-5 md:p-6"
+      className="panel flex h-full scroll-mt-24 flex-col p-5 md:p-[1.375rem]"
     >
       <div className="mb-4 flex flex-wrap items-start justify-between gap-2">
         <div>

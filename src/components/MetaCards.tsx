@@ -18,7 +18,7 @@ export function MetaCards({
   });
 
   return (
-    <div className="panel relative overflow-hidden p-6">
+    <div className="panel relative overflow-hidden p-5 md:p-6">
       {/* abstract ripple / radar feel */}
       <div
         className="pointer-events-none absolute inset-0 opacity-45"
