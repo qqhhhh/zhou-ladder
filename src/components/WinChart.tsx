@@ -81,13 +81,23 @@ export function WinChart({
   }
 
   const last = points[points.length - 1];
-  const first = points[0];
-  const delta = last.cumulativeNetWins - (first?.cumulativeNetWins ?? 0);
+  // Range net wins = final cumulative (series starts at 0 within the filter)
+  const netWins = summary?.netWins ?? last.cumulativeNetWins;
   const wr =
-    last.rollingWinrate != null ? last.rollingWinrate : summary?.winrate ?? 0;
+    last.rollingWinrate != null
+      ? last.rollingWinrate
+      : (summary?.winrate ?? 0);
+
+  // Compare rolling winrate vs earlier in THIS series (not a % of net wins)
+  const earlierWr =
+    points.length > 10
+      ? points[Math.max(0, points.length - 11)]?.rollingWinrate
+      : points.length > 5
+        ? points[0]?.rollingWinrate
+        : null;
   const wrDelta =
-    points.length > 5 && points[points.length - 6]?.rollingWinrate != null
-      ? wr - (points[points.length - 6].rollingWinrate as number)
+    earlierWr != null && last.rollingWinrate != null
+      ? last.rollingWinrate - earlierWr
       : null;
 
   return (
@@ -95,7 +105,6 @@ export function WinChart({
       id="trend"
       className="panel scroll-mt-24 flex flex-col p-5 md:p-6"
     >
-      {/* Horizon Total Spent header — period chip + chart action */}
       <div className="mb-2 flex flex-wrap items-center justify-between gap-3">
         <button type="button" className="btn-ghost" tabIndex={-1}>
           <svg
@@ -109,10 +118,8 @@ export function WinChart({
           <span>{rangeLabel ?? "本周"}</span>
         </button>
         <div className="flex items-center gap-2">
-          <span
-            className={delta >= 0 ? "badge-ok" : "badge-warn"}
-          >
-            {delta >= 0 ? "上行" : "下行"}
+          <span className={netWins >= 0 ? "badge-ok" : "badge-warn"}>
+            {netWins > 0 ? "上行" : netWins < 0 ? "下行" : "持平"}
           </span>
           <span className="icon-btn pointer-events-none" aria-hidden>
             <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor">
@@ -124,24 +131,41 @@ export function WinChart({
 
       <div className="mb-1 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="text-3xl font-bold tabular-nums text-navy-700">
-            {last.cumulativeNetWins >= 0 ? "+" : ""}
-            {last.cumulativeNetWins}
+          <p
+            className={`text-3xl font-bold tabular-nums ${
+              netWins > 0
+                ? "text-[#05cd99]"
+                : netWins < 0
+                  ? "text-[#ee5d50]"
+                  : "text-navy-700"
+            }`}
+          >
+            {netWins > 0 ? "+" : ""}
+            {netWins}
           </p>
-          <div className="mt-1 flex flex-wrap items-center gap-2">
-            <p className="text-sm font-medium text-ink-muted">走势图 · 累计净胜</p>
-            {wrDelta != null && (
-              <span
-                className={`text-sm font-bold tabular-nums ${
-                  wrDelta >= 0 ? "text-[#05cd99]" : "text-[#ee5d50]"
-                }`}
-              >
-                {wrDelta >= 0 ? "↑" : "↓"} {Math.abs(wrDelta).toFixed(1)}%
-              </span>
-            )}
-          </div>
+          <p className="mt-1 text-sm font-medium text-ink-muted">
+            走势图 · 累计净胜（胜−负）
+          </p>
           <p className="mt-1 text-[11px] leading-snug text-ink-muted">
-            累计净胜 + 滚动胜率
+            紫色实线：累计净胜 · 灰色虚线：近 20 场滚动胜率
+            {wrDelta != null ? (
+              <>
+                {" "}
+                · 滚动胜率{" "}
+                <span
+                  className={`font-bold tabular-nums ${
+                    wrDelta > 0
+                      ? "text-[#05cd99]"
+                      : wrDelta < 0
+                        ? "text-[#ee5d50]"
+                        : "text-ink-faint"
+                  }`}
+                >
+                  {wrDelta > 0 ? "↑" : wrDelta < 0 ? "↓" : "→"}{" "}
+                  {Math.abs(wrDelta).toFixed(1)}%
+                </span>
+              </>
+            ) : null}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3 text-xs text-ink-muted">
@@ -262,8 +286,8 @@ export function WinChart({
             累计净胜
           </p>
           <p className="mt-0.5 font-mono text-sm font-bold tabular-nums text-navy-700">
-            {last.cumulativeNetWins >= 0 ? "+" : ""}
-            {last.cumulativeNetWins}
+            {netWins > 0 ? "+" : ""}
+            {netWins}
           </p>
         </div>
         <div>
