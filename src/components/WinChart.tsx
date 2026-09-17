@@ -11,7 +11,7 @@ import {
   YAxis,
 } from "recharts";
 import type { ChartPoint, SummaryStats } from "@/lib/types";
-import { StartleGroup, WaveLabel } from "@/components/WaveLabel";
+import { WaveLabel } from "@/components/WaveLabel";
 
 function CustomTooltip({
   active,
@@ -100,7 +100,7 @@ export function WinChart({
             走势图
           </h2>
           <div className="mt-3 flex flex-col gap-1.5">
-            <StartleGroup className="flex items-baseline gap-2">
+            <div className="flex items-baseline gap-2">
               <span className="text-sm font-medium text-ink-muted">
                 <WaveLabel text="累计净胜" />
               </span>
@@ -115,8 +115,8 @@ export function WinChart({
               >
                 <WaveLabel text={`${netWins > 0 ? "+" : ""}${netWins}`} />
               </span>
-            </StartleGroup>
-            <StartleGroup className="flex items-baseline gap-2">
+            </div>
+            <div className="flex items-baseline gap-2">
               <span className="text-sm font-medium text-ink-muted">
                 <WaveLabel text="滚动胜率" />
               </span>
@@ -131,8 +131,8 @@ export function WinChart({
               >
                 <WaveLabel text={`${rollingWr.toFixed(1)}%`} />
               </span>
-            </StartleGroup>
-            <StartleGroup className="flex items-baseline gap-2">
+            </div>
+            <div className="flex items-baseline gap-2">
               <span className="text-sm font-medium text-ink-muted">
                 <WaveLabel text="胜率" />
               </span>
@@ -147,7 +147,7 @@ export function WinChart({
               >
                 <WaveLabel text={`${overallWr.toFixed(1)}%`} />
               </span>
-            </StartleGroup>
+            </div>
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-3 text-xs text-ink-muted">
@@ -255,30 +255,30 @@ export function WinChart({
       </div>
 
       <div className="mt-4 grid grid-cols-3 gap-3 border-t border-[#e9edf7] pt-4">
-        <StartleGroup>
+        <div>
           <p className="text-[10px] font-medium tracking-wide text-ink-muted">
             <WaveLabel text="场次" />
           </p>
           <p className="mt-0.5 font-mono text-sm font-bold tabular-nums text-navy-700">
             <WaveLabel text={String(summary?.games ?? points.length)} />
           </p>
-        </StartleGroup>
-        <StartleGroup>
+        </div>
+        <div>
           <p className="text-[10px] font-medium tracking-wide text-ink-muted">
             <WaveLabel text="累计净胜" />
           </p>
           <p className="mt-0.5 font-mono text-sm font-bold tabular-nums text-navy-700">
             <WaveLabel text={`${netWins > 0 ? "+" : ""}${netWins}`} />
           </p>
-        </StartleGroup>
-        <StartleGroup>
+        </div>
+        <div>
           <p className="text-[10px] font-medium tracking-wide text-ink-muted">
             <WaveLabel text="滚动胜率" />
           </p>
           <p className="mt-0.5 font-mono text-sm font-bold tabular-nums text-navy-700">
             <WaveLabel text={`${rollingWr.toFixed(1)}%`} />
           </p>
-        </StartleGroup>
+        </div>
       </div>
     </section>
   );

@@ -1,8 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useState } from "react";
 
-/** Split into chars for staggered startle animation (parent `.is-startled`). */
+/**
+ * Hit box = this text's own glyphs only.
+ * Mouse enter → one-shot staggered startle, then idle (ignore leave).
+ */
 export function WaveLabel({
   text,
   className = "",
@@ -10,9 +13,25 @@ export function WaveLabel({
   text: string;
   className?: string;
 }) {
+  const [playing, setPlaying] = useState(false);
+  const chars = [...text];
+
+  useEffect(() => {
+    if (!playing) return;
+    const ms = 450 + Math.max(0, chars.length - 1) * 45 + 40;
+    const t = window.setTimeout(() => setPlaying(false), ms);
+    return () => window.clearTimeout(t);
+  }, [playing, chars.length]);
+
   return (
-    <span className={`wave-label ${className}`.trim()} aria-label={text}>
-      {[...text].map((ch, i) => (
+    <span
+      className={`wave-label ${playing ? "is-startled" : ""} ${className}`.trim()}
+      aria-label={text}
+      onMouseEnter={() => {
+        if (!playing) setPlaying(true);
+      }}
+    >
+      {chars.map((ch, i) => (
         <span
           key={`${i}-${ch}`}
           className="wave-char"
@@ -23,41 +42,5 @@ export function WaveLabel({
         </span>
       ))}
     </span>
-  );
-}
-
-/**
- * Mouse enter once → children WaveLabels startle (lift + settle), then idle.
- * Does not stay elevated while hovered.
- */
-export function StartleGroup({
-  children,
-  className = "",
-}: {
-  children: ReactNode;
-  className?: string;
-}) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [playing, setPlaying] = useState(false);
-
-  useEffect(() => {
-    if (!playing) return;
-    const el = ref.current;
-    const n = el?.querySelectorAll(".wave-char").length ?? 1;
-    const ms = 450 + Math.max(0, n - 1) * 45 + 40;
-    const t = window.setTimeout(() => setPlaying(false), ms);
-    return () => window.clearTimeout(t);
-  }, [playing]);
-
-  return (
-    <div
-      ref={ref}
-      className={`startle-group ${playing ? "is-startled" : ""} ${className}`.trim()}
-      onMouseEnter={() => {
-        if (!playing) setPlaying(true);
-      }}
-    >
-      {children}
-    </div>
   );
 }
