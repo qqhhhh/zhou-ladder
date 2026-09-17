@@ -262,29 +262,7 @@ footer {
   animation: startle-bounce 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
-/* KPI icon startle — bg jitter + glyph spin/scale, ~0.4s like text */
-@keyframes icon-well-shake {
-  0%,
-  100% {
-    transform: translate(0, 0);
-  }
-  15% {
-    transform: translate(-1.5px, 1px);
-  }
-  30% {
-    transform: translate(1.5px, -1px);
-  }
-  45% {
-    transform: translate(-1px, -1.5px);
-  }
-  60% {
-    transform: translate(1px, 1px);
-  }
-  75% {
-    transform: translate(-0.5px, 0.5px);
-  }
-}
-
+/* KPI icon startle — glyph spin/scale only, ~0.4s like text */
 @keyframes icon-spin-pop {
   0% {
     transform: scale(1) rotate(0deg);
@@ -302,10 +280,6 @@ footer {
   align-items: center;
   justify-content: center;
   pointer-events: none;
-}
-
-.startle-icon-well.is-startled {
-  animation: icon-well-shake 0.4s ease both;
 }
 
 .startle-icon-well.is-startled .startle-icon-glyph {
@@ -389,7 +363,6 @@ footer {
     animation: none;
   }
   .wave-char-inner.is-startled,
-  .startle-icon-well.is-startled,
   .startle-icon-well.is-startled .startle-icon-glyph,
   .startle-avatar.is-startled .startle-avatar-inner {
     animation: none !important;
