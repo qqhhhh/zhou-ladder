@@ -4,6 +4,87 @@ import type { SummaryStats } from "@/lib/types";
 import { formatNum } from "@/lib/stats";
 import { WaveLabel } from "@/components/WaveLabel";
 
+const iconCls = "h-[22px] w-[22px]";
+
+/** Shared stroke icons — thin, rounded, one visual language */
+function IconMatches() {
+  return (
+    <svg viewBox="0 0 24 24" className={iconCls} fill="none" aria-hidden>
+      <path
+        d="M8 7h8M8 12h8M8 17h5"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+      />
+      <rect
+        x="4"
+        y="4"
+        width="16"
+        height="16"
+        rx="4"
+        stroke="currentColor"
+        strokeWidth="1.75"
+      />
+    </svg>
+  );
+}
+
+function IconTrend() {
+  return (
+    <svg viewBox="0 0 24 24" className={iconCls} fill="none" aria-hidden>
+      <path
+        d="M4 16.5 9.2 11l3.3 3.3L20 7"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M14.5 7H20v5.5"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function IconWinrate() {
+  return (
+    <svg viewBox="0 0 24 24" className={iconCls} fill="none" aria-hidden>
+      <circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="1.75" />
+      <path
+        d="M12 4a8 8 0 0 1 8 8h-8V4Z"
+        fill="currentColor"
+        fillOpacity="0.18"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function IconKda() {
+  return (
+    <svg viewBox="0 0 24 24" className={iconCls} fill="none" aria-hidden>
+      <path
+        d="m14.5 4.5 5 5-9.5 9.5H5v-5L14.5 4.5Z"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinejoin="round"
+      />
+      <path
+        d="m12.5 6.5 5 5M5 16.5h.01"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 /** Horizon MiniStatistics / Widget row — Flowbite KPI density */
 export function SummaryCards({
   summary,
@@ -18,11 +99,7 @@ export function SummaryCards({
       label: "场次",
       value: String(summary.games),
       hint: rangeLabel,
-      icon: (
-        <svg viewBox="0 0 24 24" className="h-6 w-6" fill="currentColor">
-          <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" />
-        </svg>
-      ),
+      icon: <IconMatches />,
       tone: "text-navy-700",
     },
     {
@@ -35,11 +112,7 @@ export function SummaryCards({
           : summary.netWins < 0
             ? `净胜 ${summary.netWins}`
             : "净胜 0",
-      icon: (
-        <svg viewBox="0 0 24 24" className="h-6 w-6" fill="currentColor">
-          <path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6h-6z" />
-        </svg>
-      ),
+      icon: <IconTrend />,
       tone:
         summary.netWins > 0
           ? "text-[#05cd99]"
@@ -67,11 +140,7 @@ export function SummaryCards({
           : summary.winrate >= 48
             ? "平稳输出"
             : "需要调整",
-      icon: (
-        <svg viewBox="0 0 24 24" className="h-6 w-6" fill="currentColor">
-          <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
-        </svg>
-      ),
+      icon: <IconWinrate />,
       tone: summary.winrate >= 50 ? "text-[#05cd99]" : "text-[#ee5d50]",
       delta: {
         up: summary.winrate >= 50,
@@ -83,11 +152,7 @@ export function SummaryCards({
       label: "场均 KDA",
       value: formatNum(summary.avgKda, 2),
       hint: "K+A / D",
-      icon: (
-        <svg viewBox="0 0 24 24" className="h-6 w-6" fill="currentColor">
-          <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-        </svg>
-      ),
+      icon: <IconKda />,
       tone: "text-navy-700",
     },
   ];

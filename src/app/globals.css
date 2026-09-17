@@ -99,6 +99,11 @@ footer {
   flex-shrink: 0;
 }
 
+.stat-icon svg {
+  display: block;
+}
+
+
 .avatar-ring {
   box-shadow: 0 0 0 3px #fff, 0 0 0 5px rgba(66, 42, 251, 0.35);
 }
