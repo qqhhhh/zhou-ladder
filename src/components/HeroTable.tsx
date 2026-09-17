@@ -5,6 +5,7 @@ import { useMemo } from "react";
 import type { HeroStat } from "@/lib/types";
 import { formatNum, formatPct } from "@/lib/stats";
 import { WaveLabel } from "@/components/WaveLabel";
+import { StartleAvatar } from "@/components/StartleMotion";
 
 /** Horizon Complex Table + Mantine thin-divider polish */
 export function HeroTable({ rows }: { rows: HeroStat[] }) {
@@ -77,14 +78,16 @@ export function HeroTable({ rows }: { rows: HeroStat[] }) {
                   <td className="hz-td px-4 py-3 md:px-5">
                     <div className="flex items-center gap-2.5">
                       {r.iconUrl ? (
-                        <Image
-                          src={r.iconUrl}
-                          alt={r.localizedName}
-                          width={48}
-                          height={27}
-                          className="rounded-lg object-cover shadow-sm ring-1 ring-[#e9edf7]"
-                          unoptimized
-                        />
+                        <StartleAvatar className="shrink-0">
+                          <Image
+                            src={r.iconUrl}
+                            alt={r.localizedName}
+                            width={48}
+                            height={27}
+                            className="rounded-lg object-cover shadow-sm ring-1 ring-[#e9edf7]"
+                            unoptimized
+                          />
+                        </StartleAvatar>
                       ) : (
                         <div className="h-[27px] w-12 rounded-lg bg-light-primary" />
                       )}

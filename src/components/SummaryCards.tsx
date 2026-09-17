@@ -3,6 +3,7 @@
 import type { SummaryStats } from "@/lib/types";
 import { formatNum } from "@/lib/stats";
 import { WaveLabel } from "@/components/WaveLabel";
+import { StartleIconWell } from "@/components/StartleMotion";
 
 const iconCls = "h-[22px] w-[22px]";
 
@@ -167,7 +168,7 @@ export function SummaryCards({
           key={item.key}
           className="panel kpi-card flex flex-row items-center gap-3 px-4 py-4 md:gap-4 md:px-5 md:py-[18px]"
         >
-          <div className="stat-icon">{item.icon}</div>
+          <StartleIconWell>{item.icon}</StartleIconWell>
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-medium text-ink-muted">
               <WaveLabel text={item.label} />
