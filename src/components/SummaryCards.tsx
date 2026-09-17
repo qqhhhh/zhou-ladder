@@ -2,7 +2,7 @@
 
 import type { SummaryStats } from "@/lib/types";
 import { formatNum } from "@/lib/stats";
-import { WaveLabel } from "@/components/WaveLabel";
+import { StartleGroup, WaveLabel } from "@/components/WaveLabel";
 
 /** Horizon MiniStatistics / Widget row — Flowbite KPI density */
 export function SummaryCards({
@@ -103,7 +103,7 @@ export function SummaryCards({
           className="panel kpi-card flex flex-row items-center gap-3 px-4 py-4 md:gap-4 md:px-5 md:py-[18px]"
         >
           <div className="stat-icon">{item.icon}</div>
-          <div className="min-w-0 flex-1">
+          <StartleGroup className="min-w-0 flex-1">
             <p className="truncate text-sm font-medium text-ink-muted">
               <WaveLabel text={item.label} />
             </p>
@@ -111,7 +111,7 @@ export function SummaryCards({
               <p
                 className={`font-mono text-xl font-bold tabular-nums tracking-tight md:text-[22px] ${item.tone}`}
               >
-                {item.value}
+                <WaveLabel text={item.value} />
               </p>
               {"delta" in item && item.delta ? (
                 <span
@@ -126,7 +126,7 @@ export function SummaryCards({
             <p className="mt-0.5 truncate text-[11px] text-ink-muted/90">
               {item.hint}
             </p>
-          </div>
+          </StartleGroup>
         </div>
       ))}
     </section>
