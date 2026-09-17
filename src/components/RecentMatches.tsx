@@ -1,6 +1,7 @@
 "use client";
 
 import type { ChartPoint } from "@/lib/types";
+import { WaveLabel } from "@/components/WaveLabel";
 
 export function RecentMatches({ points }: { points: ChartPoint[] }) {
   const recent = [...points].reverse().slice(0, 8);
@@ -9,16 +10,16 @@ export function RecentMatches({ points }: { points: ChartPoint[] }) {
     <div id="recent" className="panel scroll-mt-24 overflow-hidden">
       <div className="flex items-center justify-between px-5 pb-2 pt-5">
         <h2 className="text-lg font-bold tracking-tight text-navy-700">
-          近期对局
+          <WaveLabel text="近期对局" />
         </h2>
         <span className="text-[11px] font-medium text-ink-muted">
-          最近 {recent.length} 场
+          <WaveLabel text={`最近 ${recent.length} 场`} />
         </span>
       </div>
       <ul>
         {recent.length === 0 ? (
           <li className="px-5 py-8 text-center text-sm text-ink-muted">
-            暂无对局
+            <WaveLabel text="暂无对局" />
           </li>
         ) : (
           recent.map((p) => {
@@ -35,14 +36,14 @@ export function RecentMatches({ points }: { points: ChartPoint[] }) {
                       : "bg-[rgba(238,93,80,0.1)] text-[#ee5d50]"
                   }`}
                 >
-                  {p.result}
+                  <WaveLabel text={p.result} />
                 </span>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-bold text-navy-700">
-                    {p.hero}
+                    <WaveLabel text={p.hero} />
                   </p>
                   <p className="truncate text-[11px] text-ink-muted">
-                    #{p.index} · {p.dateLabel}
+                    <WaveLabel text={`#${p.index} · ${p.dateLabel}`} />
                   </p>
                 </div>
               </li>

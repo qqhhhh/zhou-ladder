@@ -124,7 +124,7 @@ export function SummaryCards({
               ) : null}
             </div>
             <p className="mt-0.5 truncate text-[11px] text-ink-muted/90">
-              {item.hint}
+              <WaveLabel text={item.hint} />
             </p>
           </div>
         </div>

@@ -5,6 +5,7 @@ import type { OpenDotaPlayer } from "@/lib/types";
 import type { RangeState } from "@/lib/range";
 import { formatRankTier } from "@/lib/opendota";
 import { DateRangeFilter } from "@/components/DateRangeFilter";
+import { WaveLabel } from "@/components/WaveLabel";
 
 function todayLabel(): string {
   return new Date().toLocaleDateString("zh-CN", {
@@ -51,22 +52,26 @@ export function PlayerHeader({
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="truncate text-lg font-bold tracking-tight text-navy-700 md:text-xl">
-                Zhou
-                <span className="ml-2 font-medium text-ink-faint">鲷哥</span>
+                <WaveLabel text="Zhou" />
+                <span className="ml-2 font-medium text-ink-faint">
+                  <WaveLabel text="鲷哥" />
+                </span>
               </h1>
               <span className="rank-chip rounded-full px-2.5 py-0.5 text-[11px] font-bold">
-                {rank}
+                <WaveLabel text={rank} />
               </span>
             </div>
             <p className="mt-0.5 truncate text-xs text-ink-muted">
-              {todayLabel()}
+              <WaveLabel text={todayLabel()} />
               <span className="mx-1.5 text-[#c3cae7]">·</span>
-              {rangeLabel}
+              <WaveLabel text={rangeLabel} />
               <span className="mx-1.5 text-[#c3cae7]">·</span>
-              {player.profile.personaname}
+              <WaveLabel text={player.profile.personaname} />
             </p>
             {historyHint ? (
-              <p className="mt-0.5 text-[10px] text-ink-faint">{historyHint}</p>
+              <p className="mt-0.5 text-[10px] text-ink-faint">
+                <WaveLabel text={historyHint} />
+              </p>
             ) : null}
           </div>
         </div>
@@ -83,7 +88,7 @@ export function PlayerHeader({
               rel="noreferrer"
               className="btn-live inline-flex items-center justify-center rounded-full px-5 py-2.5 text-sm font-bold"
             >
-              直播间
+              <WaveLabel text="直播间" />
             </a>
           </div>
         </div>

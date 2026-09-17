@@ -75,7 +75,7 @@ export function WinChart({
         id="trend"
         className="panel flex min-h-72 scroll-mt-24 items-center justify-center text-ink-muted"
       >
-        所选范围内暂无天梯对局
+        <WaveLabel text="所选范围内暂无天梯对局" />
       </div>
     );
   }
@@ -97,7 +97,7 @@ export function WinChart({
       <div className="mb-1 flex flex-wrap items-end justify-between gap-3">
         <div className="min-w-0">
           <h2 className="text-lg font-bold tracking-tight text-navy-700">
-            走势图
+            <WaveLabel text="走势图" />
           </h2>
           <div className="mt-3 flex flex-col gap-1.5">
             <div className="flex items-baseline gap-2">
@@ -156,11 +156,11 @@ export function WinChart({
               className="inline-block h-0.5 w-4 rounded-full"
               style={{ background: "#422AFB" }}
             />
-            累计净胜
+            <WaveLabel text="累计净胜" />
           </span>
           <span className="inline-flex items-center gap-1.5">
             <span className="inline-block h-px w-4 border-t border-dashed border-[#a3aed0]" />
-            滚动胜率
+            <WaveLabel text="滚动胜率" />
           </span>
         </div>
       </div>

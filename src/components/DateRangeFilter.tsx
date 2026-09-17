@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { parseRange, type RangeState } from "@/lib/range";
+import { WaveLabel } from "@/components/WaveLabel";
 
 const PRESETS: { label: string; days: string }[] = [
   { label: "近1天", days: "1" },
@@ -51,12 +52,12 @@ export function DateRangeFilter({
             onClick={() => onRangeChange(parseRange({ days: p.days }))}
             className={pill(active)}
           >
-            {p.label}
+            <WaveLabel text={p.label} />
           </button>
         );
       })}
       <label className="ml-1 flex items-center gap-1 rounded-full bg-light-primary px-2 py-1 text-[11px] font-medium text-ink-muted">
-        近
+        <WaveLabel text="近" />
         <input
           type="number"
           min={1}
@@ -72,15 +73,13 @@ export function DateRangeFilter({
             isManual ? "border-brand" : "border-[#e9edf7]"
           }`}
         />
-        天
+        <WaveLabel text="天" />
         <button
           type="button"
           onClick={applyManual}
           disabled={!draft || Number(draft) <= 0}
           className="rounded-full bg-brand px-2 py-0.5 text-[10px] font-bold text-white disabled:opacity-40"
-        >
-          应用
-        </button>
+        ><WaveLabel text="应用" /></button>
       </label>
     </div>
   );
