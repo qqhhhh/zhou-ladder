@@ -1,10 +1,28 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+
+/** One glyph: mouse enter → startle once, then idle. */
+function StartleChar({ ch, index }: { ch: string; index: number }) {
+  const [playing, setPlaying] = useState(false);
+  const glyph = ch === " " ? "\u00a0" : ch;
+
+  return (
+    <span
+      className={`wave-char ${playing ? "is-startled" : ""}`}
+      aria-hidden="true"
+      onMouseEnter={() => {
+        if (!playing) setPlaying(true);
+      }}
+      onAnimationEnd={() => setPlaying(false)}
+    >
+      {glyph}
+    </span>
+  );
+}
 
 /**
- * Hit box = this text's own glyphs only.
- * Mouse enter → one-shot staggered startle, then idle (ignore leave).
+ * Hit box per character. Touching a glyph startles only that glyph.
  */
 export function WaveLabel({
   text,
@@ -13,33 +31,10 @@ export function WaveLabel({
   text: string;
   className?: string;
 }) {
-  const [playing, setPlaying] = useState(false);
-  const chars = [...text];
-
-  useEffect(() => {
-    if (!playing) return;
-    const ms = 450 + Math.max(0, chars.length - 1) * 45 + 40;
-    const t = window.setTimeout(() => setPlaying(false), ms);
-    return () => window.clearTimeout(t);
-  }, [playing, chars.length]);
-
   return (
-    <span
-      className={`wave-label ${playing ? "is-startled" : ""} ${className}`.trim()}
-      aria-label={text}
-      onMouseEnter={() => {
-        if (!playing) setPlaying(true);
-      }}
-    >
-      {chars.map((ch, i) => (
-        <span
-          key={`${i}-${ch}`}
-          className="wave-char"
-          aria-hidden="true"
-          style={{ ["--i" as string]: i }}
-        >
-          {ch === " " ? "\u00a0" : ch}
-        </span>
+    <span className={`wave-label ${className}`.trim()} aria-label={text}>
+      {[...text].map((ch, i) => (
+        <StartleChar key={`${i}-${ch}`} ch={ch} index={i} />
       ))}
     </span>
   );
