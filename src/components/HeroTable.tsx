@@ -46,8 +46,8 @@ export function HeroTable({ rows }: { rows: HeroStat[] }) {
       <button
         type="button"
         onClick={() => toggle(key)}
-        className={`inline-flex items-center gap-1 hover:text-cyan-200 ${
-          sortKey === key ? "text-cyan-300" : "text-slate-400"
+        className={`inline-flex items-center gap-1 hover:text-amber-200 ${
+          sortKey === key ? "text-amber-300" : "text-slate-400"
         }`}
       >
         {label}
@@ -58,12 +58,12 @@ export function HeroTable({ rows }: { rows: HeroStat[] }) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
+      initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.08 }}
+      transition={{ delay: 0.1, duration: 0.45 }}
       className="glass-card overflow-hidden"
     >
-      <div className="border-b border-white/10 px-4 py-3 md:px-5">
+      <div className="border-b border-white/10 bg-gradient-to-r from-amber-500/5 via-transparent to-cyan-500/5 px-4 py-3 md:px-5">
         <h2 className="text-lg font-semibold text-white">英雄统计</h2>
         <p className="mt-1 text-xs text-slate-400">
           「上分」列固定为 —：真实天梯分变动需 Steam Game Coordinator
@@ -97,9 +97,15 @@ export function HeroTable({ rows }: { rows: HeroStat[] }) {
               </tr>
             ) : (
               sorted.map((r, i) => (
-                <tr
+                <motion.tr
                   key={r.heroId}
-                  className={`border-t border-white/5 transition hover:bg-cyan-400/5 ${
+                  initial={{ opacity: 0, x: -6 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: Math.min(i * 0.025, 0.35), duration: 0.3 }}
+                  whileHover={{
+                    backgroundColor: "rgba(245, 158, 11, 0.07)",
+                  }}
+                  className={`border-t border-white/5 transition-colors ${
                     i % 2 === 0 ? "bg-white/[0.02]" : ""
                   }`}
                 >
@@ -111,7 +117,7 @@ export function HeroTable({ rows }: { rows: HeroStat[] }) {
                           alt={r.localizedName}
                           width={54}
                           height={30}
-                          className="rounded object-cover ring-1 ring-white/10"
+                          className="rounded object-cover ring-1 ring-white/10 transition group-hover:ring-amber-400/40"
                           unoptimized
                         />
                       ) : (
@@ -158,13 +164,13 @@ export function HeroTable({ rows }: { rows: HeroStat[] }) {
                       </span>
                       <span className="h-1 w-16 overflow-hidden rounded-full bg-white/10">
                         <span
-                          className="block h-full rounded-full bg-gradient-to-r from-cyan-400 to-violet-400"
+                          className="block h-full rounded-full bg-gradient-to-r from-amber-400 via-orange-400 to-cyan-400 shadow-[0_0_8px_rgba(251,191,36,0.5)]"
                           style={{ width: `${Math.min(100, r.winrate)}%` }}
                         />
                       </span>
                     </div>
                   </td>
-                </tr>
+                </motion.tr>
               ))
             )}
           </tbody>

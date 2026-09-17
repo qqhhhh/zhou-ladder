@@ -93,7 +93,7 @@ export default async function HomePage({
         <p>
           © oldboys.games · Zhou / 鲷哥 · 数据源{" "}
           <a
-            className="text-cyan-400/80 hover:text-cyan-300"
+            className="text-amber-400/80 hover:text-amber-300"
             href="https://www.opendota.com/players/90137663"
             target="_blank"
             rel="noreferrer"

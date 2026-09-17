@@ -33,7 +33,7 @@ export function DateRangeFilter({ currentDays }: { currentDays: string }) {
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <span className="text-xs uppercase tracking-widest text-cyan-300/70">
+      <span className="text-xs uppercase tracking-widest text-amber-300/70">
         时间范围
       </span>
       <div className="flex flex-wrap gap-1.5">
@@ -47,7 +47,7 @@ export function DateRangeFilter({ currentDays }: { currentDays: string }) {
               onClick={() => setDays(p.days)}
               className={`rounded-full px-3 py-1 text-sm transition ${
                 active
-                  ? "bg-cyan-400/20 text-cyan-200 ring-1 ring-cyan-400/50 shadow-[0_0_20px_rgba(34,211,238,0.25)]"
+                  ? "bg-amber-400/20 text-amber-100 ring-1 ring-amber-400/50 shadow-[0_0_22px_rgba(245,158,11,0.35)]"
                   : "bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white"
               } ${pending ? "opacity-60" : ""}`}
             >
