@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import type { ReactNode } from "react";
 
 const DOUYU = "https://www.douyu.com/88660";
@@ -9,18 +10,17 @@ const items: {
   label: string;
   href: string;
   external?: boolean;
+  current?: boolean;
   icon: ReactNode;
 }[] = [
   {
     id: "overview",
     label: "总览",
     href: "#overview",
+    current: true,
     icon: (
       <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.75">
-        <rect x="3" y="3" width="7" height="7" rx="1.5" />
-        <rect x="14" y="3" width="7" height="7" rx="1.5" />
-        <rect x="3" y="14" width="7" height="7" rx="1.5" />
-        <rect x="14" y="14" width="7" height="7" rx="1.5" />
+        <path d="M4 10.5L12 4l8 6.5V20a1 1 0 01-1 1h-5v-6H10v6H5a1 1 0 01-1-1v-9.5z" strokeLinejoin="round" />
       </svg>
     ),
   },
@@ -41,7 +41,18 @@ const items: {
     href: "#heroes",
     icon: (
       <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.75">
-        <path d="M12 3l2.2 4.5L19 8.3l-3.5 3.4.8 4.8L12 14.8 7.7 16.5l.8-4.8L5 8.3l4.8-.8L12 3z" strokeLinejoin="round" />
+        <circle cx="12" cy="12" r="3" />
+        <path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" strokeLinecap="round" />
+      </svg>
+    ),
+  },
+  {
+    id: "recent",
+    label: "近期",
+    href: "#recent",
+    icon: (
+      <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.75">
+        <path d="M4 19V5M4 19h16M8 15v4M12 11v8M16 8v11" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     ),
   },
@@ -53,8 +64,6 @@ const items: {
     icon: (
       <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.75">
         <path d="M5 5h14a2 2 0 012 2v8a2 2 0 01-2 2H9l-4 3v-3H5a2 2 0 01-2-2V7a2 2 0 012-2z" strokeLinejoin="round" />
-        <circle cx="9" cy="11" r="1" fill="currentColor" stroke="none" />
-        <circle cx="15" cy="11" r="1" fill="currentColor" stroke="none" />
       </svg>
     ),
   },
@@ -64,28 +73,50 @@ export function Sidebar() {
   return (
     <>
       <aside
-        className="sidebar-rail fixed left-3 top-1/2 z-40 hidden w-14 -translate-y-1/2 flex-col items-center gap-2 rounded-2xl px-2 py-4 md:flex lg:left-4"
+        className="sidebar-rail fixed left-3 top-1/2 z-40 hidden w-[4.25rem] -translate-y-1/2 flex-col items-center rounded-[1.75rem] px-2 py-4 md:flex lg:left-5"
         aria-label="主导航"
       >
-        <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-full bg-amber-100 text-xs font-bold text-amber-800 ring-1 ring-amber-200">
-          Z
+        <div className="mb-4 overflow-hidden rounded-full ring-2 ring-white/15">
+          <Image
+            src="/zhou-avatar.jpg"
+            alt="Zhou"
+            width={40}
+            height={40}
+            className="h-10 w-10 object-cover"
+            priority
+          />
         </div>
-        <nav className="flex flex-col items-center gap-1.5">
+
+        <nav className="flex flex-1 flex-col items-center gap-2">
           {items.map((item) => (
             <a
               key={item.id}
               href={item.href}
-              {...(item.external
-                ? { target: "_blank", rel: "noreferrer" }
-                : {})}
+              {...(item.external ? { target: "_blank", rel: "noreferrer" } : {})}
               title={item.label}
               aria-label={item.label}
+              aria-current={item.current ? "true" : undefined}
               className="nav-icon flex h-10 w-10 items-center justify-center rounded-xl"
             >
               {item.icon}
             </a>
           ))}
         </nav>
+
+        <div className="mt-4 flex flex-col items-center gap-2 pt-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 text-white/50">
+            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.75">
+              <path d="M21 12a9 9 0 11-3-6.7" strokeLinecap="round" />
+              <path d="M21 3v6h-6" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
+          <p
+            className="max-w-[2.5rem] text-center text-[9px] leading-tight text-white/40"
+            style={{ writingMode: "vertical-rl", letterSpacing: "0.08em" }}
+          >
+            刚刚更新
+          </p>
+        </div>
       </aside>
 
       <nav
@@ -99,6 +130,7 @@ export function Sidebar() {
             {...(item.external ? { target: "_blank", rel: "noreferrer" } : {})}
             title={item.label}
             aria-label={item.label}
+            aria-current={item.current ? "true" : undefined}
             className="nav-icon flex flex-col items-center gap-0.5 rounded-xl px-3 py-1.5 text-[10px]"
           >
             {item.icon}

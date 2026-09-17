@@ -17,62 +17,45 @@ export function MetaCards({
     timeZone: "Asia/Shanghai",
   });
 
-  const items = [
-    {
-      title: "段位",
-      value: rank,
-      sub: "奖牌段位（对局数据源）",
-    },
-    {
-      title: "数据新鲜度",
-      value: fetchedLocal,
-      sub: `缓存约 3 分钟 · ${rangeLabel}`,
-    },
-    {
-      title: "账号编号",
-      value: "90137663",
-      sub: "仅天梯对局",
-      mono: true,
-      href: "https://www.opendota.com/players/90137663",
-    },
-  ];
-
   return (
-    <div className="panel overflow-hidden">
-      <div className="grid grid-cols-1 divide-y divide-stone-100 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
-        {items.map((c) => {
-          const inner = (
-            <>
-              <p className="text-[11px] font-medium tracking-wide text-amber-700/80">
-                {c.title}
-              </p>
-              <p
-                className={`mt-1.5 text-sm font-medium text-stone-900 ${
-                  c.mono ? "font-mono tabular-nums" : ""
-                }`}
-              >
-                {c.value}
-              </p>
-              <p className="mt-1 text-xs text-stone-400">{c.sub}</p>
-            </>
-          );
-          return (
-            <div key={c.title} className="px-4 py-3.5 md:px-5">
-              {c.href ? (
-                <a
-                  href={c.href}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="block transition hover:text-amber-800"
-                >
-                  {inner}
-                </a>
-              ) : (
-                inner
-              )}
-            </div>
-          );
-        })}
+    <div className="panel relative overflow-hidden p-5">
+      {/* abstract ripple / radar feel */}
+      <div
+        className="pointer-events-none absolute inset-0 opacity-40"
+        aria-hidden
+      >
+        <div className="absolute left-1/2 top-1/2 h-40 w-40 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/10" />
+        <div className="absolute left-1/2 top-1/2 h-28 w-28 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/10" />
+        <div className="absolute left-1/2 top-1/2 h-16 w-16 -translate-x-1/2 -translate-y-1/2 rounded-full border border-sky-400/25" />
+        <div className="absolute left-1/2 top-1/2 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-sky-400/80" />
+      </div>
+
+      <div className="relative z-[1]">
+        <p className="text-[11px] tracking-wide text-white/40">段位 / 账号</p>
+        <p className="mt-2 text-xl font-semibold text-white">{rank}</p>
+        <p className="mt-1 text-sm text-white/50">奖牌段位 · 对局数据源</p>
+
+        <div className="mt-5 space-y-3 border-t border-white/10 pt-4">
+          <div className="flex items-center justify-between gap-2 text-sm">
+            <span className="text-white/40">账号</span>
+            <a
+              href="https://www.opendota.com/players/90137663"
+              target="_blank"
+              rel="noreferrer"
+              className="font-mono tabular-nums text-sky-300/90 hover:text-sky-200"
+            >
+              90137663
+            </a>
+          </div>
+          <div className="flex items-center justify-between gap-2 text-sm">
+            <span className="text-white/40">范围</span>
+            <span className="text-white/70">{rangeLabel}</span>
+          </div>
+          <div className="flex items-center justify-between gap-2 text-sm">
+            <span className="text-white/40">更新</span>
+            <span className="text-right text-xs text-white/55">{fetchedLocal}</span>
+          </div>
+        </div>
       </div>
     </div>
   );

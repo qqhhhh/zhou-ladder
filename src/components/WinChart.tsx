@@ -2,7 +2,6 @@
 
 import {
   CartesianGrid,
-  Legend,
   Line,
   LineChart,
   ResponsiveContainer,
@@ -11,7 +10,7 @@ import {
   YAxis,
 } from "recharts";
 import type { ChartPoint } from "@/lib/types";
-import { DashDivider } from "@/components/DashMotion";
+import type { SummaryStats } from "@/lib/types";
 
 function CustomTooltip({
   active,
@@ -30,8 +29,8 @@ function CustomTooltip({
   if (!active || !payload?.length) return null;
   const p = payload[0]?.payload;
   return (
-    <div className="chart-tooltip min-w-[180px] text-sm text-stone-800">
-      <div className="mb-1.5 border-b border-amber-200/60 pb-1.5 text-xs text-amber-800/90">
+    <div className="chart-tooltip min-w-[180px] text-sm">
+      <div className="mb-1.5 border-b border-white/10 pb-1.5 text-xs text-white/50">
         {p
           ? `#${p.index} · ${p.dateLabel} · ${p.hero} · ${p.result}`
           : `#${label}`}
@@ -42,14 +41,14 @@ function CustomTooltip({
             key={entry.name}
             className="flex items-center justify-between gap-4"
           >
-            <span className="flex items-center gap-2 text-stone-600">
+            <span className="flex items-center gap-2 text-white/60">
               <span
                 className="inline-block h-2 w-2 rounded-full"
                 style={{ background: entry.color }}
               />
               {entry.name}
             </span>
-            <span className="font-mono tabular-nums text-stone-900">
+            <span className="font-mono tabular-nums text-white">
               {entry.name === "滚动胜率%"
                 ? `${Number(entry.value).toFixed(1)}%`
                 : entry.value}
@@ -61,96 +60,114 @@ function CustomTooltip({
   );
 }
 
-export function WinChart({ points }: { points: ChartPoint[] }) {
+export function WinChart({
+  points,
+  summary,
+}: {
+  points: ChartPoint[];
+  summary?: SummaryStats;
+}) {
   if (points.length === 0) {
     return (
       <div
         id="trend"
-        className="panel flex h-full min-h-72 scroll-mt-24 items-center justify-center text-stone-400"
+        className="panel flex h-full min-h-72 scroll-mt-24 items-center justify-center text-white/40"
       >
         所选范围内暂无天梯对局
       </div>
     );
   }
 
+  const last = points[points.length - 1];
+  const first = points[0];
+  const delta = last.cumulativeNetWins - (first?.cumulativeNetWins ?? 0);
+  const wr =
+    last.rollingWinrate != null ? last.rollingWinrate : summary?.winrate ?? 0;
+  const wrDelta =
+    points.length > 5 && points[points.length - 6]?.rollingWinrate != null
+      ? wr - (points[points.length - 6].rollingWinrate as number)
+      : null;
+
   return (
     <div
       id="trend"
       className="panel flex h-full scroll-mt-24 flex-col p-4 md:p-5"
     >
-      <div className="mb-2 flex flex-wrap items-end justify-between gap-2">
+      <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
         <div>
-          <h2 className="text-lg font-semibold text-stone-900">走势图</h2>
-          <p className="mt-1 text-xs text-stone-500">
-            累计净胜场 / 滚动胜率（近 20 场）·{" "}
-            <strong className="text-amber-700">不是真实天梯分</strong>
-            ，对局数据源无法提供官方天梯分导出
+          <h2 className="text-base font-semibold text-white">走势图</h2>
+          <p className="mt-1 text-[11px] text-white/40">
+            累计净胜 / 滚动胜率 ·{" "}
+            <span className="text-orange-300/90">不是真实天梯分</span>
           </p>
         </div>
+        <div className="flex flex-wrap items-center gap-2">
+          {wrDelta != null && (
+            <span
+              className={`text-sm font-semibold tabular-nums ${
+                wrDelta >= 0 ? "text-sky-300" : "text-rose-300"
+              }`}
+            >
+              {wrDelta >= 0 ? "↑" : "↓"} {Math.abs(wrDelta).toFixed(1)}%
+            </span>
+          )}
+          <span className="badge-warn">
+            {delta >= 0 ? "上行" : "下行"}
+          </span>
+        </div>
       </div>
-      <DashDivider className="mb-3" />
-      <div className="h-64 w-full md:h-72 lg:h-[300px]">
+
+      <div className="min-h-0 flex-1" style={{ height: 220 }}>
         <ResponsiveContainer width="100%" height="100%">
           <LineChart
             data={points}
-            margin={{ top: 8, right: 12, left: 0, bottom: 0 }}
+            margin={{ top: 8, right: 8, left: -8, bottom: 0 }}
           >
+            <defs>
+              <linearGradient id="netGrad" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stopColor="#5b9dff" />
+                <stop offset="100%" stopColor="#ff8a4c" />
+              </linearGradient>
+            </defs>
             <CartesianGrid
-              stroke="rgba(217,119,6,0.12)"
-              strokeDasharray="4 8"
+              stroke="rgba(255,255,255,0.06)"
+              strokeDasharray="3 8"
               vertical={false}
             />
             <XAxis
               dataKey="index"
-              tick={{ fill: "#a8a29e", fontSize: 11 }}
+              tick={{ fill: "rgba(255,255,255,0.28)", fontSize: 10 }}
               tickLine={false}
               axisLine={false}
-              label={{
-                value: "场次序",
-                position: "insideBottomRight",
-                offset: -2,
-                fill: "#a8a29e",
-                fontSize: 11,
-              }}
             />
             <YAxis
               yAxisId="net"
-              tick={{ fill: "#a8a29e", fontSize: 11 }}
+              tick={{ fill: "rgba(255,255,255,0.28)", fontSize: 10 }}
               tickLine={false}
               axisLine={false}
-              width={40}
+              width={36}
             />
             <YAxis
               yAxisId="wr"
               orientation="right"
               domain={[0, 100]}
-              tick={{ fill: "#a8a29e", fontSize: 11 }}
-              tickLine={false}
-              axisLine={false}
-              width={40}
-              unit="%"
+              hide
             />
             <Tooltip
               content={<CustomTooltip />}
-              cursor={{ stroke: "rgba(217,119,6,0.35)", strokeWidth: 1 }}
-            />
-            <Legend
-              wrapperStyle={{ paddingTop: 8 }}
-              formatter={(value) => (
-                <span className="text-xs text-stone-600">{value}</span>
-              )}
+              cursor={{ stroke: "rgba(255,255,255,0.15)", strokeWidth: 1 }}
             />
             <Line
               yAxisId="net"
               type="monotone"
               dataKey="cumulativeNetWins"
               name="累计净胜"
-              stroke="#d97706"
-              strokeWidth={2.4}
+              stroke="url(#netGrad)"
+              strokeWidth={2.5}
               dot={false}
               activeDot={{
                 r: 4,
-                fill: "#d97706",
+                fill: "#ff8a4c",
                 stroke: "#fff",
                 strokeWidth: 1.5,
               }}
@@ -160,15 +177,52 @@ export function WinChart({ points }: { points: ChartPoint[] }) {
               type="monotone"
               dataKey="rollingWinrate"
               name="滚动胜率%"
-              stroke="#78716c"
-              strokeWidth={2}
-              strokeDasharray="5 4"
+              stroke="rgba(255,255,255,0.28)"
+              strokeWidth={1.5}
+              strokeDasharray="4 4"
               dot={false}
               connectNulls
-              activeDot={{ r: 3.5, fill: "#78716c" }}
+              activeDot={{ r: 3, fill: "rgba(255,255,255,0.6)" }}
             />
           </LineChart>
         </ResponsiveContainer>
+      </div>
+
+      <div className="mt-3 grid grid-cols-3 gap-2 border-t border-white/8 pt-3">
+        <div className="flex items-center gap-2 text-xs text-white/55">
+          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/5 text-[10px]">
+            场
+          </span>
+          <div>
+            <p className="text-[10px] text-white/35">场次</p>
+            <p className="font-mono tabular-nums text-white/80">
+              {summary?.games ?? points.length}
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 text-xs text-white/55">
+          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/5 text-[10px]">
+            净
+          </span>
+          <div>
+            <p className="text-[10px] text-white/35">累计净胜</p>
+            <p className="font-mono tabular-nums text-white/80">
+              {last.cumulativeNetWins >= 0 ? "+" : ""}
+              {last.cumulativeNetWins}
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 text-xs text-white/55">
+          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/5 text-[10px]">
+            率
+          </span>
+          <div>
+            <p className="text-[10px] text-white/35">滚动胜率</p>
+            <p className="font-mono tabular-nums text-white/80">
+              {wr.toFixed(1)}%
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
