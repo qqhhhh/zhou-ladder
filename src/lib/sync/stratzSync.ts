@@ -10,7 +10,7 @@ import {
 const STRATZ_URL = "https://api.stratz.com/graphql";
 const STRATZ_UA = "STRATZ_API";
 const PAGE_SIZE = 100;
-const MAX_PAGES = 50;
+const MAX_PAGES = 150;  // ~15k matches at PAGE_SIZE 100
 
 type StratzMatchNode = {
   id: number;
@@ -32,9 +32,9 @@ type StratzPlayerPayload = {
       steamAccount?: {
         name?: string | null;
         avatar?: string | null;
+        seasonRank?: number | null;
+        seasonLeaderboardRank?: number | null;
       } | null;
-      seasonRank?: number | null;
-      seasonLeaderboardRank?: number | null;
       matches?: StratzMatchNode[] | null;
     } | null;
   };
@@ -73,9 +73,9 @@ query PlayerRankedMatches($steamAccountId: Long!, $take: Int!, $skip: Int!) {
     steamAccount {
       name
       avatar
+      seasonRank
+      seasonLeaderboardRank
     }
-    seasonRank
-    seasonLeaderboardRank
     matches(
       request: {
         take: $take
@@ -174,16 +174,16 @@ export async function syncStratz(opts?: {
     if (!player) break;
 
     if (!metaWritten) {
+      const sa = player.steamAccount;
       await upsertPlayerMeta({
         account_id: ACCOUNT_ID,
-        rank_tier:
-          player.seasonRank != null ? Number(player.seasonRank) : null,
+        rank_tier: sa?.seasonRank != null ? Number(sa.seasonRank) : null,
         leaderboard_rank:
-          player.seasonLeaderboardRank != null
-            ? Number(player.seasonLeaderboardRank)
+          sa?.seasonLeaderboardRank != null
+            ? Number(sa.seasonLeaderboardRank)
             : null,
-        personaname: player.steamAccount?.name ?? null,
-        avatar: player.steamAccount?.avatar ?? null,
+        personaname: sa?.name ?? null,
+        avatar: sa?.avatar ?? null,
       });
       metaWritten = true;
       playerSynced = true;

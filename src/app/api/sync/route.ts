@@ -39,8 +39,18 @@ async function runSync(req: Request) {
   const beforeCount = await countMatches();
   const beforeMax = await getMaxMatchId();
 
-  const opendota = await syncOpenDota({ full });
-  const stratz = await syncStratz({ full });
+  let opendota: Awaited<ReturnType<typeof syncOpenDota>> | { error: string } ;
+  let stratz: Awaited<ReturnType<typeof syncStratz>> | { error: string };
+  try {
+    opendota = await syncOpenDota({ full });
+  } catch (e) {
+    opendota = { error: e instanceof Error ? e.message : String(e) };
+  }
+  try {
+    stratz = await syncStratz({ full });
+  } catch (e) {
+    stratz = { error: e instanceof Error ? e.message : String(e) };
+  }
 
   const afterCount = await countMatches();
   const afterMax = await getMaxMatchId();
