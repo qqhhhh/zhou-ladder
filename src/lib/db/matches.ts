@@ -282,6 +282,11 @@ function resolveRawJson(m: UpsertMatchInput): string | null {
  * ON CONFLICT: prefer non-null excluded values; KDA keeps opendota-prefer / empty-fill rules;
  * raw_json merges opendota/stratz keys via json_extract (excluded source wins when present).
  */
+function sqlNum(v: number | null | undefined): number | null {
+  if (v == null) return null;
+  return Number.isFinite(v) ? v : null;
+}
+
 export async function upsertMatches(matches: UpsertMatchInput[]): Promise<number> {
   if (matches.length === 0) return 0;
   const db = getTurso();
@@ -379,30 +384,30 @@ export async function upsertMatches(matches: UpsertMatchInput[]): Promise<number
       args: [
         m.match_id,
         m.start_time,
-        m.hero_id,
+        sqlNum(m.hero_id) ?? 0,
         m.win ? 1 : 0,
-        m.kills,
-        m.deaths,
-        m.assists,
-        m.lobby_type ?? 7,
+        sqlNum(m.kills) ?? 0,
+        sqlNum(m.deaths) ?? 0,
+        sqlNum(m.assists) ?? 0,
+        sqlNum(m.lobby_type) ?? 7,
         m.source,
         now,
-        m.duration ?? null,
-        m.player_slot ?? null,
-        m.party_size ?? null,
-        m.game_mode ?? null,
-        m.average_rank ?? null,
-        m.leaver_status ?? null,
-        m.gold_per_min ?? null,
-        m.xp_per_min ?? null,
-        m.hero_damage ?? null,
-        m.tower_damage ?? null,
-        m.hero_healing ?? null,
-        m.last_hits ?? null,
-        m.denies ?? null,
-        m.net_worth ?? null,
+        sqlNum(m.duration),
+        sqlNum(m.player_slot),
+        sqlNum(m.party_size),
+        sqlNum(m.game_mode),
+        sqlNum(m.average_rank),
+        sqlNum(m.leaver_status),
+        sqlNum(m.gold_per_min),
+        sqlNum(m.xp_per_min),
+        sqlNum(m.hero_damage),
+        sqlNum(m.tower_damage),
+        sqlNum(m.hero_healing),
+        sqlNum(m.last_hits),
+        sqlNum(m.denies),
+        sqlNum(m.net_worth),
         m.award ?? null,
-        m.imp ?? null,
+        sqlNum(m.imp),
         resolveRawJson(m),
       ] as (string | number | null)[],
     }));

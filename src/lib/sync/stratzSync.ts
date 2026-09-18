@@ -61,6 +61,12 @@ type StratzPlayerPayload = {
   errors?: Array<{ message?: string }>;
 };
 
+function finiteNum(v: unknown, fallback: number | null = null): number | null {
+  if (v == null || v === "") return fallback;
+  const n = Number(v);
+  return Number.isFinite(n) ? n : fallback;
+}
+
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -197,36 +203,34 @@ function nodeToUpsert(node: StratzMatchNode): UpsertMatchInput | null {
     }
   }
 
+  const matchId = finiteNum(node.id, null);
+  if (matchId == null || matchId <= 0) return null;
+
   return {
-    match_id: Number(node.id),
-    start_time: Number(node.startDateTime ?? 0),
-    hero_id: Number(me.heroId ?? 0),
+    match_id: matchId,
+    start_time: finiteNum(node.startDateTime, 0) ?? 0,
+    hero_id: finiteNum(me.heroId, 0) ?? 0,
     win: Boolean(me.isVictory),
-    kills: Number(me.kills ?? 0),
-    deaths: Number(me.deaths ?? 0),
-    assists: Number(me.assists ?? 0),
-    lobby_type: node.lobbyType != null ? Number(node.lobbyType) : 7,
+    kills: finiteNum(me.kills, 0) ?? 0,
+    deaths: finiteNum(me.deaths, 0) ?? 0,
+    assists: finiteNum(me.assists, 0) ?? 0,
+    lobby_type: finiteNum(node.lobbyType, 7) ?? 7,
     source: "stratz",
-    duration: node.durationSeconds != null ? Number(node.durationSeconds) : null,
-    game_mode: node.gameMode != null ? Number(node.gameMode) : null,
-    average_rank: node.averageRank != null ? Number(node.averageRank) : null,
+    duration: finiteNum(node.durationSeconds),
+    game_mode: finiteNum(node.gameMode),
+    average_rank: finiteNum(node.averageRank),
     party_size: partySize,
-    leaver_status:
-      me.leaverStatus != null ? Number(me.leaverStatus) : null,
-    gold_per_min:
-      me.goldPerMinute != null ? Number(me.goldPerMinute) : null,
-    xp_per_min:
-      me.experiencePerMinute != null
-        ? Number(me.experiencePerMinute)
-        : null,
-    hero_damage: me.heroDamage != null ? Number(me.heroDamage) : null,
-    tower_damage: me.towerDamage != null ? Number(me.towerDamage) : null,
-    hero_healing: me.heroHealing != null ? Number(me.heroHealing) : null,
-    last_hits: me.numLastHits != null ? Number(me.numLastHits) : null,
-    denies: me.numDenies != null ? Number(me.numDenies) : null,
-    net_worth: me.networth != null ? Number(me.networth) : null,
+    leaver_status: finiteNum(me.leaverStatus),
+    gold_per_min: finiteNum(me.goldPerMinute),
+    xp_per_min: finiteNum(me.experiencePerMinute),
+    hero_damage: finiteNum(me.heroDamage),
+    tower_damage: finiteNum(me.towerDamage),
+    hero_healing: finiteNum(me.heroHealing),
+    last_hits: finiteNum(me.numLastHits),
+    denies: finiteNum(me.numDenies),
+    net_worth: finiteNum(me.networth),
     award: awardToText(me.award),
-    imp: me.imp != null ? Number(me.imp) : null,
+    imp: finiteNum(me.imp),
     raw_json: wrapRawJson("stratz", node),
   };
 }
@@ -346,7 +350,16 @@ export async function syncStratz(opts?: {
     if (matches.length < PAGE_SIZE) break;
   }
 
-  const insertedOrUpdated = await upsertMatches(collected);
+  const cleaned = collected.map((row) => {
+    const out: typeof row = { ...row };
+    for (const [k, v] of Object.entries(out)) {
+      if (typeof v === "number" && !Number.isFinite(v)) {
+        (out as Record<string, unknown>)[k] = k === "match_id" || k === "start_time" ? 0 : null;
+      }
+    }
+    return out;
+  }).filter((r) => Number.isFinite(r.match_id) && r.match_id > 0);
+  const insertedOrUpdated = await upsertMatches(cleaned);
 
   await setSyncState(
     "stratz_last_sync",
