@@ -1,9 +1,14 @@
 import { Dashboard } from "@/components/Dashboard";
-import { fetchLadderBootstrap } from "@/lib/opendota";
-import { toCompactMatches } from "@/lib/stats";
+import { ACCOUNT_ID, fetchHeroes } from "@/lib/opendota";
+import {
+  getPlayerMeta,
+  listRecentCompactMatches,
+} from "@/lib/db/matches";
+import { hasTursoEnv } from "@/lib/turso";
+import type { CompactMatch } from "@/lib/stats";
 import type { OpenDotaHero, OpenDotaPlayer } from "@/lib/types";
 
-export const revalidate = 300;
+export const revalidate = 60;
 export const maxDuration = 60;
 
 type SearchParams = Promise<{
@@ -36,6 +41,51 @@ function slimHeroes(heroes: OpenDotaHero[]): OpenDotaHero[] {
   }));
 }
 
+function playerFromMeta(
+  meta: Awaited<ReturnType<typeof getPlayerMeta>>,
+): OpenDotaPlayer {
+  const name = meta?.personaname ?? "Zhou";
+  const avatar = meta?.avatar ?? "";
+  return {
+    profile: {
+      account_id: ACCOUNT_ID,
+      personaname: name,
+      avatar,
+      avatarmedium: avatar,
+      avatarfull: avatar,
+      profileurl: "",
+    },
+    rank_tier: meta?.rank_tier ?? null,
+    leaderboard_rank: meta?.leaderboard_rank ?? null,
+  };
+}
+
+async function loadBootstrap(): Promise<{
+  player: OpenDotaPlayer;
+  matches: CompactMatch[];
+  heroes: OpenDotaHero[];
+  fetchedAt: string;
+}> {
+  if (!hasTursoEnv()) {
+    throw new Error(
+      "缺少 Turso 配置：请设置 TURSO_DATABASE_URL 与 TURSO_AUTH_TOKEN",
+    );
+  }
+
+  const [meta, matches, heroes] = await Promise.all([
+    getPlayerMeta(ACCOUNT_ID),
+    listRecentCompactMatches(200),
+    fetchHeroes(86400).catch(() => [] as OpenDotaHero[]),
+  ]);
+
+  return {
+    player: playerFromMeta(meta),
+    matches,
+    heroes,
+    fetchedAt: meta?.updated_at ?? new Date().toISOString(),
+  };
+}
+
 export default async function HomePage({
   searchParams,
 }: {
@@ -44,10 +94,10 @@ export default async function HomePage({
   const sp = await searchParams;
 
   let error: string | null = null;
-  let payload: Awaited<ReturnType<typeof fetchLadderBootstrap>> | null = null;
+  let payload: Awaited<ReturnType<typeof loadBootstrap>> | null = null;
 
   try {
-    payload = await fetchLadderBootstrap();
+    payload = await loadBootstrap();
   } catch (e) {
     error = e instanceof Error ? e.message : "对局数据请求失败";
   }
@@ -67,7 +117,7 @@ export default async function HomePage({
   return (
     <Dashboard
       player={slimPlayer(payload.player)}
-      matches={toCompactMatches(payload.matches)}
+      matches={payload.matches}
       heroes={slimHeroes(payload.heroes)}
       fetchedAt={payload.fetchedAt}
       initialDays={sp.days}

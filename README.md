@@ -15,6 +15,19 @@ Next.js App Router + TypeScript + Tailwind 的 Dota 2 天梯**数据统计看板
 
 ## 本地运行
 
+需要 Turso 环境变量（展示数据只读库，不再在请求路径打 OpenDota）：
+
+```bash
+# .env.local
+TURSO_DATABASE_URL=libsql://...
+TURSO_AUTH_TOKEN=...
+# optional
+STRATZ_API_TOKEN=...
+CRON_SECRET=...
+```
+
+首次：在 Turso 执行 `src/lib/db/schema.sql`，再 `POST /api/sync?full=1`（见 `docs/data-architecture.md`）。
+
 ```bash
 npm install
 npm run dev
