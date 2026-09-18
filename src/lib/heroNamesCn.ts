@@ -1,5 +1,7 @@
 /** Official Valve CN client hero names (schinese name_loc from dota2.com datafeed). */
 
+import type { OpenDotaHero } from "./types";
+
 export const HERO_NAME_CN_BY_ID: Record<number, string> = {
   1: "敌法师",
   2: "斧王",
@@ -269,3 +271,22 @@ export function heroNameCn(heroId: number, internalName?: string, fallback?: str
   );
 }
 
+/** Build static hero list (id → internal name) so SSR never waits on OpenDota /heroes. */
+export function getStaticHeroes(): OpenDotaHero[] {
+  const cnToInternal = new Map<string, string>();
+  for (const [internal, cn] of Object.entries(HERO_NAME_CN_BY_INTERNAL)) {
+    cnToInternal.set(cn, internal);
+  }
+  return Object.entries(HERO_NAME_CN_BY_ID).map(([idStr, cn]) => {
+    const id = Number(idStr);
+    const name = cnToInternal.get(cn) ?? `npc_dota_hero_id_${id}`;
+    return {
+      id,
+      name,
+      localized_name: cn,
+      primary_attr: "",
+      attack_type: "",
+      roles: [] as string[],
+    };
+  });
+}

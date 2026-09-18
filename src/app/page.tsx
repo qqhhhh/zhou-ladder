@@ -1,9 +1,10 @@
 import { Dashboard } from "@/components/Dashboard";
-import { ACCOUNT_ID, fetchHeroes } from "@/lib/opendota";
+import { ACCOUNT_ID } from "@/lib/opendota";
 import {
   getPlayerMeta,
   listRecentCompactMatches,
 } from "@/lib/db/matches";
+import { getStaticHeroes } from "@/lib/heroNamesCn";
 import { hasTursoEnv } from "@/lib/turso";
 import type { CompactMatch } from "@/lib/stats";
 import type { OpenDotaHero, OpenDotaPlayer } from "@/lib/types";
@@ -72,11 +73,12 @@ async function loadBootstrap(): Promise<{
     );
   }
 
-  const [meta, matches, heroes] = await Promise.all([
+  // Heroes from checked-in static map — no OpenDota on critical path.
+  const [meta, matches] = await Promise.all([
     getPlayerMeta(ACCOUNT_ID),
     listRecentCompactMatches(200),
-    fetchHeroes(86400).catch(() => [] as OpenDotaHero[]),
   ]);
+  const heroes = getStaticHeroes();
 
   return {
     player: playerFromMeta(meta),

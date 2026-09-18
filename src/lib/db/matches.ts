@@ -63,6 +63,68 @@ export async function listCompactMatches(): Promise<CompactMatch[]> {
   );
 }
 
+/** Ranked matches with start_time >= minStartTime (unix sec), ascending. */
+export async function listCompactMatchesSince(
+  minStartTime: number,
+): Promise<CompactMatch[]> {
+  const db = getTurso();
+  const result = await db.execute({
+    sql: `SELECT match_id, start_time, hero_id, win, kills, deaths, assists, lobby_type, source, updated_at
+          FROM ranked_matches
+          WHERE (lobby_type = 7 OR lobby_type IS NULL)
+            AND start_time >= ?
+          ORDER BY start_time ASC`,
+    args: [minStartTime],
+  });
+
+  return result.rows.map((row) =>
+    rowToCompact({
+      match_id: Number(row.match_id),
+      start_time: Number(row.start_time),
+      hero_id: row.hero_id == null ? null : Number(row.hero_id),
+      win: row.win == null ? null : Number(row.win),
+      kills: row.kills == null ? null : Number(row.kills),
+      deaths: row.deaths == null ? null : Number(row.deaths),
+      assists: row.assists == null ? null : Number(row.assists),
+      lobby_type: row.lobby_type == null ? null : Number(row.lobby_type),
+      source: row.source == null ? null : String(row.source),
+      updated_at: row.updated_at == null ? null : String(row.updated_at),
+    }),
+  );
+}
+
+/** Ranked matches in [minStartTime, maxStartTime] inclusive (unix sec), ascending. */
+export async function listCompactMatchesBetween(
+  minStartTime: number,
+  maxStartTime: number,
+): Promise<CompactMatch[]> {
+  const db = getTurso();
+  const result = await db.execute({
+    sql: `SELECT match_id, start_time, hero_id, win, kills, deaths, assists, lobby_type, source, updated_at
+          FROM ranked_matches
+          WHERE (lobby_type = 7 OR lobby_type IS NULL)
+            AND start_time >= ?
+            AND start_time <= ?
+          ORDER BY start_time ASC`,
+    args: [minStartTime, maxStartTime],
+  });
+
+  return result.rows.map((row) =>
+    rowToCompact({
+      match_id: Number(row.match_id),
+      start_time: Number(row.start_time),
+      hero_id: row.hero_id == null ? null : Number(row.hero_id),
+      win: row.win == null ? null : Number(row.win),
+      kills: row.kills == null ? null : Number(row.kills),
+      deaths: row.deaths == null ? null : Number(row.deaths),
+      assists: row.assists == null ? null : Number(row.assists),
+      lobby_type: row.lobby_type == null ? null : Number(row.lobby_type),
+      source: row.source == null ? null : String(row.source),
+      updated_at: row.updated_at == null ? null : String(row.updated_at),
+    }),
+  );
+}
+
 /** Recent N matches for fast SSR bootstrap (newest first → reverse to asc). */
 export async function listRecentCompactMatches(
   limit = 200,
