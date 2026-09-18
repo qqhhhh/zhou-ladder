@@ -2,6 +2,10 @@ import { getTurso } from "@/lib/turso";
 import type { CompactMatch } from "@/lib/stats";
 import { ACCOUNT_ID } from "@/lib/opendota";
 
+/** Slim columns only — hot display paths must never touch raw_json / rich stats. */
+const SLIM_COLUMNS =
+  "match_id, start_time, hero_id, win, kills, deaths, assists, lobby_type";
+
 export type PlayerMetaRow = {
   account_id: number;
   rank_tier: number | null;
@@ -22,9 +26,35 @@ export type RankedMatchRow = {
   lobby_type: number | null;
   source: string | null;
   updated_at: string | null;
+  duration: number | null;
+  player_slot: number | null;
+  party_size: number | null;
+  game_mode: number | null;
+  average_rank: number | null;
+  leaver_status: number | null;
+  gold_per_min: number | null;
+  xp_per_min: number | null;
+  hero_damage: number | null;
+  tower_damage: number | null;
+  hero_healing: number | null;
+  last_hits: number | null;
+  denies: number | null;
+  net_worth: number | null;
+  award: string | null;
+  imp: number | null;
+  raw_json: string | null;
 };
 
-function rowToCompact(r: RankedMatchRow): CompactMatch {
+function rowToCompact(r: {
+  match_id: number;
+  start_time: number;
+  hero_id: number | null;
+  win: number | null;
+  kills: number | null;
+  deaths: number | null;
+  assists: number | null;
+  lobby_type: number | null;
+}): CompactMatch {
   return {
     match_id: r.match_id,
     start_time: r.start_time,
@@ -37,70 +67,104 @@ function rowToCompact(r: RankedMatchRow): CompactMatch {
   };
 }
 
-/** All ranked matches from Turso, newest first then sorted asc for callers. */
+function mapSlimRow(row: Record<string, unknown>): CompactMatch {
+  return rowToCompact({
+    match_id: Number(row.match_id),
+    start_time: Number(row.start_time),
+    hero_id: row.hero_id == null ? null : Number(row.hero_id),
+    win: row.win == null ? null : Number(row.win),
+    kills: row.kills == null ? null : Number(row.kills),
+    deaths: row.deaths == null ? null : Number(row.deaths),
+    assists: row.assists == null ? null : Number(row.assists),
+    lobby_type: row.lobby_type == null ? null : Number(row.lobby_type),
+  });
+}
+
+function numOrNull(v: unknown): number | null {
+  if (v == null) return null;
+  const n = Number(v);
+  return Number.isFinite(n) ? n : null;
+}
+
+function strOrNull(v: unknown): string | null {
+  if (v == null) return null;
+  return String(v);
+}
+
+function mapRichRow(row: Record<string, unknown>): RankedMatchRow {
+  return {
+    match_id: Number(row.match_id),
+    start_time: Number(row.start_time),
+    hero_id: numOrNull(row.hero_id),
+    win: numOrNull(row.win),
+    kills: numOrNull(row.kills),
+    deaths: numOrNull(row.deaths),
+    assists: numOrNull(row.assists),
+    lobby_type: numOrNull(row.lobby_type),
+    source: strOrNull(row.source),
+    updated_at: strOrNull(row.updated_at),
+    duration: numOrNull(row.duration),
+    player_slot: numOrNull(row.player_slot),
+    party_size: numOrNull(row.party_size),
+    game_mode: numOrNull(row.game_mode),
+    average_rank: numOrNull(row.average_rank),
+    leaver_status: numOrNull(row.leaver_status),
+    gold_per_min: numOrNull(row.gold_per_min),
+    xp_per_min: numOrNull(row.xp_per_min),
+    hero_damage: numOrNull(row.hero_damage),
+    tower_damage: numOrNull(row.tower_damage),
+    hero_healing: numOrNull(row.hero_healing),
+    last_hits: numOrNull(row.last_hits),
+    denies: numOrNull(row.denies),
+    net_worth: numOrNull(row.net_worth),
+    award: strOrNull(row.award),
+    imp: numOrNull(row.imp),
+    raw_json: strOrNull(row.raw_json),
+  };
+}
+
+/** Wrap a source payload under {opendota|stratz: ...} for merge-friendly storage. */
+export function wrapRawJson(source: string, payload: unknown): string {
+  const key = source === "stratz" ? "stratz" : source === "opendota" ? "opendota" : source;
+  return JSON.stringify({ [key]: payload });
+}
+
+/** All ranked matches from Turso, ascending. Slim SELECT only. */
 export async function listCompactMatches(): Promise<CompactMatch[]> {
   const db = getTurso();
   const result = await db.execute(
-    `SELECT match_id, start_time, hero_id, win, kills, deaths, assists, lobby_type, source, updated_at
+    `SELECT ${SLIM_COLUMNS}
      FROM ranked_matches
      WHERE lobby_type = 7 OR lobby_type IS NULL
      ORDER BY start_time ASC`,
   );
-
-  return result.rows.map((row) =>
-    rowToCompact({
-      match_id: Number(row.match_id),
-      start_time: Number(row.start_time),
-      hero_id: row.hero_id == null ? null : Number(row.hero_id),
-      win: row.win == null ? null : Number(row.win),
-      kills: row.kills == null ? null : Number(row.kills),
-      deaths: row.deaths == null ? null : Number(row.deaths),
-      assists: row.assists == null ? null : Number(row.assists),
-      lobby_type: row.lobby_type == null ? null : Number(row.lobby_type),
-      source: row.source == null ? null : String(row.source),
-      updated_at: row.updated_at == null ? null : String(row.updated_at),
-    }),
-  );
+  return result.rows.map((row) => mapSlimRow(row as Record<string, unknown>));
 }
 
-/** Ranked matches with start_time >= minStartTime (unix sec), ascending. */
+/** Ranked matches with start_time >= minStartTime (unix sec), ascending. Slim SELECT. */
 export async function listCompactMatchesSince(
   minStartTime: number,
 ): Promise<CompactMatch[]> {
   const db = getTurso();
   const result = await db.execute({
-    sql: `SELECT match_id, start_time, hero_id, win, kills, deaths, assists, lobby_type, source, updated_at
+    sql: `SELECT ${SLIM_COLUMNS}
           FROM ranked_matches
           WHERE (lobby_type = 7 OR lobby_type IS NULL)
             AND start_time >= ?
           ORDER BY start_time ASC`,
     args: [minStartTime],
   });
-
-  return result.rows.map((row) =>
-    rowToCompact({
-      match_id: Number(row.match_id),
-      start_time: Number(row.start_time),
-      hero_id: row.hero_id == null ? null : Number(row.hero_id),
-      win: row.win == null ? null : Number(row.win),
-      kills: row.kills == null ? null : Number(row.kills),
-      deaths: row.deaths == null ? null : Number(row.deaths),
-      assists: row.assists == null ? null : Number(row.assists),
-      lobby_type: row.lobby_type == null ? null : Number(row.lobby_type),
-      source: row.source == null ? null : String(row.source),
-      updated_at: row.updated_at == null ? null : String(row.updated_at),
-    }),
-  );
+  return result.rows.map((row) => mapSlimRow(row as Record<string, unknown>));
 }
 
-/** Ranked matches in [minStartTime, maxStartTime] inclusive (unix sec), ascending. */
+/** Ranked matches in [minStartTime, maxStartTime] inclusive, ascending. Slim SELECT. */
 export async function listCompactMatchesBetween(
   minStartTime: number,
   maxStartTime: number,
 ): Promise<CompactMatch[]> {
   const db = getTurso();
   const result = await db.execute({
-    sql: `SELECT match_id, start_time, hero_id, win, kills, deaths, assists, lobby_type, source, updated_at
+    sql: `SELECT ${SLIM_COLUMNS}
           FROM ranked_matches
           WHERE (lobby_type = 7 OR lobby_type IS NULL)
             AND start_time >= ?
@@ -108,52 +172,49 @@ export async function listCompactMatchesBetween(
           ORDER BY start_time ASC`,
     args: [minStartTime, maxStartTime],
   });
-
-  return result.rows.map((row) =>
-    rowToCompact({
-      match_id: Number(row.match_id),
-      start_time: Number(row.start_time),
-      hero_id: row.hero_id == null ? null : Number(row.hero_id),
-      win: row.win == null ? null : Number(row.win),
-      kills: row.kills == null ? null : Number(row.kills),
-      deaths: row.deaths == null ? null : Number(row.deaths),
-      assists: row.assists == null ? null : Number(row.assists),
-      lobby_type: row.lobby_type == null ? null : Number(row.lobby_type),
-      source: row.source == null ? null : String(row.source),
-      updated_at: row.updated_at == null ? null : String(row.updated_at),
-    }),
-  );
+  return result.rows.map((row) => mapSlimRow(row as Record<string, unknown>));
 }
 
-/** Recent N matches for fast SSR bootstrap (newest first → reverse to asc). */
+/** Recent N matches for fast SSR bootstrap. Slim SELECT. */
 export async function listRecentCompactMatches(
   limit = 200,
 ): Promise<CompactMatch[]> {
   const db = getTurso();
   const result = await db.execute({
-    sql: `SELECT match_id, start_time, hero_id, win, kills, deaths, assists, lobby_type, source, updated_at
+    sql: `SELECT ${SLIM_COLUMNS}
           FROM ranked_matches
           WHERE lobby_type = 7 OR lobby_type IS NULL
           ORDER BY start_time DESC
           LIMIT ?`,
     args: [limit],
   });
-
   const rows = result.rows.map((row) =>
-    rowToCompact({
-      match_id: Number(row.match_id),
-      start_time: Number(row.start_time),
-      hero_id: row.hero_id == null ? null : Number(row.hero_id),
-      win: row.win == null ? null : Number(row.win),
-      kills: row.kills == null ? null : Number(row.kills),
-      deaths: row.deaths == null ? null : Number(row.deaths),
-      assists: row.assists == null ? null : Number(row.assists),
-      lobby_type: row.lobby_type == null ? null : Number(row.lobby_type),
-      source: row.source == null ? null : String(row.source),
-      updated_at: row.updated_at == null ? null : String(row.updated_at),
-    }),
+    mapSlimRow(row as Record<string, unknown>),
   );
   return rows.reverse();
+}
+
+/**
+ * Full rich row for a single match (incl. raw_json). Not used by Dashboard —
+ * for future detail UI / tooling only.
+ */
+export async function getMatchRich(
+  matchId: number,
+): Promise<RankedMatchRow | null> {
+  const db = getTurso();
+  const result = await db.execute({
+    sql: `SELECT match_id, start_time, hero_id, win, kills, deaths, assists,
+                 lobby_type, source, updated_at,
+                 duration, player_slot, party_size, game_mode, average_rank,
+                 leaver_status, gold_per_min, xp_per_min, hero_damage,
+                 tower_damage, hero_healing, last_hits, denies, net_worth,
+                 award, imp, raw_json
+          FROM ranked_matches WHERE match_id = ?`,
+    args: [matchId],
+  });
+  const row = result.rows[0];
+  if (!row) return null;
+  return mapRichRow(row as Record<string, unknown>);
 }
 
 export async function getPlayerMeta(
@@ -188,12 +249,38 @@ export type UpsertMatchInput = {
   assists: number;
   lobby_type?: number;
   source: string;
+  duration?: number | null;
+  player_slot?: number | null;
+  party_size?: number | null;
+  game_mode?: number | null;
+  average_rank?: number | null;
+  leaver_status?: number | null;
+  gold_per_min?: number | null;
+  xp_per_min?: number | null;
+  hero_damage?: number | null;
+  tower_damage?: number | null;
+  hero_healing?: number | null;
+  last_hits?: number | null;
+  denies?: number | null;
+  net_worth?: number | null;
+  award?: string | null;
+  imp?: number | null;
+  /** Plain upstream object or already-stringified JSON; wrapped under source key on write. */
+  raw?: unknown;
+  /** If set, used as-is (should already be wrapRawJson form). Overrides `raw`. */
+  raw_json?: string | null;
 };
 
+function resolveRawJson(m: UpsertMatchInput): string | null {
+  if (m.raw_json != null && m.raw_json !== "") return m.raw_json;
+  if (m.raw !== undefined) return wrapRawJson(m.source, m.raw);
+  return null;
+}
+
 /**
- * Upsert matches. When merging STRATZ over OpenDota (or vice versa):
- * - Prefer non-zero / richer KDA if the other source has zeros/nulls.
- * - Never wipe richer OpenDota KDA with empty STRATZ values.
+ * Upsert matches with rich columns + raw_json.
+ * ON CONFLICT: prefer non-null excluded values; KDA keeps opendota-prefer / empty-fill rules;
+ * raw_json merges opendota/stratz keys via json_extract (excluded source wins when present).
  */
 export async function upsertMatches(matches: UpsertMatchInput[]): Promise<number> {
   if (matches.length === 0) return 0;
@@ -201,14 +288,25 @@ export async function upsertMatches(matches: UpsertMatchInput[]): Promise<number
   const now = new Date().toISOString();
   let written = 0;
 
-  // Batch in chunks to stay under libSQL statement limits
-  const CHUNK = 40;
+  const CHUNK = 30;
   for (let i = 0; i < matches.length; i += CHUNK) {
     const chunk = matches.slice(i, i + CHUNK);
     const stmts = chunk.map((m) => ({
-      sql: `INSERT INTO ranked_matches
-              (match_id, start_time, hero_id, win, kills, deaths, assists, lobby_type, source, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      sql: `INSERT INTO ranked_matches (
+              match_id, start_time, hero_id, win, kills, deaths, assists,
+              lobby_type, source, updated_at,
+              duration, player_slot, party_size, game_mode, average_rank,
+              leaver_status, gold_per_min, xp_per_min, hero_damage,
+              tower_damage, hero_healing, last_hits, denies, net_worth,
+              award, imp, raw_json
+            ) VALUES (
+              ?, ?, ?, ?, ?, ?, ?,
+              ?, ?, ?,
+              ?, ?, ?, ?, ?,
+              ?, ?, ?, ?,
+              ?, ?, ?, ?, ?,
+              ?, ?, ?
+            )
             ON CONFLICT(match_id) DO UPDATE SET
               start_time = excluded.start_time,
               hero_id = COALESCE(excluded.hero_id, ranked_matches.hero_id),
@@ -241,9 +339,40 @@ export async function upsertMatches(matches: UpsertMatchInput[]): Promise<number
                 ELSE ranked_matches.assists
               END,
               lobby_type = COALESCE(excluded.lobby_type, ranked_matches.lobby_type),
+              duration = COALESCE(excluded.duration, ranked_matches.duration),
+              player_slot = COALESCE(excluded.player_slot, ranked_matches.player_slot),
+              party_size = COALESCE(excluded.party_size, ranked_matches.party_size),
+              game_mode = COALESCE(excluded.game_mode, ranked_matches.game_mode),
+              average_rank = COALESCE(excluded.average_rank, ranked_matches.average_rank),
+              leaver_status = COALESCE(excluded.leaver_status, ranked_matches.leaver_status),
+              gold_per_min = COALESCE(excluded.gold_per_min, ranked_matches.gold_per_min),
+              xp_per_min = COALESCE(excluded.xp_per_min, ranked_matches.xp_per_min),
+              hero_damage = COALESCE(excluded.hero_damage, ranked_matches.hero_damage),
+              tower_damage = COALESCE(excluded.tower_damage, ranked_matches.tower_damage),
+              hero_healing = COALESCE(excluded.hero_healing, ranked_matches.hero_healing),
+              last_hits = COALESCE(excluded.last_hits, ranked_matches.last_hits),
+              denies = COALESCE(excluded.denies, ranked_matches.denies),
+              net_worth = COALESCE(excluded.net_worth, ranked_matches.net_worth),
+              award = COALESCE(excluded.award, ranked_matches.award),
+              imp = COALESCE(excluded.imp, ranked_matches.imp),
+              raw_json = CASE
+                WHEN ranked_matches.raw_json IS NULL THEN excluded.raw_json
+                WHEN excluded.raw_json IS NULL THEN ranked_matches.raw_json
+                ELSE json_object(
+                  'opendota', COALESCE(
+                    json_extract(excluded.raw_json, '$.opendota'),
+                    json_extract(ranked_matches.raw_json, '$.opendota')
+                  ),
+                  'stratz', COALESCE(
+                    json_extract(excluded.raw_json, '$.stratz'),
+                    json_extract(ranked_matches.raw_json, '$.stratz')
+                  )
+                )
+              END,
               source = CASE
                 WHEN ranked_matches.source IS NULL THEN excluded.source
                 WHEN ranked_matches.source = excluded.source THEN excluded.source
+                WHEN instr(ranked_matches.source, excluded.source) > 0 THEN ranked_matches.source
                 ELSE ranked_matches.source || '+' || excluded.source
               END,
               updated_at = excluded.updated_at`,
@@ -258,7 +387,24 @@ export async function upsertMatches(matches: UpsertMatchInput[]): Promise<number
         m.lobby_type ?? 7,
         m.source,
         now,
-      ] as (string | number)[],
+        m.duration ?? null,
+        m.player_slot ?? null,
+        m.party_size ?? null,
+        m.game_mode ?? null,
+        m.average_rank ?? null,
+        m.leaver_status ?? null,
+        m.gold_per_min ?? null,
+        m.xp_per_min ?? null,
+        m.hero_damage ?? null,
+        m.tower_damage ?? null,
+        m.hero_healing ?? null,
+        m.last_hits ?? null,
+        m.denies ?? null,
+        m.net_worth ?? null,
+        m.award ?? null,
+        m.imp ?? null,
+        resolveRawJson(m),
+      ] as (string | number | null)[],
     }));
     await db.batch(stmts, "write");
     written += chunk.length;

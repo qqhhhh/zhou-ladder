@@ -6,6 +6,7 @@ import {
   setSyncState,
   upsertMatches,
   upsertPlayerMeta,
+  wrapRawJson,
   type UpsertMatchInput,
 } from "@/lib/db/matches";
 
@@ -14,6 +15,9 @@ const MATCH_PAGE_SIZE = 200;
 const MATCH_MAX_PAGES = 200;
 const PAGE_GAP_MS = 120;
 const RETRY_MAX = 6;
+/** Detail-enrich only the newest N matches per sync (avoid N+1 on full history). */
+const DETAIL_ENRICH_LIMIT = 20;
+const DETAIL_GAP_MS = 150;
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -45,8 +49,12 @@ async function opendotaFetch<T>(path: string): Promise<T> {
   throw new Error(`OpenDota 请求过于频繁（${lastStatus}）`);
 }
 
-function toUpsert(m: OpenDotaMatch): UpsertMatchInput {
-  return {
+/** Map list-endpoint fields (+ optional detail overlays) into upsert input. */
+function toUpsert(
+  m: OpenDotaMatch,
+  detail?: OpenDotaPlayerDetail | null,
+): UpsertMatchInput {
+  const input: UpsertMatchInput = {
     match_id: m.match_id,
     start_time: m.start_time,
     hero_id: m.hero_id,
@@ -56,6 +64,118 @@ function toUpsert(m: OpenDotaMatch): UpsertMatchInput {
     assists: m.assists,
     lobby_type: m.lobby_type ?? 7,
     source: "opendota",
+    duration: m.duration ?? null,
+    player_slot: m.player_slot ?? null,
+    party_size: m.party_size ?? null,
+    game_mode: m.game_mode ?? null,
+    average_rank: m.average_rank ?? null,
+    leaver_status: m.leaver_status ?? null,
+    raw_json: wrapRawJson("opendota", m),
+  };
+
+  if (detail) {
+    input.gold_per_min = detail.gold_per_min ?? null;
+    input.xp_per_min = detail.xp_per_min ?? null;
+    input.hero_damage = detail.hero_damage ?? null;
+    input.tower_damage = detail.tower_damage ?? null;
+    input.hero_healing = detail.hero_healing ?? null;
+    input.last_hits = detail.last_hits ?? null;
+    input.denies = detail.denies ?? null;
+    input.net_worth = detail.net_worth ?? null;
+    // Prefer richer merged raw: list + player slice from detail
+    input.raw_json = wrapRawJson("opendota", {
+      ...m,
+      _detail_player: detail,
+    });
+  }
+
+  return input;
+}
+
+type OpenDotaPlayerDetail = {
+  account_id?: number;
+  gold_per_min?: number | null;
+  xp_per_min?: number | null;
+  hero_damage?: number | null;
+  tower_damage?: number | null;
+  hero_healing?: number | null;
+  last_hits?: number | null;
+  denies?: number | null;
+  net_worth?: number | null;
+};
+
+type OpenDotaMatchDetail = {
+  players?: OpenDotaPlayerDetail[];
+};
+
+async function fetchPlayerDetailForMatch(
+  matchId: number,
+): Promise<OpenDotaPlayerDetail | null> {
+  try {
+    const detail = await opendotaFetch<OpenDotaMatchDetail>(
+      `/matches/${matchId}`,
+    );
+    const me = (detail.players ?? []).find(
+      (p) => Number(p.account_id) === ACCOUNT_ID,
+    );
+    return me ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Optionally enrich the newest matches with /matches/{id} player stats.
+ * Skipped on full backfill to avoid rate-limits across ~10k rows.
+ */
+async function enrichNewestWithDetails(
+  rows: UpsertMatchInput[],
+  full: boolean,
+): Promise<{ rows: UpsertMatchInput[]; detailEnriched: number }> {
+  if (full || rows.length === 0) return { rows, detailEnriched: 0 };
+  const byId = new Map(rows.map((r) => [r.match_id, r]));
+  const newest = [...rows]
+    .sort((a, b) => b.match_id - a.match_id)
+    .slice(0, DETAIL_ENRICH_LIMIT);
+  let detailEnriched = 0;
+
+  for (let i = 0; i < newest.length; i += 1) {
+    if (i > 0) await sleep(DETAIL_GAP_MS);
+    const base = newest[i];
+    const detail = await fetchPlayerDetailForMatch(base.match_id);
+    if (!detail) continue;
+    detailEnriched += 1;
+    // Rebuild from stored raw list object when possible
+    let listMatch: OpenDotaMatch | null = null;
+    try {
+      const parsed = JSON.parse(base.raw_json ?? "{}") as {
+        opendota?: OpenDotaMatch;
+      };
+      listMatch = parsed.opendota ?? null;
+    } catch {
+      listMatch = null;
+    }
+    if (!listMatch) {
+      byId.set(base.match_id, {
+        ...base,
+        gold_per_min: detail.gold_per_min ?? null,
+        xp_per_min: detail.xp_per_min ?? null,
+        hero_damage: detail.hero_damage ?? null,
+        tower_damage: detail.tower_damage ?? null,
+        hero_healing: detail.hero_healing ?? null,
+        last_hits: detail.last_hits ?? null,
+        denies: detail.denies ?? null,
+        net_worth: detail.net_worth ?? null,
+        raw_json: wrapRawJson("opendota", { match_id: base.match_id, _detail_player: detail }),
+      });
+      continue;
+    }
+    byId.set(base.match_id, toUpsert(listMatch, detail));
+  }
+
+  return {
+    rows: rows.map((r) => byId.get(r.match_id) ?? r),
+    detailEnriched,
   };
 }
 
@@ -65,11 +185,13 @@ export type OpenDotaSyncResult = {
   stoppedAtKnown: boolean;
   newestMatchId: number | null;
   playerSynced: boolean;
+  detailEnriched: number;
 };
 
 /**
  * Incremental OpenDota sync: newest-first pagination until we hit match_id
  * already in Turso (watermark = MAX(match_id)). Pass full=true to backfill all pages.
+ * List endpoint fields → columns + raw_json; optional detail enrich for newest ~20.
  */
 export async function syncOpenDota(opts?: {
   full?: boolean;
@@ -107,7 +229,6 @@ export async function syncOpenDota(opts?: {
       pageHasNew = true;
     }
 
-    // Newest-first: once a page has no new ids (all <= watermark), older pages are known
     if (watermark != null && !pageHasNew) {
       stoppedAtKnown = true;
       break;
@@ -116,7 +237,12 @@ export async function syncOpenDota(opts?: {
     if (batch.length < MATCH_PAGE_SIZE) break;
   }
 
-  const insertedOrUpdated = await upsertMatches(collected);
+  const { rows: enriched, detailEnriched } = await enrichNewestWithDetails(
+    collected,
+    full,
+  );
+
+  const insertedOrUpdated = await upsertMatches(enriched);
 
   let playerSynced = false;
   try {
@@ -150,6 +276,7 @@ export async function syncOpenDota(opts?: {
       stoppedAtKnown,
       newestMatchId,
       full,
+      detailEnriched,
     }),
   );
 
@@ -159,5 +286,6 @@ export async function syncOpenDota(opts?: {
     stoppedAtKnown,
     newestMatchId,
     playerSynced,
+    detailEnriched,
   };
 }

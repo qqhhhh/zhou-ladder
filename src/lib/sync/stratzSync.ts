@@ -4,26 +4,46 @@ import {
   setSyncState,
   upsertMatches,
   upsertPlayerMeta,
+  wrapRawJson,
   type UpsertMatchInput,
 } from "@/lib/db/matches";
 
 const STRATZ_URL = "https://api.stratz.com/graphql";
 const STRATZ_UA = "STRATZ_API";
 const PAGE_SIZE = 100;
-const MAX_PAGES = 150;  // ~15k matches at PAGE_SIZE 100
+const MAX_PAGES = 150; // ~15k matches at PAGE_SIZE 100
+
+type StratzPlayerNode = {
+  steamAccountId?: number | null;
+  heroId?: number | null;
+  isVictory?: boolean | null;
+  kills?: number | null;
+  deaths?: number | null;
+  assists?: number | null;
+  goldPerMinute?: number | null;
+  experiencePerMinute?: number | null;
+  heroDamage?: number | null;
+  towerDamage?: number | null;
+  heroHealing?: number | null;
+  numLastHits?: number | null;
+  numDenies?: number | null;
+  networth?: number | null;
+  imp?: number | null;
+  award?: string | null;
+  lane?: string | number | null;
+  partyId?: number | null;
+  leaverStatus?: number | null;
+  position?: string | null;
+};
 
 type StratzMatchNode = {
   id: number;
   startDateTime?: number | null;
+  durationSeconds?: number | null;
   lobbyType?: number | null;
-  players?: Array<{
-    steamAccountId?: number | null;
-    heroId?: number | null;
-    isVictory?: boolean | null;
-    kills?: number | null;
-    deaths?: number | null;
-    assists?: number | null;
-  }> | null;
+  gameMode?: number | null;
+  averageRank?: number | null;
+  players?: StratzPlayerNode[] | null;
 };
 
 type StratzPlayerPayload = {
@@ -67,7 +87,8 @@ async function stratzGraphql<T>(
   return res.json() as Promise<T>;
 }
 
-const MATCHES_QUERY = `
+/** Expanded player match fields; falls back to slim query if schema rejects extras. */
+const MATCHES_QUERY_RICH = `
 query PlayerRankedMatches($steamAccountId: Long!, $take: Int!, $skip: Int!) {
   player(steamAccountId: $steamAccountId) {
     steamAccount {
@@ -85,6 +106,55 @@ query PlayerRankedMatches($steamAccountId: Long!, $take: Int!, $skip: Int!) {
     ) {
       id
       startDateTime
+      durationSeconds
+      lobbyType
+      gameMode
+      averageRank
+      players {
+        steamAccountId
+        heroId
+        isVictory
+        kills
+        deaths
+        assists
+        goldPerMinute
+        experiencePerMinute
+        heroDamage
+        towerDamage
+        heroHealing
+        numLastHits
+        numDenies
+        networth
+        imp
+        award
+        lane
+        partyId
+        leaverStatus
+      }
+    }
+  }
+}
+`;
+
+const MATCHES_QUERY_SLIM = `
+query PlayerRankedMatches($steamAccountId: Long!, $take: Int!, $skip: Int!) {
+  player(steamAccountId: $steamAccountId) {
+    steamAccount {
+      name
+      avatar
+      seasonRank
+      seasonLeaderboardRank
+    }
+    matches(
+      request: {
+        take: $take
+        skip: $skip
+        lobbyTypeIds: [7]
+      }
+    ) {
+      id
+      startDateTime
+      durationSeconds
       lobbyType
       players {
         steamAccountId
@@ -93,17 +163,40 @@ query PlayerRankedMatches($steamAccountId: Long!, $take: Int!, $skip: Int!) {
         kills
         deaths
         assists
+        goldPerMinute
+        experiencePerMinute
+        numLastHits
+        numDenies
+        networth
+        imp
+        award
       }
     }
   }
 }
 `;
 
+function awardToText(award: unknown): string | null {
+  if (award == null) return null;
+  return String(award);
+}
+
 function nodeToUpsert(node: StratzMatchNode): UpsertMatchInput | null {
   const me = (node.players ?? []).find(
     (p) => Number(p.steamAccountId) === ACCOUNT_ID,
   );
   if (!me || node.id == null) return null;
+
+  let partySize: number | null = null;
+  if (me.partyId != null) {
+    const pid = Number(me.partyId);
+    if (Number.isFinite(pid) && pid > 0) {
+      partySize = (node.players ?? []).filter(
+        (p) => p.partyId != null && Number(p.partyId) === pid,
+      ).length;
+    }
+  }
+
   return {
     match_id: Number(node.id),
     start_time: Number(node.startDateTime ?? 0),
@@ -112,8 +205,29 @@ function nodeToUpsert(node: StratzMatchNode): UpsertMatchInput | null {
     kills: Number(me.kills ?? 0),
     deaths: Number(me.deaths ?? 0),
     assists: Number(me.assists ?? 0),
-    lobby_type: 7,
+    lobby_type: node.lobbyType != null ? Number(node.lobbyType) : 7,
     source: "stratz",
+    duration: node.durationSeconds != null ? Number(node.durationSeconds) : null,
+    game_mode: node.gameMode != null ? Number(node.gameMode) : null,
+    average_rank: node.averageRank != null ? Number(node.averageRank) : null,
+    party_size: partySize,
+    leaver_status:
+      me.leaverStatus != null ? Number(me.leaverStatus) : null,
+    gold_per_min:
+      me.goldPerMinute != null ? Number(me.goldPerMinute) : null,
+    xp_per_min:
+      me.experiencePerMinute != null
+        ? Number(me.experiencePerMinute)
+        : null,
+    hero_damage: me.heroDamage != null ? Number(me.heroDamage) : null,
+    tower_damage: me.towerDamage != null ? Number(me.towerDamage) : null,
+    hero_healing: me.heroHealing != null ? Number(me.heroHealing) : null,
+    last_hits: me.numLastHits != null ? Number(me.numLastHits) : null,
+    denies: me.numDenies != null ? Number(me.numDenies) : null,
+    net_worth: me.networth != null ? Number(me.networth) : null,
+    award: awardToText(me.award),
+    imp: me.imp != null ? Number(me.imp) : null,
+    raw_json: wrapRawJson("stratz", node),
   };
 }
 
@@ -126,9 +240,21 @@ export type StratzSyncResult = {
   playerSynced: boolean;
 };
 
+async function fetchPage(
+  token: string,
+  skip: number,
+  useRich: boolean,
+): Promise<StratzPlayerPayload> {
+  return stratzGraphql<StratzPlayerPayload>(
+    useRich ? MATCHES_QUERY_RICH : MATCHES_QUERY_SLIM,
+    { steamAccountId: ACCOUNT_ID, take: PAGE_SIZE, skip },
+    token,
+  );
+}
+
 /**
  * STRATZ GraphQL sync. Skips quietly when STRATZ_API_TOKEN is missing.
- * Merges without wiping richer OpenDota KDA (handled in upsertMatches).
+ * Writes expanded columns + raw_json; merges without wiping richer OpenDota KDA.
  */
 export async function syncStratz(opts?: {
   full?: boolean;
@@ -154,15 +280,18 @@ export async function syncStratz(opts?: {
   let stoppedAtKnown = false;
   let playerSynced = false;
   let metaWritten = false;
+  let useRich = true;
 
   for (let page = 0; page < MAX_PAGES; page += 1) {
     if (page > 0) await sleep(150);
     const skip = page * PAGE_SIZE;
-    const json = await stratzGraphql<StratzPlayerPayload>(
-      MATCHES_QUERY,
-      { steamAccountId: ACCOUNT_ID, take: PAGE_SIZE, skip },
-      token,
-    );
+    let json = await fetchPage(token, skip, useRich);
+
+    if (json.errors?.length && useRich) {
+      // Schema may reject some fields — fall back once and retry this page.
+      useRich = false;
+      json = await fetchPage(token, skip, false);
+    }
 
     if (json.errors?.length) {
       throw new Error(
@@ -227,6 +356,7 @@ export async function syncStratz(opts?: {
       insertedOrUpdated,
       stoppedAtKnown,
       full,
+      query: useRich ? "rich" : "slim",
     }),
   );
 
