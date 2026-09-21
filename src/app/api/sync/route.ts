@@ -42,17 +42,25 @@ async function runSync(req: Request) {
   const beforeCount = await countMatches();
   const beforeMax = await getMaxMatchId();
 
-  let opendota: Awaited<ReturnType<typeof syncOpenDota>> | { error: string } ;
-  let stratz: Awaited<ReturnType<typeof syncStratz>> | { error: string };
+  // Isolate sources: OpenDota failure must NOT abort STRATZ or wipe Turso.
+  // Both syncs are upsert-only (no DELETE/TRUNCATE).
+  let opendota: Awaited<ReturnType<typeof syncOpenDota>> | { error: string; skipped: true };
+  let stratz: Awaited<ReturnType<typeof syncStratz>> | { error: string; skipped: true };
   try {
     opendota = await syncOpenDota({ full });
   } catch (e) {
-    opendota = { error: e instanceof Error ? e.message : String(e) };
+    opendota = {
+      skipped: true,
+      error: e instanceof Error ? e.message : String(e),
+    };
   }
   try {
     stratz = await syncStratz({ full });
   } catch (e) {
-    stratz = { error: e instanceof Error ? e.message : String(e) };
+    stratz = {
+      skipped: true,
+      error: e instanceof Error ? e.message : String(e),
+    };
   }
 
   const afterCount = await countMatches();
