@@ -1,12 +1,5 @@
 import { Dashboard } from "@/components/Dashboard";
-import { ACCOUNT_ID } from "@/lib/opendota";
-import {
-  getPlayerMeta,
-  listRecentCompactMatches,
-} from "@/lib/db/matches";
-import { getStaticHeroes } from "@/lib/heroNamesCn";
-import { hasTursoEnv } from "@/lib/turso";
-import type { CompactMatch } from "@/lib/stats";
+import { loadBootstrapWithFallback } from "@/lib/matchRead";
 import type { OpenDotaHero, OpenDotaPlayer } from "@/lib/types";
 
 export const revalidate = 60;
@@ -42,52 +35,6 @@ function slimHeroes(heroes: OpenDotaHero[]): OpenDotaHero[] {
   }));
 }
 
-function playerFromMeta(
-  meta: Awaited<ReturnType<typeof getPlayerMeta>>,
-): OpenDotaPlayer {
-  const name = meta?.personaname ?? "Zhou";
-  const avatar = meta?.avatar ?? "";
-  return {
-    profile: {
-      account_id: ACCOUNT_ID,
-      personaname: name,
-      avatar,
-      avatarmedium: avatar,
-      avatarfull: avatar,
-      profileurl: "",
-    },
-    rank_tier: meta?.rank_tier ?? null,
-    leaderboard_rank: meta?.leaderboard_rank ?? null,
-  };
-}
-
-async function loadBootstrap(): Promise<{
-  player: OpenDotaPlayer;
-  matches: CompactMatch[];
-  heroes: OpenDotaHero[];
-  fetchedAt: string;
-}> {
-  if (!hasTursoEnv()) {
-    throw new Error(
-      "缺少 Turso 配置：请设置 TURSO_DATABASE_URL 与 TURSO_AUTH_TOKEN",
-    );
-  }
-
-  // Heroes from checked-in static map — no OpenDota on critical path.
-  const [meta, matches] = await Promise.all([
-    getPlayerMeta(ACCOUNT_ID),
-    listRecentCompactMatches(200),
-  ]);
-  const heroes = getStaticHeroes();
-
-  return {
-    player: playerFromMeta(meta),
-    matches,
-    heroes,
-    fetchedAt: meta?.updated_at ?? new Date().toISOString(),
-  };
-}
-
 export default async function HomePage({
   searchParams,
 }: {
@@ -96,10 +43,11 @@ export default async function HomePage({
   const sp = await searchParams;
 
   let error: string | null = null;
-  let payload: Awaited<ReturnType<typeof loadBootstrap>> | null = null;
+  let payload: Awaited<ReturnType<typeof loadBootstrapWithFallback>> | null =
+    null;
 
   try {
-    payload = await loadBootstrap();
+    payload = await loadBootstrapWithFallback();
   } catch (e) {
     error = e instanceof Error ? e.message : "对局数据请求失败";
   }
