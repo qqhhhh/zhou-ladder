@@ -72,18 +72,16 @@ function IconScore() {
   return (
     <svg viewBox="0 0 24 24" className={iconCls} fill="none" aria-hidden>
       <path
-        d="M12 3v3M12 18v3M3 12h3M18 12h3"
+        d="M8 4v16M16 4v16"
         stroke="currentColor"
         strokeWidth="1.75"
         strokeLinecap="round"
       />
-      <circle cx="12" cy="12" r="6.25" stroke="currentColor" strokeWidth="1.75" />
       <path
-        d="M10.2 12.8 11.4 14l2.6-3.2"
+        d="M8 8h8M8 12h8M8 16h8"
         stroke="currentColor"
         strokeWidth="1.75"
         strokeLinecap="round"
-        strokeLinejoin="round"
       />
     </svg>
   );
