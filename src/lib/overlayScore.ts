@@ -57,3 +57,13 @@ export function trustedLadderScore(
   const hit = overlay.heroes.some((h) => namesMatch(official, h.name));
   return hit ? overlay.total : null;
 }
+
+/** Lookup signed overlay delta for an official CN hero name. */
+export function overlayDeltaForHero(
+  officialCn: string,
+  overlay: OverlayScorePayload | null | undefined,
+): number | null {
+  if (!overlay || overlay.empty || !overlay.heroes.length) return null;
+  const hit = overlay.heroes.find((h) => namesMatch(officialCn, h.name));
+  return hit ? hit.value : null;
+}
