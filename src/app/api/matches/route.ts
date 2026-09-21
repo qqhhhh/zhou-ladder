@@ -1,6 +1,5 @@
-import { getCachedCompactMatches } from "@/lib/matchCache";
+import { getMatchesWithFallback } from "@/lib/matchRead";
 import { toSlimMatch } from "@/lib/slimMatch";
-import { hasTursoEnv } from "@/lib/turso";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -19,7 +18,7 @@ function parseUnixOrIso(raw: string | null): number | null {
 }
 
 /**
- * Range-scoped compact matches from Turso.
+ * Range-scoped compact matches: Turso first, OpenDota fallback.
  *
  * Query params:
  * - days=30 (default) — last N calendar days; days=all for full history
@@ -28,16 +27,6 @@ function parseUnixOrIso(raw: string | null): number | null {
  */
 export async function GET(request: Request) {
   try {
-    if (!hasTursoEnv()) {
-      return Response.json(
-        {
-          error:
-            "缺少 Turso 配置：请设置 TURSO_DATABASE_URL 与 TURSO_AUTH_TOKEN",
-        },
-        { status: 503 },
-      );
-    }
-
     const url = new URL(request.url);
     const daysRaw = url.searchParams.get("days");
     const from = parseUnixOrIso(url.searchParams.get("from"));
@@ -49,7 +38,7 @@ export async function GET(request: Request) {
     let days: number | "all" = 30;
     if (from != null || to != null) {
       // bounds mode — ignore days default
-      days = "all"; // placeholder; from/to take precedence in cache helper
+      days = "all"; // placeholder; from/to take precedence in reader
     } else if (daysRaw == null || daysRaw === "") {
       days = 30;
     } else if (daysRaw === "all" || daysRaw === "*") {
@@ -65,8 +54,8 @@ export async function GET(request: Request) {
 
     const bundle =
       from != null || to != null
-        ? await getCachedCompactMatches({ from, to })
-        : await getCachedCompactMatches({ days });
+        ? await getMatchesWithFallback({ from, to })
+        : await getMatchesWithFallback({ days });
 
     const body = slim
       ? {
@@ -76,6 +65,7 @@ export async function GET(request: Request) {
           count: bundle.count,
           since: bundle.since,
           until: bundle.until,
+          source: bundle.source,
           days: from != null || to != null ? null : days === "all" ? "all" : days,
         }
       : {
@@ -84,6 +74,7 @@ export async function GET(request: Request) {
           count: bundle.count,
           since: bundle.since,
           until: bundle.until,
+          source: bundle.source,
           days: from != null || to != null ? null : days === "all" ? "all" : days,
         };
 
