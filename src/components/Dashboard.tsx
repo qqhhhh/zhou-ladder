@@ -11,6 +11,8 @@ import { SummaryCards } from "@/components/SummaryCards";
 import { WinChart } from "@/components/WinChart";
 import type { OpenDotaHero, OpenDotaPlayer } from "@/lib/types";
 import type { CompactMatch } from "@/lib/stats";
+import type { OverlayScorePayload } from "@/lib/parseOverlayScore";
+import { trustedLadderScore } from "@/lib/overlayScore";
 import {
   buildChartPointsFromCompact,
   buildHeroStatsFromCompact,
@@ -73,6 +75,8 @@ export function Dashboard({
   const basePath = pathname.startsWith("/zhou") ? "/zhou" : "/";
 
   const [matches, setMatches] = useState(bootstrapMatches);
+  const [overlayScore, setOverlayScore] =
+    useState<OverlayScorePayload | null>(null);
   const [fetchedAt, setFetchedAt] = useState(bootstrapFetchedAt);
   const [historyReady, setHistoryReady] = useState(false);
   const [historyError, setHistoryError] = useState<string | null>(null);
@@ -166,6 +170,28 @@ export function Dashboard({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- mount once for initial range
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/overlay-score", { cache: "no-store" });
+        if (!res.ok) return;
+        const body = (await res.json()) as OverlayScorePayload & {
+          empty?: boolean;
+        };
+        if (cancelled) return;
+        if (body.empty) setOverlayScore(null);
+        else setOverlayScore(body);
+      } catch {
+        // optional
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+
   const filtered = useMemo(
     () =>
       filterCompactByRange(
@@ -208,6 +234,8 @@ export function Dashboard({
           Math.ceil((Date.now() / 1000 - loadedMinStart) / 86400),
         );
 
+  const ladderScore = trustedLadderScore(filtered, overlayScore, heroes);
+
   const historyHint = historyError
     ? `近况模式 · ${historyError}`
     : historyLoading
@@ -229,7 +257,11 @@ export function Dashboard({
           historyHint={historyHint}
         />
 
-        <SummaryCards summary={summary} rangeLabel={range.label} />
+        <SummaryCards
+          summary={summary}
+          rangeLabel={range.label}
+          ladderScore={ladderScore}
+        />
 
         <WinChart
           points={chartDisplay}

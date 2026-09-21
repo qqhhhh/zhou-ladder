@@ -67,6 +67,28 @@ function IconWinrate() {
   );
 }
 
+
+function IconScore() {
+  return (
+    <svg viewBox="0 0 24 24" className={iconCls} fill="none" aria-hidden>
+      <path
+        d="M12 3v3M12 18v3M3 12h3M18 12h3"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+      />
+      <circle cx="12" cy="12" r="6.25" stroke="currentColor" strokeWidth="1.75" />
+      <path
+        d="M10.2 12.8 11.4 14l2.6-3.2"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 function IconKda() {
   return (
     <svg viewBox="0 0 24 24" className={iconCls} fill="none" aria-hidden>
@@ -90,9 +112,12 @@ function IconKda() {
 export function SummaryCards({
   summary,
   rangeLabel,
+  ladderScore = null,
 }: {
   summary: SummaryStats;
   rangeLabel: string;
+  /** Trusted overlay total; null = hide card */
+  ladderScore?: number | null;
 }) {
   const items = [
     {
@@ -156,12 +181,24 @@ export function SummaryCards({
       icon: <IconKda />,
       tone: "text-navy-700",
     },
+    ...(ladderScore != null
+      ? [
+          {
+            key: "ladder",
+            label: "当前天梯分数",
+            value: String(ladderScore),
+            hint: "近期英雄有分·可信",
+            icon: <IconScore />,
+            tone: "text-navy-700",
+          },
+        ]
+      : []),
   ];
 
   return (
     <section
       aria-label="关键指标"
-      className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-5"
+      className={`grid grid-cols-2 gap-3 md:gap-5 ${ladderScore != null ? "md:grid-cols-5" : "md:grid-cols-4"}`}
     >
       {items.map((item) => (
         <div
