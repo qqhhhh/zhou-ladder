@@ -75,6 +75,8 @@ export function Dashboard({
   const basePath = pathname.startsWith("/zhou") ? "/zhou" : "/";
 
   const [matches, setMatches] = useState(bootstrapMatches);
+  const [overlayScore, setOverlayScore] =
+    useState<OverlayScorePayload | null>(null);
   const [fetchedAt, setFetchedAt] = useState(bootstrapFetchedAt);
   const [historyReady, setHistoryReady] = useState(false);
   const [historyError, setHistoryError] = useState<string | null>(null);
@@ -168,25 +170,27 @@ export function Dashboard({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- mount once for initial range
   }, []);
 
-  
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
         const res = await fetch("/api/overlay-score", { cache: "no-store" });
         if (!res.ok) return;
-        const body = (await res.json()) as OverlayScorePayload & { empty?: boolean };
+        const body = (await res.json()) as OverlayScorePayload & {
+          empty?: boolean;
+        };
         if (cancelled) return;
         if (body.empty) setOverlayScore(null);
         else setOverlayScore(body);
       } catch {
-        // overlay score is optional
+        // optional
       }
     })();
     return () => {
       cancelled = true;
     };
   }, []);
+
 
   const filtered = useMemo(
     () =>
@@ -253,7 +257,11 @@ export function Dashboard({
           historyHint={historyHint}
         />
 
-        <SummaryCards summary={summary} rangeLabel={range.label} ladderScore={ladderScore} />
+        <SummaryCards
+          summary={summary}
+          rangeLabel={range.label}
+          ladderScore={ladderScore}
+        />
 
         <WinChart
           points={chartDisplay}
