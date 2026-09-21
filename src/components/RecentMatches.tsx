@@ -1,9 +1,21 @@
 "use client";
 
 import type { ChartPoint } from "@/lib/types";
+import type { OverlayScorePayload } from "@/lib/parseOverlayScore";
+import { overlayDeltaForHero } from "@/lib/overlayScore";
 import { WaveLabel } from "@/components/WaveLabel";
 
-export function RecentMatches({ points }: { points: ChartPoint[] }) {
+function formatDelta(n: number): string {
+  return n > 0 ? `+${n}` : String(n);
+}
+
+export function RecentMatches({
+  points,
+  overlayScore = null,
+}: {
+  points: ChartPoint[];
+  overlayScore?: OverlayScorePayload | null;
+}) {
   const recent = [...points].reverse().slice(0, 8);
 
   return (
@@ -24,6 +36,9 @@ export function RecentMatches({ points }: { points: ChartPoint[] }) {
         ) : (
           recent.map((p) => {
             const win = p.result === "胜";
+            const delta = overlayDeltaForHero(p.hero, overlayScore);
+            const deltaPositive = delta != null && delta > 0;
+            const deltaNegative = delta != null && delta < 0;
             return (
               <li
                 key={`${p.index}-${p.date}`}
@@ -46,6 +61,19 @@ export function RecentMatches({ points }: { points: ChartPoint[] }) {
                     <WaveLabel text={`#${p.index} · ${p.dateLabel}`} />
                   </p>
                 </div>
+                {delta != null ? (
+                  <span
+                    className={`shrink-0 text-sm font-bold tabular-nums ${
+                      deltaPositive
+                        ? "text-[#05cd99]"
+                        : deltaNegative
+                          ? "text-[#ee5d50]"
+                          : "text-ink-muted"
+                    }`}
+                  >
+                    <WaveLabel text={formatDelta(delta)} />
+                  </span>
+                ) : null}
               </li>
             );
           })
