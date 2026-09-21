@@ -8,14 +8,17 @@ export const maxDuration = 60;
 
 function authorize(req: Request): boolean {
   const secret = process.env.CRON_SECRET;
-  // If unset, allow in development only
-  if (!secret) {
-    return process.env.NODE_ENV !== "production";
-  }
   const header = req.headers.get("authorization") ?? "";
   const bearer = header.startsWith("Bearer ") ? header.slice(7) : "";
-  // Vercel Cron sends Authorization: Bearer <CRON_SECRET>
-  return bearer === secret;
+  // Vercel Cron sends Authorization: Bearer <CRON_SECRET> when set
+  if (secret) {
+    return bearer === secret;
+  }
+  // Hobby deploy without CRON_SECRET: trust platform cron header only
+  if (req.headers.get("x-vercel-cron") === "1") {
+    return true;
+  }
+  return process.env.NODE_ENV !== "production";
 }
 
 async function runSync(req: Request) {

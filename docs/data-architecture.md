@@ -67,3 +67,6 @@ curl -X POST "https://<host>/api/sync?full=1" \
 - `src/lib/sync/opendotaSync.ts` / `stratzSync.ts` — 上游同步
 - `src/app/api/sync/route.ts` — Cron / 手动触发
 - `scripts/migrate-enrich.sql` — 线上 ALTER
+
+## Sync schedule
+Vercel Hobby only allows cron once per day; `vercel.json` uses `0 16 * * *` (00:00 Asia/Shanghai). For nearer-real-time, run `npx tsx scripts/sync-now.ts` or an external/hourly box routine.
