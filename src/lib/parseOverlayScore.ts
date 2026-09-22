@@ -15,11 +15,24 @@ export type OverlayHeroEntry = {
   value: number;
 };
 
+export type OverlayMatchDelta = {
+  match_id: number;
+  name: string;
+  value: number;
+  /** Ladder total after this match, when known. */
+  total_after?: number | null;
+  when?: string;
+};
+
 export type OverlayScorePayload = {
   total: number | null;
   heroes: OverlayHeroEntry[];
   rawLines: string[];
   empty: boolean;
+  /** Per-match deltas locked from overlay/yuba matching. */
+  matchDeltas?: OverlayMatchDelta[];
+  /** Free-form ledger snapshot for audit (optional). */
+  ledger?: unknown;
   /** ISO time when this payload was ingested (optional). */
   updatedAt?: string;
 };
