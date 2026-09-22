@@ -9,6 +9,7 @@ export const runtime = "nodejs";
 export const maxDuration = 30;
 
 const STATE_KEY = "overlay_score";
+const LEDGER_KEY = "overlay_ledger";
 
 function authorize(req: Request): boolean {
   const secret = process.env.CRON_SECRET;
@@ -34,7 +35,7 @@ export async function GET() {
   try {
     const payload = await readStored();
     if (!payload || payload.empty) {
-      return Response.json({ empty: true, total: null, heroes: [] });
+      return Response.json({ empty: true, total: null, heroes: [], matchDeltas: [] });
     }
     return Response.json(payload, {
       headers: {
@@ -49,7 +50,7 @@ export async function GET() {
 
 /**
  * Ingest overlay text or JSON.
- * Body: { text: "7635\\n1、风行-26\\n..." } or full OverlayScorePayload
+ * Body: { text } | { total, heroes, matchDeltas?, ledger? } | { clear: true }
  * Auth: Bearer CRON_SECRET
  */
 export async function POST(req: Request) {
@@ -65,12 +66,16 @@ export async function POST(req: Request) {
       clear?: boolean;
       total?: number | null;
       heroes?: OverlayScorePayload["heroes"];
+      matchDeltas?: OverlayScorePayload["matchDeltas"];
+      ledger?: unknown;
+      rawLines?: string[];
     };
 
     if (body.clear) {
       const empty: OverlayScorePayload = {
         total: null,
         heroes: [],
+        matchDeltas: [],
         rawLines: [],
         empty: true,
         updatedAt: new Date().toISOString(),
@@ -82,19 +87,33 @@ export async function POST(req: Request) {
     let payload: OverlayScorePayload;
     if (typeof body.text === "string") {
       payload = parseOverlayScore(body.text);
-    } else if (Array.isArray(body.heroes) || body.total != null) {
+      if (body.matchDeltas) payload.matchDeltas = body.matchDeltas;
+      if (body.ledger !== undefined) payload.ledger = body.ledger;
+    } else if (
+      Array.isArray(body.heroes) ||
+      body.total != null ||
+      Array.isArray(body.matchDeltas)
+    ) {
       payload = {
         total: body.total ?? null,
         heroes: body.heroes ?? [],
-        rawLines: [],
-        empty: (body.total == null || Number.isNaN(body.total)) && !(body.heroes?.length),
+        matchDeltas: body.matchDeltas ?? [],
+        rawLines: body.rawLines ?? [],
+        empty:
+          (body.total == null || Number.isNaN(body.total)) &&
+          !(body.heroes?.length) &&
+          !(body.matchDeltas?.length),
       };
+      if (body.ledger !== undefined) payload.ledger = body.ledger;
     } else {
-      return Response.json({ error: "需要 text 或 total/heroes" }, { status: 400 });
+      return Response.json({ error: "需要 text 或 total/heroes/matchDeltas" }, { status: 400 });
     }
 
     payload = { ...payload, updatedAt: new Date().toISOString() };
     await setSyncState(STATE_KEY, JSON.stringify(payload));
+    if (body.ledger !== undefined) {
+      await setSyncState(LEDGER_KEY, JSON.stringify(body.ledger));
+    }
     return Response.json(payload);
   } catch (e) {
     const message = e instanceof Error ? e.message : "写入失败";
