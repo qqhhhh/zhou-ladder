@@ -74,6 +74,7 @@ export type ChartPoint = {
   rollingWinrate: number | null;
   result: "胜" | "负";
   hero: string;
+  match_id?: number;
 };
 
 export type LadderPayload = {

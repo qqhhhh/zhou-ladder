@@ -67,3 +67,17 @@ export function overlayDeltaForHero(
   const hit = overlay.heroes.find((h) => namesMatch(officialCn, h.name));
   return hit ? hit.value : null;
 }
+
+/** Prefer exact match_id delta; fall back to hero-name overlay list. */
+export function overlayDeltaForMatch(
+  matchId: number | undefined,
+  officialCn: string,
+  overlay: OverlayScorePayload | null | undefined,
+): number | null {
+  if (!overlay || overlay.empty) return null;
+  if (matchId != null && overlay.matchDeltas?.length) {
+    const hit = overlay.matchDeltas.find((d) => d.match_id === matchId);
+    if (hit) return hit.value;
+  }
+  return overlayDeltaForHero(officialCn, overlay);
+}

@@ -2,7 +2,7 @@
 
 import type { ChartPoint } from "@/lib/types";
 import type { OverlayScorePayload } from "@/lib/parseOverlayScore";
-import { overlayDeltaForHero } from "@/lib/overlayScore";
+import { overlayDeltaForMatch } from "@/lib/overlayScore";
 import { WaveLabel } from "@/components/WaveLabel";
 
 function formatDelta(n: number): string {
@@ -36,7 +36,7 @@ export function RecentMatches({
         ) : (
           recent.map((p) => {
             const win = p.result === "胜";
-            const delta = overlayDeltaForHero(p.hero, overlayScore);
+            const delta = overlayDeltaForMatch(p.match_id, p.hero, overlayScore);
             const deltaPositive = delta != null && delta > 0;
             const deltaNegative = delta != null && delta < 0;
             return (

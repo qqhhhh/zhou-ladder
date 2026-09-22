@@ -162,6 +162,7 @@ export function buildChartPoints(
       rollingWinrate: rolling,
       result: win ? "胜" : "负",
       hero: heroNameCn(m.hero_id, hero?.name, hero?.localized_name),
+      match_id: m.match_id,
     });
   });
 
@@ -367,6 +368,7 @@ export function buildChartPointsFromCompact(
       rollingWinrate: rolling,
       result: m.win ? "胜" : "负",
       hero: heroNameCn(m.hero_id, hero?.name, hero?.localized_name),
+      match_id: m.match_id,
     });
   });
 
