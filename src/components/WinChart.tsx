@@ -1,7 +1,7 @@
 "use client";
 
 import { useLayoutEffect, useRef, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, MotionConfig } from "framer-motion";
 import {
   Area,
   CartesianGrid,
@@ -196,7 +196,7 @@ export function WinChart({
   summary,
   compact = false,
   layoutWidth,
-  widthAnimating = false,
+  widthAnimating: _widthAnimating = false,
   enterKey = "",
 }: {
   points: ChartPoint[];
@@ -362,46 +362,31 @@ export function WinChart({
         className="mt-2 min-h-[220px] w-full max-w-full flex-1 overflow-hidden"
       >
         {/*
-          Desktop: always paint with explicit px size so SVG exists in the same
-          frame as the enter fade (ResponsiveContainer paints 1–2 frames late,
-          which made CSS/framer fade finish on an empty box → "no animation").
-          Remount on enterKey/data; skip remount while divider width tweens.
+          Keep ONE motion wrapper for range switches (never unmount it while the
+          divider tweens — that swap was painting the new SVG at opacity 1).
+          Desktop: explicit px size so SVG exists in the same frame as the fade.
+          reducedMotion=never: OS "reduce motion" was zeroing this enter.
         */}
-        {liveWidth ? (
-          widthAnimating ? (
-            <div className="h-full min-h-[220px] w-full">
-              <PlotBody points={points} width={chartW} height={boxH} />
-            </div>
-          ) : (
-            <motion.div
-              key={plotKey}
-              className="h-full min-h-[220px] w-full"
-              initial={{ opacity: 0, y: 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{
-                duration: 0.55,
-                ease: [0.05, 0.7, 0.1, 1],
-              }}
-            >
-              <PlotBody points={points} width={chartW} height={boxH} />
-            </motion.div>
-          )
-        ) : (
+        <MotionConfig reducedMotion="never">
           <motion.div
             key={plotKey}
             className="h-full min-h-[220px] w-full"
-            initial={{ opacity: 0, y: 14 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{
-              duration: 0.55,
+              duration: 0.65,
               ease: [0.05, 0.7, 0.1, 1],
             }}
           >
-            <ResponsiveContainer width="100%" height="100%" debounce={0}>
-              <PlotBody points={points} />
-            </ResponsiveContainer>
+            {liveWidth ? (
+              <PlotBody points={points} width={chartW} height={boxH} />
+            ) : (
+              <ResponsiveContainer width="100%" height="100%" debounce={0}>
+                <PlotBody points={points} />
+              </ResponsiveContainer>
+            )}
           </motion.div>
-        )}
+        </MotionConfig>
       </div>
 
       <div

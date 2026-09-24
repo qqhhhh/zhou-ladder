@@ -405,8 +405,3 @@ footer {
   animation: chart-data-enter 0.5s cubic-bezier(0.05, 0.7, 0.1, 1) both;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .chart-data-enter {
-    animation: none;
-  }
-}
