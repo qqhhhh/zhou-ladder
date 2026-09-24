@@ -11,6 +11,7 @@ Next.js App Router + TypeScript + Tailwind 的 Dota 2 天梯**数据统计看板
 - 走势图：累计净胜 + 滚动胜率（**不是真实 MMR 曲线**），带轻量折线入场动画
 - 英雄表：官方中文名、上分(—)、场次、W-L、净胜、场均 K/D/A、KDA、胜率；粘性表头 + 行悬停
 - 时间范围筛选（默认近 40 天）
+- **真实天梯分（overlay）**：用户截图 / 鱼吧分表 → 解析写入，见 [`docs/overlay-playbook.md`](docs/overlay-playbook.md)
 - 服务端拉取，`revalidate` ≈ 180s；OpenDota 请求带 `User-Agent`
 
 ## 本地运行

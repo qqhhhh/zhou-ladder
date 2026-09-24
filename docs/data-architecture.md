@@ -50,3 +50,7 @@ Vercel Hobby 每天只能跑一次 Cron；`vercel.json` 使用 `0 16 * * *`（As
 - `src/lib/turso.ts` / `src/lib/db/matches.ts` / `src/lib/matchCache.ts`
 - `src/lib/sync/opendotaSync.ts` / `stratzSync.ts`
 - `src/app/api/sync/route.ts` / `src/app/api/matches/route.ts`
+
+## Overlay 天梯分
+
+直播 / 鱼吧黄字分表的截图解析、锚点匹配与写入流程见 [`overlay-playbook.md`](./overlay-playbook.md)。展示用 payload 存在 Turso `sync_state.overlay_score`（及可选 `overlay_ledger`），**不是** OpenDota MMR。
