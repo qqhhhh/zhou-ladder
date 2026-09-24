@@ -13,11 +13,14 @@ export function RecentMatches({
   points,
   overlayScore = null,
   limit = 8,
+  compact = false,
 }: {
   points: ChartPoint[];
   overlayScore?: OverlayScorePayload | null;
-  /** How many recent rows to show (hover-expand can raise this). */
+  /** How many recent rows to show. */
   limit?: number;
+  /** Shrunk pane: only 胜负 + 英雄 + 分数. */
+  compact?: boolean;
 }) {
   const recent = [...points].reverse().slice(0, Math.max(1, limit));
 
@@ -45,7 +48,7 @@ export function RecentMatches({
             return (
               <li
                 key={`${p.index}-${p.date}`}
-                className="recent-row flex items-center gap-3 px-5 py-1.5"
+                className={`recent-row flex items-center gap-3 px-5 ${compact ? "py-2" : "py-1.5"}`}
               >
                 <span
                   className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-[11px] font-bold ${
@@ -60,9 +63,11 @@ export function RecentMatches({
                   <p className="truncate text-sm font-bold text-navy-700">
                     <WaveLabel text={p.hero} />
                   </p>
-                  <p className="truncate text-[11px] text-ink-muted">
-                    <WaveLabel text={`#${p.index} · ${p.dateLabel}`} />
-                  </p>
+                  {!compact ? (
+                    <p className="truncate text-[11px] text-ink-muted">
+                      <WaveLabel text={`#${p.index} · ${p.dateLabel}`} />
+                    </p>
+                  ) : null}
                 </div>
                 {delta != null ? (
                   <span

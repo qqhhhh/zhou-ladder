@@ -91,6 +91,7 @@ export function TrendRecentSplit({
             points={chartPoints}
             overlayScore={overlayScore}
             limit={8}
+            compact={focus === "chart"}
           />
         </div>
       </div>
