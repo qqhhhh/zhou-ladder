@@ -24,7 +24,7 @@ export function TrendRecentSplit({
   summary: SummaryStats;
   overlayScore: OverlayScorePayload | null;
 }) {
-  const [focus, setFocus] = useState<Focus>(null);
+  const [focus, setFocus] = useState<Focus>("recent");
   const [isDesktop, setIsDesktop] = useState(false);
   const shellRef = useRef<HTMLDivElement>(null);
   const [shellW, setShellW] = useState(0);
@@ -33,7 +33,7 @@ export function TrendRecentSplit({
     const mq = window.matchMedia(`(min-width: ${MD_MIN}px)`);
     const apply = () => {
       setIsDesktop(mq.matches);
-      if (!mq.matches) setFocus(null);
+      if (!mq.matches) setFocus("recent");
     };
     apply();
     mq.addEventListener("change", apply);
@@ -74,11 +74,6 @@ export function TrendRecentSplit({
     if (!isDesktop) return;
     setFocus(pane);
   };
-  const onLeave = () => {
-    if (!isDesktop) return;
-    setFocus(null);
-  };
-
   return (
     <div
       ref={shellRef}
@@ -97,7 +92,6 @@ export function TrendRecentSplit({
           ...paneTransition,
         }}
         onMouseEnter={() => onEnter("chart")}
-        onMouseLeave={onLeave}
       >
         <div className="h-full min-h-0 md:[&_.panel]:h-full md:[&_.panel]:rounded-none md:[&_.panel]:border-0 md:[&_.panel]:bg-transparent md:[&_.panel]:shadow-none">
           <WinChart
@@ -121,7 +115,6 @@ export function TrendRecentSplit({
           ...paneTransition,
         }}
         onMouseEnter={() => onEnter("recent")}
-        onMouseLeave={onLeave}
       >
         <div className="h-full min-h-0 md:[&_.panel]:h-full md:[&_.panel]:rounded-none md:[&_.panel]:border-0 md:[&_.panel]:bg-transparent md:[&_.panel]:shadow-none">
           <RecentMatches
