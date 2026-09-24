@@ -7,6 +7,8 @@ export const maxDuration = 60;
 
 type SearchParams = Promise<{
   days?: string;
+  from?: string;
+  to?: string;
 }>;
 
 function slimPlayer(player: OpenDotaPlayer): OpenDotaPlayer {
@@ -71,6 +73,8 @@ export default async function HomePage({
       heroes={slimHeroes(payload.heroes)}
       fetchedAt={payload.fetchedAt}
       initialDays={sp.days}
+      initialFrom={sp.from}
+      initialTo={sp.to}
     />
   );
 }

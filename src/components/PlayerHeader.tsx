@@ -23,12 +23,20 @@ export function PlayerHeader({
   rangeLabel,
   onRangeChange,
   historyHint,
+  minDate,
+  maxDate,
+  customFrom,
+  customTo,
 }: {
   player: OpenDotaPlayer;
   rangeKey: string;
   rangeLabel: string;
   onRangeChange: (range: RangeState) => void;
   historyHint?: string;
+  minDate?: string;
+  maxDate?: string;
+  customFrom?: string;
+  customTo?: string;
 }) {
   const rank = formatRankTier(player.rank_tier, player.leaderboard_rank);
 
@@ -76,9 +84,13 @@ export function PlayerHeader({
           </div>
         </div>
 
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-3">
           <DateRangeFilter
             currentDays={rangeKey}
+            minDate={minDate}
+            maxDate={maxDate}
+            customFrom={customFrom}
+            customTo={customTo}
             onRangeChange={onRangeChange}
           />
           <div className="flex shrink-0 items-center gap-2">

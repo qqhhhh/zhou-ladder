@@ -18,6 +18,7 @@ import {
   buildSummaryFromCompact,
   downsampleChartPoints,
   filterCompactByRange,
+  shanghaiYmd,
 } from "@/lib/stats";
 import { parseRange, replaceRangeQuery, type RangeState } from "@/lib/range";
 import { fromSlimMatch, type SlimMatch } from "@/lib/slimMatch";
@@ -63,12 +64,16 @@ export function Dashboard({
   heroes,
   fetchedAt: bootstrapFetchedAt,
   initialDays,
+  initialFrom,
+  initialTo,
 }: {
   player: OpenDotaPlayer;
   matches: CompactMatch[];
   heroes: OpenDotaHero[];
   fetchedAt: string;
   initialDays?: string;
+  initialFrom?: string;
+  initialTo?: string;
 }) {
   const pathname = usePathname();
   const basePath = pathname.startsWith("/zhou") ? "/zhou" : "/";
@@ -90,7 +95,7 @@ export function Dashboard({
   const loadedAllRef = useRef(false);
 
   const [range, setRange] = useState<RangeState>(() =>
-    parseRange({ days: initialDays }),
+    parseRange({ days: initialDays, from: initialFrom, to: initialTo }),
   );
   const fetchGen = useRef(0);
 
@@ -234,6 +239,30 @@ export function Dashboard({
 
   const ladderScore = trustedLadderScore(filtered, overlayScore, heroes);
 
+  const dateBounds = useMemo(() => {
+    const nowSec = Math.floor(Date.now() / 1000);
+    const maxDate = shanghaiYmd(nowSec);
+    if (matches.length === 0) {
+      return {
+        minDate: shanghaiYmd(nowSec - 10 * 365 * 86400),
+        maxDate,
+      };
+    }
+    const oldest = Math.min(...matches.map((m) => m.start_time));
+    return { minDate: shanghaiYmd(oldest), maxDate };
+  }, [matches]);
+
+  const customFromYmd =
+    range.key === "custom"
+      ? (range.fromYmd ??
+        (range.customFrom != null ? shanghaiYmd(range.customFrom) : undefined))
+      : undefined;
+  const customToYmd =
+    range.key === "custom"
+      ? (range.toYmd ??
+        (range.customTo != null ? shanghaiYmd(range.customTo) : undefined))
+      : undefined;
+
   const historyHint = historyError
     ? `近况模式 · ${historyError}`
     : historyLoading
@@ -253,6 +282,10 @@ export function Dashboard({
           rangeLabel={range.label}
           onRangeChange={applyRange}
           historyHint={historyHint}
+          minDate={dateBounds.minDate}
+          maxDate={dateBounds.maxDate}
+          customFrom={customFromYmd}
+          customTo={customToYmd}
         />
 
         <SummaryCards
