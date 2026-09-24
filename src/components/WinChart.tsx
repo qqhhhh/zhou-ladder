@@ -96,7 +96,7 @@ type PlotBodyProps = {
   height?: number;
 };
 
-function PlotBody({ points, width, height }: Omit<PlotBodyProps, "animate">) {
+function PlotBody({ points, width, height }: PlotBodyProps) {
   const lastIndex = points.length - 1;
   return (
     <ComposedChart
@@ -195,7 +195,7 @@ export function WinChart({
   summary,
   compact = false,
   layoutWidth,
-  widthAnimating: _widthAnimating = false,
+  widthAnimating = false,
   enterKey = "",
 }: {
   points: ChartPoint[];
@@ -204,9 +204,9 @@ export function WinChart({
   compact?: boolean;
   /** Chart pane width (px); updates every divider animation frame. */
   layoutWidth?: number;
-  /** True only while hover split width is tweening. */
+  /** True only while hover split width is tweening — mute enter then. */
   widthAnimating?: boolean;
-  /** Date-range key — remount plot so CSS enter actually runs. */
+  /** Date-range key — light CSS enter on switch (not Recharts stroke). */
   enterKey?: string;
 }) {
   const boxRef = useRef<HTMLDivElement>(null);
@@ -217,15 +217,15 @@ export function WinChart({
   const chartW = liveWidth
     ? Math.max(1, Math.round(layoutWidth - PANEL_LEFT_PAD))
     : 0;
-  const plotKey = `${enterKey}:${points.length}:${points[points.length - 1]?.match_id ?? points[points.length - 1]?.date ?? ""}:${points[points.length - 1]?.cumulativeNetWins ?? 0}`;
 
+  // Light enter only when date range changes; never during divider stretch.
   useLayoutEffect(() => {
     const el = plotEnterRef.current;
-    if (!el) return;
+    if (!el || widthAnimating) return;
     el.classList.remove("chart-data-enter");
     void el.offsetWidth;
     el.classList.add("chart-data-enter");
-  }, [plotKey]);
+  }, [enterKey, widthAnimating]);
 
   useLayoutEffect(() => {
     const el = boxRef.current;
