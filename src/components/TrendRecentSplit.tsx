@@ -27,8 +27,7 @@ export function TrendRecentSplit({
   const chartFr = focus === "chart" ? 2.4 : focus === "recent" ? 1 : 1;
 
   const gridStyle: CSSProperties = {
-    ["--recent-fr" as string]: String(recentFr),
-    ["--chart-fr" as string]: String(chartFr),
+    ["--split-cols" as string]: `minmax(0, ${recentFr}fr) minmax(0, ${chartFr}fr)`,
   };
 
   return (
@@ -39,10 +38,8 @@ export function TrendRecentSplit({
       <style>{`
         @media (min-width: 768px) {
           .trend-recent-split {
-            grid-template-columns:
-              minmax(240px, calc(var(--recent-fr) * 1fr))
-              minmax(200px, calc(var(--chart-fr) * 1fr));
-            transition: grid-template-columns 280ms cubic-bezier(0.22, 1, 0.36, 1);
+            grid-template-columns: var(--split-cols);
+            transition: grid-template-columns 300ms cubic-bezier(0.22, 1, 0.36, 1);
           }
         }
       `}</style>
