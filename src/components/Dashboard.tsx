@@ -7,7 +7,8 @@ import { HeroTable } from "@/components/HeroTable";
 import { PlayerHeader } from "@/components/PlayerHeader";
 import { SummaryCards } from "@/components/SummaryCards";
 import { formatRankTier } from "@/lib/opendota";
-import { TrendRecentSplit } from "@/components/TrendRecentSplit";
+import { WinChart } from "@/components/WinChart";
+import { RecentMatches } from "@/components/RecentMatches";
 import { DateRangeFilter } from "@/components/DateRangeFilter";
 import type { OpenDotaHero, OpenDotaPlayer } from "@/lib/types";
 import type { CompactMatch } from "@/lib/stats";
@@ -263,12 +264,10 @@ export function Dashboard({
           rankLabel={formatRankTier(player.rank_tier, player.leaderboard_rank)}
         />
 
-        <TrendRecentSplit
-          chartPoints={chartPoints}
-          chartDisplay={chartDisplay}
+        <WinChart
+          points={chartDisplay}
           summary={summary}
-          overlayScore={overlayScore}
-          rangeKey={range.key}
+          rangeLabel={range.label}
         />
 
         <div className="panel flex flex-wrap items-center justify-between gap-3 px-4 py-3 md:px-5">
@@ -282,6 +281,8 @@ export function Dashboard({
         </div>
 
         <HeroTable rows={heroRows} />
+
+        <RecentMatches points={chartPoints} overlayScore={overlayScore} />
 
         <footer className="pb-2 pt-1 text-center text-xs text-ink-muted">
           <p>© oldboys.games · Zhou / 鲷哥</p>
