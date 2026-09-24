@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type CSSProperties } from "react";
+import { useState } from "react";
 import type { ChartPoint, SummaryStats } from "@/lib/types";
 import type { OverlayScorePayload } from "@/lib/parseOverlayScore";
 import { WinChart } from "@/components/WinChart";
@@ -8,7 +8,7 @@ import { RecentMatches } from "@/components/RecentMatches";
 
 type Focus = "recent" | "chart" | null;
 
-/** 左：近期对局 · 右：走势图；悬停哪边，哪边变宽。 */
+/** 左：近期对局 · 右：走势图；悬停哪边，哪边平滑变宽。 */
 export function TrendRecentSplit({
   chartPoints,
   chartDisplay,
@@ -22,30 +22,16 @@ export function TrendRecentSplit({
 }) {
   const [focus, setFocus] = useState<Focus>(null);
 
-  // default ~58% / 42%; hover recent ~75/25; hover chart ~30/70
-  const recentFr = focus === "recent" ? 3 : focus === "chart" ? 1.1 : 1.4;
-  const chartFr = focus === "chart" ? 2.4 : focus === "recent" ? 1 : 1;
-
-  const gridStyle: CSSProperties = {
-    ["--split-cols" as string]: `minmax(0, ${recentFr}fr) minmax(0, ${chartFr}fr)`,
-  };
+  // percentages (flex-basis) — browsers interpolate these smoothly
+  const recentPct =
+    focus === "recent" ? 72 : focus === "chart" ? 30 : 56;
+  const chartPct = 100 - recentPct;
 
   return (
-    <div
-      className="trend-recent-split grid grid-cols-1 gap-3 md:min-h-[420px] md:gap-0 md:overflow-hidden md:rounded-[20px] md:border md:border-[#e9edf7] md:bg-white md:shadow-[0_8px_20px_-8px_rgba(67,24,255,0.12)]"
-      style={gridStyle}
-    >
-      <style>{`
-        @media (min-width: 768px) {
-          .trend-recent-split {
-            grid-template-columns: var(--split-cols);
-            transition: grid-template-columns 300ms cubic-bezier(0.22, 1, 0.36, 1);
-          }
-        }
-      `}</style>
-
+    <div className="flex min-h-0 flex-col gap-3 md:min-h-[420px] md:flex-row md:gap-0 md:overflow-hidden md:rounded-[20px] md:border md:border-[#e9edf7] md:bg-white md:shadow-[0_8px_20px_-8px_rgba(67,24,255,0.12)]">
       <div
-        className="min-h-0 md:border-r md:border-[#e9edf7]"
+        className="min-h-0 min-w-0 md:border-r md:border-[#e9edf7] md:transition-[flex-basis] md:duration-300 md:ease-[cubic-bezier(0.22,1,0.36,1)]"
+        style={{ flex: `0 0 ${recentPct}%` }}
         onMouseEnter={() => setFocus("recent")}
         onMouseLeave={() => setFocus(null)}
       >
@@ -59,7 +45,8 @@ export function TrendRecentSplit({
       </div>
 
       <div
-        className="min-h-0"
+        className="min-h-0 min-w-0 md:transition-[flex-basis] md:duration-300 md:ease-[cubic-bezier(0.22,1,0.36,1)]"
+        style={{ flex: `0 0 ${chartPct}%` }}
         onMouseEnter={() => setFocus("chart")}
         onMouseLeave={() => setFocus(null)}
       >
