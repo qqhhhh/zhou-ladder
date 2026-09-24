@@ -14,15 +14,17 @@ import type { ChartPoint, SummaryStats } from "@/lib/types";
 import { WaveLabel } from "@/components/WaveLabel";
 
 
-function EndPointDot(
-  props: {
-    cx?: number;
-    cy?: number;
-    index?: number;
-    lastIndex: number;
-  },
-) {
-  const { cx, cy, index, lastIndex } = props;
+function EndPointDot({
+  cx,
+  cy,
+  index,
+  lastIndex,
+}: {
+  cx?: number;
+  cy?: number;
+  index?: number;
+  lastIndex: number;
+}) {
   if (cx == null || cy == null || index == null) return null;
   if (index !== 0 && index !== lastIndex) return null;
   return (
@@ -118,13 +120,16 @@ export function WinChart({
       ? last.rollingWinrate
       : (summary?.winrate ?? 0);
   const overallWr = summary?.winrate ?? 0;
+  // Pane width includes left padding (pl-5/md:pl-6 ≈ 24px); chart box is the rest to the divider.
+  const chartBoxW =
+    layoutWidth != null ? Math.max(1, Math.round(layoutWidth - 24)) : undefined;
 
   return (
     <section
       id="trend"
       className="panel scroll-mt-24 flex h-full w-full max-w-full flex-col overflow-hidden py-5 pl-5 pr-0 md:py-6 md:pl-6 md:pr-0"
     >
-      <div className="mb-1 flex flex-wrap items-end justify-between gap-3">
+      <div className="mb-1 flex flex-wrap items-end gap-3">
         <div className="min-w-0">
           <h2 className="text-lg font-bold tracking-tight text-navy-700">
             <WaveLabel text="走势图" />
@@ -205,19 +210,19 @@ export function WinChart({
               </span>
             </p>
           ) : null}
-        </div>
-        <div className={`flex-wrap items-center gap-3 text-xs text-ink-muted ${compact ? "hidden" : "flex"}`}>
-          <span className="inline-flex items-center gap-1.5">
-            <span
-              className="inline-block h-0.5 w-4 rounded-full"
-              style={{ background: "#422AFB" }}
-            />
-            <WaveLabel text="累计净胜" />
-          </span>
-          <span className="inline-flex items-center gap-1.5">
-            <span className="inline-block h-px w-4 border-t border-dashed border-[#a3aed0]" />
-            <WaveLabel text="滚动胜率" />
-          </span>
+          <div className={`mt-2 flex-wrap items-center gap-3 text-xs text-ink-muted ${compact ? "hidden" : "flex"}`}>
+            <span className="inline-flex items-center gap-1.5">
+              <span
+                className="inline-block h-0.5 w-4 rounded-full"
+                style={{ background: "#422AFB" }}
+              />
+              <WaveLabel text="累计净胜" />
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <span className="inline-block h-px w-4 border-t border-dashed border-[#a3aed0]" />
+              <WaveLabel text="滚动胜率" />
+            </span>
+          </div>
         </div>
       </div>
 
@@ -225,10 +230,10 @@ export function WinChart({
         className="mt-2 min-h-[220px] w-full max-w-full flex-1 overflow-hidden"
         data-layout-w={layoutWidth != null ? Math.round(layoutWidth) : undefined}
       >
-        <ResponsiveContainer width="100%" height="100%" debounce={0}>
+        <ResponsiveContainer width={chartBoxW ?? "100%"} height="100%" debounce={0}>
           <ComposedChart
             data={points}
-            margin={{ top: 12, right: 0, left: 0, bottom: 4 }}
+            margin={{ top: 8, right: 0, left: -4, bottom: 0 }}
           >
             <defs>
               <linearGradient id="netGrad" x1="0" y1="0" x2="1" y2="0">
@@ -246,12 +251,15 @@ export function WinChart({
               vertical={false}
             />
             <XAxis
+              type="number"
               dataKey="index"
+              domain={[points[0].index, points[points.length - 1].index]}
+              ticks={points.map((p) => p.index)}
               tick={{ fill: "#a3aed0", fontSize: 11 }}
               tickLine={false}
               axisLine={false}
-              scale="point"
               padding={{ left: 0, right: 0 }}
+              allowDecimals={false}
             />
             <YAxis
               yAxisId="net"
