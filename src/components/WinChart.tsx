@@ -13,6 +13,30 @@ import {
 import type { ChartPoint, SummaryStats } from "@/lib/types";
 import { WaveLabel } from "@/components/WaveLabel";
 
+
+function EndPointDot(
+  props: {
+    cx?: number;
+    cy?: number;
+    index?: number;
+    lastIndex: number;
+  },
+) {
+  const { cx, cy, index, lastIndex } = props;
+  if (cx == null || cy == null || index == null) return null;
+  if (index !== 0 && index !== lastIndex) return null;
+  return (
+    <circle
+      cx={cx}
+      cy={cy}
+      r={5}
+      fill="#422AFB"
+      stroke="#fff"
+      strokeWidth={2}
+    />
+  );
+}
+
 function CustomTooltip({
   active,
   payload,
@@ -198,7 +222,7 @@ export function WinChart({
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart
             data={points}
-            margin={{ top: 12, right: 0, left: -8, bottom: 4 }}
+            margin={{ top: 12, right: 0, left: 0, bottom: 4 }}
           >
             <defs>
               <linearGradient id="netGrad" x1="0" y1="0" x2="1" y2="0">
@@ -243,7 +267,9 @@ export function WinChart({
               stroke="none"
               fill="url(#netArea)"
               fillOpacity={1}
-              isAnimationActive={false}
+              isAnimationActive
+              animationDuration={900}
+              animationEasing="ease-out"
             />
             <Line
               yAxisId="net"
@@ -252,8 +278,21 @@ export function WinChart({
               name="累计净胜"
               stroke="url(#netGrad)"
               strokeWidth={3}
-              dot={false}
-              isAnimationActive={false}
+              dot={(dotProps: {
+                cx?: number;
+                cy?: number;
+                index?: number;
+              }) => (
+                <EndPointDot
+                  cx={dotProps.cx}
+                  cy={dotProps.cy}
+                  index={dotProps.index}
+                  lastIndex={points.length - 1}
+                />
+              )}
+              isAnimationActive
+              animationDuration={1100}
+              animationEasing="ease-out"
               activeDot={{
                 r: 5,
                 fill: "#422AFB",
@@ -272,7 +311,9 @@ export function WinChart({
               strokeDasharray="4 5"
               dot={false}
               connectNulls
-              isAnimationActive={false}
+              isAnimationActive
+              animationDuration={1300}
+              animationEasing="ease-out"
               activeDot={{ r: 3.5, fill: "#707eae" }}
             />
           </ComposedChart>

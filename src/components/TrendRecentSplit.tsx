@@ -67,7 +67,8 @@ export function TrendRecentSplit({
   const ease = "cubic-bezier(0.05, 0.7, 0.1, 1)";
   const paneTransition = isDesktop
     ? ({
-        transition: `flex-basis 580ms ${ease}, width 580ms ${ease}`,
+        transition: `flex-basis 580ms ${ease}`,
+        willChange: "flex-basis",
       } as const)
     : undefined;
 
@@ -84,11 +85,13 @@ export function TrendRecentSplit({
       <div
         className="flex min-h-0 min-w-0 flex-col overflow-hidden md:h-full md:border-r md:border-[#e9edf7] md:bg-white"
         style={{
-          flex: isDesktop
+          flexGrow: 0,
+          flexShrink: 0,
+          flexBasis: isDesktop
             ? chartW != null
-              ? `0 0 ${chartW}px`
-              : "1 1 58%"
-            : "0 0 auto",
+              ? chartW
+              : "58%"
+            : "auto",
           width: isDesktop ? undefined : "100%",
           ...paneTransition,
         }}
@@ -107,11 +110,13 @@ export function TrendRecentSplit({
       <div
         className="flex min-h-0 min-w-0 flex-col md:h-full md:bg-white"
         style={{
-          flex: isDesktop
+          flexGrow: 0,
+          flexShrink: 0,
+          flexBasis: isDesktop
             ? recentW != null
-              ? `0 0 ${recentW}px`
-              : "1 1 42%"
-            : "0 0 auto",
+              ? recentW
+              : "42%"
+            : "auto",
           width: isDesktop ? undefined : "100%",
           ...paneTransition,
         }}
