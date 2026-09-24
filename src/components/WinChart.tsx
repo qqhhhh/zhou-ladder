@@ -1,6 +1,7 @@
 "use client";
 
 import { useLayoutEffect, useRef, useState } from "react";
+import { motion } from "framer-motion";
 import {
   Area,
   CartesianGrid,
@@ -360,22 +361,47 @@ export function WinChart({
         ref={boxRef}
         className="mt-2 min-h-[220px] w-full max-w-full flex-1 overflow-hidden"
       >
-        <div
-          key={widthAnimating ? "width-sync" : plotKey}
-          className={
-            widthAnimating
-              ? "h-full min-h-[220px] w-full"
-              : "chart-data-enter h-full min-h-[220px] w-full"
-          }
-        >
-          {liveWidth && widthAnimating ? (
-            <PlotBody points={points} width={chartW} height={boxH} />
+        {/*
+          Desktop: always paint with explicit px size so SVG exists in the same
+          frame as the enter fade (ResponsiveContainer paints 1–2 frames late,
+          which made CSS/framer fade finish on an empty box → "no animation").
+          Remount on enterKey/data; skip remount while divider width tweens.
+        */}
+        {liveWidth ? (
+          widthAnimating ? (
+            <div className="h-full min-h-[220px] w-full">
+              <PlotBody points={points} width={chartW} height={boxH} />
+            </div>
           ) : (
+            <motion.div
+              key={plotKey}
+              className="h-full min-h-[220px] w-full"
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                duration: 0.55,
+                ease: [0.05, 0.7, 0.1, 1],
+              }}
+            >
+              <PlotBody points={points} width={chartW} height={boxH} />
+            </motion.div>
+          )
+        ) : (
+          <motion.div
+            key={plotKey}
+            className="h-full min-h-[220px] w-full"
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              duration: 0.55,
+              ease: [0.05, 0.7, 0.1, 1],
+            }}
+          >
             <ResponsiveContainer width="100%" height="100%" debounce={0}>
               <PlotBody points={points} />
             </ResponsiveContainer>
-          )}
-        </div>
+          </motion.div>
+        )}
       </div>
 
       <div
