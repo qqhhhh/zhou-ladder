@@ -387,3 +387,26 @@ footer {
 .hz-td {
   border-bottom: 1px solid var(--line);
 }
+
+
+/* Chart data switch — same motion as early framer-motion (8daa33f) */
+@keyframes chart-data-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.chart-data-enter {
+  animation: chart-data-enter 0.5s cubic-bezier(0.05, 0.7, 0.1, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chart-data-enter {
+    animation: none;
+  }
+}

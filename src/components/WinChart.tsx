@@ -1,7 +1,6 @@
 "use client";
 
 import { useLayoutEffect, useRef, useState } from "react";
-import { motion } from "framer-motion";
 import {
   Area,
   CartesianGrid,
@@ -364,17 +363,12 @@ export function WinChart({
         ref={boxRef}
         className="mt-2 min-h-[220px] w-full max-w-full flex-1 overflow-hidden"
       >
-        <motion.div
-          key={widthAnimating ? "width-sync" : dataKey}
-          className="h-full w-full"
-          initial={
-            widthAnimating ? false : { opacity: 0, y: 10 }
-          }
-          animate={{ opacity: 1, y: 0 }}
-          transition={
+        <div
+          key={dataKey}
+          className={
             widthAnimating
-              ? { duration: 0 }
-              : { duration: 0.45, ease: [0.05, 0.7, 0.1, 1] }
+              ? "h-full w-full"
+              : "chart-data-enter h-full w-full"
           }
         >
           {liveWidth && widthAnimating ? (
@@ -384,7 +378,7 @@ export function WinChart({
               <PlotBody points={points} />
             </ResponsiveContainer>
           )}
-        </motion.div>
+        </div>
       </div>
 
       <div
