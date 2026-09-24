@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import type { ChartPoint } from "@/lib/types";
 import type { OverlayScorePayload } from "@/lib/parseOverlayScore";
 import { overlayDeltaForMatch } from "@/lib/overlayScore";
@@ -9,7 +10,7 @@ function formatDelta(n: number): string {
   return n > 0 ? `+${n}` : String(n);
 }
 
-export function RecentMatches({
+function RecentMatchesInner({
   points,
   overlayScore = null,
   limit = 8,
@@ -22,7 +23,11 @@ export function RecentMatches({
   /** Shrunk pane: only 胜负 + 英雄 + 分数. */
   compact?: boolean;
 }) {
-  const recent = [...points].reverse().slice(0, Math.max(1, limit));
+  const n = Math.max(1, limit);
+  const recent =
+    points.length <= n
+      ? points.slice().reverse()
+      : points.slice(-n).reverse();
 
   return (
     <div
@@ -93,3 +98,5 @@ export function RecentMatches({
     </div>
   );
 }
+
+export const RecentMatches = memo(RecentMatchesInner);

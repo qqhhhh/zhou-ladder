@@ -142,11 +142,16 @@ export function WinChart({
   }, [points]);
 
   // Arm morph only when data changes — never when syncDragging flips false on release.
+  // Dense/long display (≥240 pts) skips morph for snappy date switches.
   useEffect(() => {
+    if (points.length > 240) {
+      setAnimForData(false);
+      return;
+    }
     setAnimForData(true);
     const t = window.setTimeout(() => setAnimForData(false), 1400);
     return () => window.clearTimeout(t);
-  }, [pointsSig]);
+  }, [pointsSig, points.length]);
 
   // Drag start → anim off immediately; stay off on release (never re-arm here).
   useEffect(() => {

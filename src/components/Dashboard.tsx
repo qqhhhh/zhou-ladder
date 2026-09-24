@@ -218,8 +218,16 @@ export function Dashboard({
     () => buildChartPointsFromCompact(filtered, heroes),
     [filtered, heroes],
   );
-  const chartDisplay = useMemo(
-    () => downsampleChartPoints(chartPoints, 360),
+  const chartDisplay = useMemo(() => {
+    const n = chartPoints.length;
+    const maxChartPts =
+      n > 2500 ? 160 : n > 1200 ? 220 : n > 600 ? 280 : 360;
+    return downsampleChartPoints(chartPoints, maxChartPts);
+  }, [chartPoints]);
+
+  /** Only last N for RecentMatches — avoid pushing full chartPoints through split. */
+  const recentPoints = useMemo(
+    () => chartPoints.slice(-8),
     [chartPoints],
   );
 
@@ -296,7 +304,7 @@ export function Dashboard({
         />
 
         <TrendRecentSplit
-          chartPoints={chartPoints}
+          chartPoints={recentPoints}
           chartDisplay={chartDisplay}
           summary={summary}
           overlayScore={overlayScore}
