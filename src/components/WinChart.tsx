@@ -2,7 +2,9 @@
 
 import {
   useCallback,
+  useEffect,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
   type PointerEvent as ReactPointerEvent,
@@ -116,6 +118,20 @@ export function WinChart({
   const pendingW = useRef<number | null>(null);
   const rafId = useRef<number | null>(null);
   const draggingRef = useRef(false);
+  /** Only true after points change; never re-armed by ending a drag. */
+  const [animForData, setAnimForData] = useState(true);
+  const pointsSig = useMemo(() => {
+    if (points.length === 0) return "empty";
+    const a = points[0];
+    const b = points[points.length - 1];
+    return `${points.length}:${a.index}:${a.cumulativeNetWins}:${b.index}:${b.cumulativeNetWins}:${b.rollingWinrate ?? ""}`;
+  }, [points]);
+
+  useEffect(() => {
+    setAnimForData(true);
+    const t = window.setTimeout(() => setAnimForData(false), 1400);
+    return () => window.clearTimeout(t);
+  }, [pointsSig]);
 
   useLayoutEffect(() => {
     const shell = shellRef.current;
@@ -168,6 +184,7 @@ export function WinChart({
     e.stopPropagation();
     e.currentTarget.setPointerCapture(e.pointerId);
     draggingRef.current = true;
+    setAnimForData(false);
     setDragging(true);
     dragStartX.current = e.clientX;
     dragStartW.current = sectionWidth > 0 ? sectionWidth : maxWidth;
@@ -222,7 +239,7 @@ export function WinChart({
       ? last.rollingWinrate
       : (summary?.winrate ?? 0);
   const overallWr = summary?.winrate ?? 0;
-  const anim = !dragging;
+  const anim = animForData && !dragging;
 
   return (
     <div ref={shellRef} className="w-full max-w-full">
