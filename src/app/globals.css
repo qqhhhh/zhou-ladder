@@ -389,11 +389,11 @@ footer {
 }
 
 
-/* Chart data switch — same motion as early framer-motion (8daa33f) */
+/* Chart data switch — restarted in WinChart useLayoutEffect on plotKey */
 @keyframes chart-data-enter {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(28px);
   }
   to {
     opacity: 1;
@@ -402,6 +402,7 @@ footer {
 }
 
 .chart-data-enter {
-  animation: chart-data-enter 0.5s cubic-bezier(0.05, 0.7, 0.1, 1) both;
+  animation: chart-data-enter 1s cubic-bezier(0.05, 0.7, 0.1, 1) both;
+  will-change: opacity, transform;
 }
 

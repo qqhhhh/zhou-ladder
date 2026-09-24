@@ -1,7 +1,6 @@
 "use client";
 
 import { useLayoutEffect, useRef, useState } from "react";
-import { motion, MotionConfig } from "framer-motion";
 import {
   Area,
   CartesianGrid,
@@ -211,6 +210,7 @@ export function WinChart({
   enterKey?: string;
 }) {
   const boxRef = useRef<HTMLDivElement>(null);
+  const plotEnterRef = useRef<HTMLDivElement>(null);
   const [boxH, setBoxH] = useState(220);
   const liveWidth = layoutWidth != null && layoutWidth > 0;
   // Same frame as divider: left pad stays, right edge = divider.
@@ -218,6 +218,14 @@ export function WinChart({
     ? Math.max(1, Math.round(layoutWidth - PANEL_LEFT_PAD))
     : 0;
   const plotKey = `${enterKey}:${points.length}:${points[points.length - 1]?.match_id ?? points[points.length - 1]?.date ?? ""}:${points[points.length - 1]?.cumulativeNetWins ?? 0}`;
+
+  useLayoutEffect(() => {
+    const el = plotEnterRef.current;
+    if (!el) return;
+    el.classList.remove("chart-data-enter");
+    void el.offsetWidth;
+    el.classList.add("chart-data-enter");
+  }, [plotKey]);
 
   useLayoutEffect(() => {
     const el = boxRef.current;
@@ -361,32 +369,15 @@ export function WinChart({
         ref={boxRef}
         className="mt-2 min-h-[220px] w-full max-w-full flex-1 overflow-hidden"
       >
-        {/*
-          Keep ONE motion wrapper for range switches (never unmount it while the
-          divider tweens — that swap was painting the new SVG at opacity 1).
-          Desktop: explicit px size so SVG exists in the same frame as the fade.
-          reducedMotion=never: OS "reduce motion" was zeroing this enter.
-        */}
-        <MotionConfig reducedMotion="never">
-          <motion.div
-            key={plotKey}
-            className="h-full min-h-[220px] w-full"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{
-              duration: 0.65,
-              ease: [0.05, 0.7, 0.1, 1],
-            }}
-          >
-            {liveWidth ? (
-              <PlotBody points={points} width={chartW} height={boxH} />
-            ) : (
-              <ResponsiveContainer width="100%" height="100%" debounce={0}>
-                <PlotBody points={points} />
-              </ResponsiveContainer>
-            )}
-          </motion.div>
-        </MotionConfig>
+        <div ref={plotEnterRef} className="h-full min-h-[220px] w-full">
+          {liveWidth ? (
+            <PlotBody points={points} width={chartW} height={boxH} />
+          ) : (
+            <ResponsiveContainer width="100%" height="100%" debounce={0}>
+              <PlotBody points={points} />
+            </ResponsiveContainer>
+          )}
+        </div>
       </div>
 
       <div
