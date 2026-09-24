@@ -8,6 +8,7 @@ import { PlayerHeader } from "@/components/PlayerHeader";
 import { SummaryCards } from "@/components/SummaryCards";
 import { formatRankTier } from "@/lib/opendota";
 import { TrendRecentSplit } from "@/components/TrendRecentSplit";
+import { DateRangeFilter } from "@/components/DateRangeFilter";
 import type { OpenDotaHero, OpenDotaPlayer } from "@/lib/types";
 import type { CompactMatch } from "@/lib/stats";
 import type { OverlayScorePayload } from "@/lib/parseOverlayScore";
@@ -269,6 +270,16 @@ export function Dashboard({
           summary={summary}
           overlayScore={overlayScore}
         />
+
+        <div className="panel flex flex-wrap items-center justify-between gap-3 px-4 py-3 md:px-5">
+          <p className="text-sm font-bold text-navy-700">
+            按日期查询
+          </p>
+          <DateRangeFilter
+            currentDays={range.key}
+            onRangeChange={applyRange}
+          />
+        </div>
 
         <HeroTable rows={heroRows} />
 
