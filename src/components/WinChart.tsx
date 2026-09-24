@@ -141,16 +141,12 @@ export function WinChart({
     return `${points.length}:${a.index}:${a.cumulativeNetWins}:${b.index}:${b.cumulativeNetWins}:${b.rollingWinrate ?? ""}`;
   }, [points]);
 
+  // Arm morph only when data changes — never when syncDragging flips false on release.
   useEffect(() => {
-    // Do not arm morph while a drag is in progress (local or parent divider).
-    if (syncDragging || draggingRef.current) {
-      setAnimForData(false);
-      return;
-    }
     setAnimForData(true);
     const t = window.setTimeout(() => setAnimForData(false), 1400);
     return () => window.clearTimeout(t);
-  }, [pointsSig, syncDragging]);
+  }, [pointsSig]);
 
   // Drag start → anim off immediately; stay off on release (never re-arm here).
   useEffect(() => {
