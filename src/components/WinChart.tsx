@@ -1,6 +1,7 @@
 "use client";
 
 import { useLayoutEffect, useRef, useState } from "react";
+import { motion } from "framer-motion";
 import {
   Area,
   CartesianGrid,
@@ -92,15 +93,11 @@ function CustomTooltip({
 
 type PlotBodyProps = {
   points: ChartPoint[];
-  /** False while divider mid-tween; otherwise enter ease-out on data change. */
-  animate: boolean;
   width?: number;
   height?: number;
 };
 
-function PlotBody({ points, animate, width, height }: PlotBodyProps) {
-  // Recharts 3 default is "auto"; boolean true is weaker than auto for data updates.
-  const anim: boolean | "auto" = animate ? "auto" : false;
+function PlotBody({ points, width, height }: Omit<PlotBodyProps, "animate">) {
   const lastIndex = points.length - 1;
   return (
     <ComposedChart
@@ -151,9 +148,7 @@ function PlotBody({ points, animate, width, height }: PlotBodyProps) {
         stroke="none"
         fill="url(#netArea)"
         fillOpacity={1}
-        isAnimationActive={anim}
-        animationDuration={900}
-        animationEasing="ease-out"
+        isAnimationActive={false}
       />
       <Line
         yAxisId="net"
@@ -170,9 +165,7 @@ function PlotBody({ points, animate, width, height }: PlotBodyProps) {
             lastIndex={lastIndex}
           />
         )}
-        isAnimationActive={anim}
-        animationDuration={1100}
-        animationEasing="ease-out"
+        isAnimationActive={false}
         activeDot={{
           r: 5,
           fill: "#422AFB",
@@ -191,9 +184,7 @@ function PlotBody({ points, animate, width, height }: PlotBodyProps) {
         strokeDasharray="4 5"
         dot={false}
         connectNulls
-        isAnimationActive={anim}
-        animationDuration={1300}
-        animationEasing="ease-out"
+        isAnimationActive={false}
         activeDot={{ r: 3.5, fill: "#707eae" }}
       />
     </ComposedChart>
@@ -223,8 +214,6 @@ export function WinChart({
   const chartW = liveWidth
     ? Math.max(1, Math.round(layoutWidth - PANEL_LEFT_PAD))
     : 0;
-  // Enter ease-out on data change; mute only during divider resize.
-  const animate = !widthAnimating;
   const dataKey = [
     points.length,
     points[0]?.match_id ?? points[0]?.date ?? "",
@@ -375,18 +364,27 @@ export function WinChart({
         ref={boxRef}
         className="mt-2 min-h-[220px] w-full max-w-full flex-1 overflow-hidden"
       >
-        {liveWidth && widthAnimating ? (
-          <PlotBody
-            points={points}
-            animate={false}
-            width={chartW}
-            height={boxH}
-          />
-        ) : (
-          <ResponsiveContainer width="100%" height="100%" debounce={0}>
-            <PlotBody key={dataKey} points={points} animate={!widthAnimating} />
-          </ResponsiveContainer>
-        )}
+        <motion.div
+          key={widthAnimating ? "width-sync" : dataKey}
+          className="h-full w-full"
+          initial={
+            widthAnimating ? false : { opacity: 0, y: 10 }
+          }
+          animate={{ opacity: 1, y: 0 }}
+          transition={
+            widthAnimating
+              ? { duration: 0 }
+              : { duration: 0.45, ease: [0.05, 0.7, 0.1, 1] }
+          }
+        >
+          {liveWidth && widthAnimating ? (
+            <PlotBody points={points} width={chartW} height={boxH} />
+          ) : (
+            <ResponsiveContainer width="100%" height="100%" debounce={0}>
+              <PlotBody points={points} />
+            </ResponsiveContainer>
+          )}
+        </motion.div>
       </div>
 
       <div
