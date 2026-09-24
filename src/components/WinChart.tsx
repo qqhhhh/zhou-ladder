@@ -92,14 +92,15 @@ function CustomTooltip({
 
 type PlotBodyProps = {
   points: ChartPoint[];
-  /** False only while the divider is mid-tween; data switches keep enter ease-out. */
+  /** False while divider mid-tween; otherwise enter ease-out on data change. */
   animate: boolean;
   width?: number;
   height?: number;
 };
 
 function PlotBody({ points, animate, width, height }: PlotBodyProps) {
-  const anim = animate;
+  // Recharts 3 default is "auto"; boolean true is weaker than auto for data updates.
+  const anim: boolean | "auto" = animate ? "auto" : false;
   const lastIndex = points.length - 1;
   return (
     <ComposedChart
@@ -224,7 +225,13 @@ export function WinChart({
     : 0;
   // Enter ease-out on data change; mute only during divider resize.
   const animate = !widthAnimating;
-  const dataKey = `${points.length}:${points[0]?.index ?? 0}:${points[points.length - 1]?.index ?? 0}:${points[points.length - 1]?.cumulativeNetWins ?? 0}`;
+  const dataKey = [
+    points.length,
+    points[0]?.match_id ?? points[0]?.date ?? "",
+    points[points.length - 1]?.match_id ?? points[points.length - 1]?.date ?? "",
+    points[points.length - 1]?.cumulativeNetWins ?? 0,
+    points[points.length - 1]?.rollingWinrate ?? "",
+  ].join(":");
 
   useLayoutEffect(() => {
     const el = boxRef.current;
@@ -368,17 +375,16 @@ export function WinChart({
         ref={boxRef}
         className="mt-2 min-h-[220px] w-full max-w-full flex-1 overflow-hidden"
       >
-        {liveWidth ? (
+        {liveWidth && widthAnimating ? (
           <PlotBody
-            key={dataKey}
             points={points}
-            animate={animate}
+            animate={false}
             width={chartW}
             height={boxH}
           />
         ) : (
           <ResponsiveContainer width="100%" height="100%" debounce={0}>
-            <PlotBody key={dataKey} points={points} animate={animate} />
+            <PlotBody key={dataKey} points={points} animate={!widthAnimating} />
           </ResponsiveContainer>
         )}
       </div>
