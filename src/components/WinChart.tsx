@@ -218,14 +218,22 @@ export function WinChart({
     ? Math.max(1, Math.round(layoutWidth - PANEL_LEFT_PAD))
     : 0;
 
-  // Light enter only when date range changes; never during divider stretch.
+  // Light enter only on date-range change. Do NOT re-run when widthAnimating
+  // flips false — that was restarting fade after every hover stretch.
   useLayoutEffect(() => {
     const el = plotEnterRef.current;
-    if (!el || widthAnimating) return;
+    if (!el) return;
     el.classList.remove("chart-data-enter");
     void el.offsetWidth;
     el.classList.add("chart-data-enter");
-  }, [enterKey, widthAnimating]);
+  }, [enterKey]);
+
+  // While divider tweens, strip enter class so opacity/transform cannot fight stretch.
+  useLayoutEffect(() => {
+    const el = plotEnterRef.current;
+    if (!el || !widthAnimating) return;
+    el.classList.remove("chart-data-enter");
+  }, [widthAnimating]);
 
   useLayoutEffect(() => {
     const el = boxRef.current;
