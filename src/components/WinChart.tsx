@@ -64,16 +64,19 @@ function CustomTooltip({
 export function WinChart({
   points,
   summary,
+  compact = false,
 }: {
   points: ChartPoint[];
   summary?: SummaryStats;
   rangeLabel?: string;
+  /** Narrow pane: hide bulky header stats, keep chart. */
+  compact?: boolean;
 }) {
   if (points.length === 0) {
     return (
       <div
         id="trend"
-        className="panel flex min-h-72 scroll-mt-24 items-center justify-center text-ink-muted"
+        className="panel flex h-full min-h-72 scroll-mt-24 items-center justify-center text-ink-muted"
       >
         <WaveLabel text="所选范围内暂无天梯对局" />
       </div>
@@ -92,14 +95,14 @@ export function WinChart({
   return (
     <section
       id="trend"
-      className="panel scroll-mt-24 flex flex-col p-5 md:p-6"
+      className="panel scroll-mt-24 flex h-full flex-col p-5 md:p-6"
     >
       <div className="mb-1 flex flex-wrap items-end justify-between gap-3">
         <div className="min-w-0">
           <h2 className="text-lg font-bold tracking-tight text-navy-700">
             <WaveLabel text="走势图" />
           </h2>
-          <div className="mt-3 flex flex-col gap-1.5">
+          <div className={`mt-3 flex-col gap-1.5 ${compact ? "hidden" : "flex"}`}>
             <div className="flex items-baseline gap-2">
               <span className="text-sm font-medium text-ink-muted">
                 <WaveLabel text="累计净胜" />
@@ -149,8 +152,34 @@ export function WinChart({
               </span>
             </div>
           </div>
+          {compact ? (
+            <p className="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-1 text-sm">
+              <span
+                className={`font-mono font-bold tabular-nums ${
+                  netWins > 0
+                    ? "text-[#05cd99]"
+                    : netWins < 0
+                      ? "text-[#ee5d50]"
+                      : "text-navy-700"
+                }`}
+              >
+                <WaveLabel text={`净胜 ${netWins > 0 ? "+" : ""}${netWins}`} />
+              </span>
+              <span
+                className={`font-mono font-bold tabular-nums ${
+                  rollingWr > 50
+                    ? "text-[#05cd99]"
+                    : rollingWr < 50
+                      ? "text-[#ee5d50]"
+                      : "text-navy-700"
+                }`}
+              >
+                <WaveLabel text={`滚动 ${rollingWr.toFixed(1)}%`} />
+              </span>
+            </p>
+          ) : null}
         </div>
-        <div className="flex flex-wrap items-center gap-3 text-xs text-ink-muted">
+        <div className={`flex-wrap items-center gap-3 text-xs text-ink-muted ${compact ? "hidden" : "flex"}`}>
           <span className="inline-flex items-center gap-1.5">
             <span
               className="inline-block h-0.5 w-4 rounded-full"
@@ -165,7 +194,7 @@ export function WinChart({
         </div>
       </div>
 
-      <div className="mt-2 w-full" style={{ height: 300 }}>
+      <div className="mt-2 min-h-[220px] w-full flex-1">
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart
             data={points}
@@ -254,7 +283,7 @@ export function WinChart({
         </ResponsiveContainer>
       </div>
 
-      <div className="mt-4 grid grid-cols-3 gap-3 border-t border-[#e9edf7] pt-4">
+      <div className={`mt-4 grid-cols-3 gap-3 border-t border-[#e9edf7] pt-4 ${compact ? "hidden" : "grid"}`}>
         <div>
           <p className="text-[10px] font-medium tracking-wide text-ink-muted">
             <WaveLabel text="场次" />

@@ -12,14 +12,17 @@ function formatDelta(n: number): string {
 export function RecentMatches({
   points,
   overlayScore = null,
+  limit = 8,
 }: {
   points: ChartPoint[];
   overlayScore?: OverlayScorePayload | null;
+  /** How many recent rows to show (hover-expand can raise this). */
+  limit?: number;
 }) {
-  const recent = [...points].reverse().slice(0, 8);
+  const recent = [...points].reverse().slice(0, Math.max(1, limit));
 
   return (
-    <div id="recent" className="panel scroll-mt-24 overflow-hidden">
+    <div id="recent" className="panel scroll-mt-24 flex h-full flex-col overflow-hidden">
       <div className="flex items-center justify-between px-5 pb-2 pt-5">
         <h2 className="text-lg font-bold tracking-tight text-navy-700">
           <WaveLabel text="近期对局" />
@@ -28,7 +31,7 @@ export function RecentMatches({
           <WaveLabel text={`最近 ${recent.length} 场`} />
         </span>
       </div>
-      <ul>
+      <ul className="min-h-0 flex-1 overflow-y-auto">
         {recent.length === 0 ? (
           <li className="px-5 py-8 text-center text-sm text-ink-muted">
             <WaveLabel text="暂无对局" />
