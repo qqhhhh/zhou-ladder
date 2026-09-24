@@ -69,6 +69,7 @@ export function TrendRecentSplit({
   const [recentW, setRecentW] = useState(0);
   const recentWRef = useRef(0);
   const rafRef = useRef<number | null>(null);
+  const [widthAnimating, setWidthAnimating] = useState(false);
 
   useEffect(() => {
     const mq = window.matchMedia(`(min-width: ${MD_MIN}px)`);
@@ -103,6 +104,7 @@ export function TrendRecentSplit({
         cancelAnimationFrame(rafRef.current);
         rafRef.current = null;
       }
+      setWidthAnimating(false);
       return;
     }
 
@@ -111,11 +113,13 @@ export function TrendRecentSplit({
     if (Math.abs(from - to) < 0.5) {
       recentWRef.current = to;
       setRecentW(to);
+      setWidthAnimating(false);
       return;
     }
 
     if (rafRef.current != null) cancelAnimationFrame(rafRef.current);
     const start = performance.now();
+    setWidthAnimating(true);
 
     const tick = (now: number) => {
       const t = Math.min(1, (now - start) / ANIM_MS);
@@ -129,6 +133,7 @@ export function TrendRecentSplit({
         recentWRef.current = to;
         setRecentW(to);
         rafRef.current = null;
+        setWidthAnimating(false);
       }
     };
 
@@ -175,6 +180,7 @@ export function TrendRecentSplit({
             summary={summary}
             compact={false}
             layoutWidth={chartW}
+            widthAnimating={widthAnimating}
           />
         </div>
       </div>

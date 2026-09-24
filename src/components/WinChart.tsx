@@ -92,13 +92,14 @@ function CustomTooltip({
 
 type PlotBodyProps = {
   points: ChartPoint[];
-  syncToDivider: boolean;
+  /** False only while the divider is mid-tween; data switches keep enter ease-out. */
+  animate: boolean;
   width?: number;
   height?: number;
 };
 
-function PlotBody({ points, syncToDivider, width, height }: PlotBodyProps) {
-  const anim = !syncToDivider;
+function PlotBody({ points, animate, width, height }: PlotBodyProps) {
+  const anim = animate;
   const lastIndex = points.length - 1;
   return (
     <ComposedChart
@@ -203,6 +204,7 @@ export function WinChart({
   summary,
   compact = false,
   layoutWidth,
+  widthAnimating = false,
 }: {
   points: ChartPoint[];
   summary?: SummaryStats;
@@ -210,14 +212,19 @@ export function WinChart({
   compact?: boolean;
   /** Chart pane width (px); updates every divider animation frame. */
   layoutWidth?: number;
+  /** True only while hover split width is tweening. */
+  widthAnimating?: boolean;
 }) {
   const boxRef = useRef<HTMLDivElement>(null);
   const [boxH, setBoxH] = useState(220);
-  const syncToDivider = layoutWidth != null && layoutWidth > 0;
+  const liveWidth = layoutWidth != null && layoutWidth > 0;
   // Same frame as divider: left pad stays, right edge = divider.
-  const chartW = syncToDivider
+  const chartW = liveWidth
     ? Math.max(1, Math.round(layoutWidth - PANEL_LEFT_PAD))
     : 0;
+  // Enter ease-out on data change; mute only during divider resize.
+  const animate = !widthAnimating;
+  const dataKey = `${points.length}:${points[0]?.index ?? 0}:${points[points.length - 1]?.index ?? 0}:${points[points.length - 1]?.cumulativeNetWins ?? 0}`;
 
   useLayoutEffect(() => {
     const el = boxRef.current;
@@ -361,16 +368,17 @@ export function WinChart({
         ref={boxRef}
         className="mt-2 min-h-[220px] w-full max-w-full flex-1 overflow-hidden"
       >
-        {syncToDivider ? (
+        {liveWidth ? (
           <PlotBody
+            key={dataKey}
             points={points}
-            syncToDivider
+            animate={animate}
             width={chartW}
             height={boxH}
           />
         ) : (
           <ResponsiveContainer width="100%" height="100%" debounce={0}>
-            <PlotBody points={points} syncToDivider={false} />
+            <PlotBody key={dataKey} points={points} animate={animate} />
           </ResponsiveContainer>
         )}
       </div>
