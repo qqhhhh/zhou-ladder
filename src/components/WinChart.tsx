@@ -95,7 +95,7 @@ export function WinChart({
   return (
     <section
       id="trend"
-      className="panel scroll-mt-24 flex h-full flex-col overflow-hidden py-5 pl-5 pr-0 md:py-6 md:pl-6 md:pr-0"
+      className="panel scroll-mt-24 flex h-full w-full max-w-full flex-col overflow-hidden py-5 pl-5 pr-0 md:py-6 md:pl-6 md:pr-0"
     >
       <div className="mb-1 flex flex-wrap items-end justify-between gap-3">
         <div className="min-w-0">
@@ -194,11 +194,11 @@ export function WinChart({
         </div>
       </div>
 
-      <div className="mt-2 min-h-[220px] w-full flex-1">
+      <div className="mt-2 min-h-[220px] w-full max-w-full flex-1 overflow-hidden">
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart
             data={points}
-            margin={{ top: 12, right: 2, left: -8, bottom: 4 }}
+            margin={{ top: 12, right: 0, left: -8, bottom: 4 }}
           >
             <defs>
               <linearGradient id="netGrad" x1="0" y1="0" x2="1" y2="0">
@@ -243,9 +243,7 @@ export function WinChart({
               stroke="none"
               fill="url(#netArea)"
               fillOpacity={1}
-              isAnimationActive
-              animationDuration={900}
-              animationEasing="ease-out"
+              isAnimationActive={false}
             />
             <Line
               yAxisId="net"
@@ -255,9 +253,7 @@ export function WinChart({
               stroke="url(#netGrad)"
               strokeWidth={3}
               dot={false}
-              isAnimationActive
-              animationDuration={1100}
-              animationEasing="ease-out"
+              isAnimationActive={false}
               activeDot={{
                 r: 5,
                 fill: "#422AFB",
@@ -276,9 +272,7 @@ export function WinChart({
               strokeDasharray="4 5"
               dot={false}
               connectNulls
-              isAnimationActive
-              animationDuration={1300}
-              animationEasing="ease-out"
+              isAnimationActive={false}
               activeDot={{ r: 3.5, fill: "#707eae" }}
             />
           </ComposedChart>

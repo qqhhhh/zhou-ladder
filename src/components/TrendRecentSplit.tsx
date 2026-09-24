@@ -82,7 +82,7 @@ export function TrendRecentSplit({
     >
       {/* 上(移动) / 左(桌面)：走势 */}
       <div
-        className="flex min-h-0 min-w-0 flex-col md:h-full md:border-r md:border-[#e9edf7] md:bg-white"
+        className="flex min-h-0 min-w-0 flex-col overflow-hidden md:h-full md:border-r md:border-[#e9edf7] md:bg-white"
         style={{
           flex: isDesktop
             ? chartW != null
@@ -94,11 +94,11 @@ export function TrendRecentSplit({
         }}
         onMouseEnter={() => onEnter("chart")}
       >
-        <div className="h-full min-h-0 md:[&_.panel]:h-full md:[&_.panel]:rounded-none md:[&_.panel]:border-0 md:[&_.panel]:bg-transparent md:[&_.panel]:shadow-none">
+        <div className="h-full min-h-0 w-full max-w-full overflow-hidden md:[&_.panel]:h-full md:[&_.panel]:rounded-none md:[&_.panel]:border-0 md:[&_.panel]:bg-transparent md:[&_.panel]:shadow-none">
           <WinChart
             points={chartDisplay}
             summary={summary}
-            compact={isDesktop && focus !== "chart"}
+            compact={false}
           />
         </div>
       </div>
