@@ -12,15 +12,24 @@ function formatDelta(n: number): string {
 export function RecentMatches({
   points,
   overlayScore = null,
+  limit = 8,
+  compact = false,
 }: {
   points: ChartPoint[];
   overlayScore?: OverlayScorePayload | null;
+  /** How many recent rows to show. */
+  limit?: number;
+  /** Shrunk pane: only 胜负 + 英雄 + 分数. */
+  compact?: boolean;
 }) {
-  const recent = [...points].reverse().slice(0, 8);
+  const recent = [...points].reverse().slice(0, Math.max(1, limit));
 
   return (
-    <div id="recent" className="panel scroll-mt-24 overflow-hidden">
-      <div className="flex items-center justify-between px-5 pb-2 pt-5">
+    <div
+      id="recent"
+      className="panel scroll-mt-24 flex h-full flex-col overflow-hidden"
+    >
+      <div className="flex items-center justify-between px-5 pb-1 pt-4">
         <h2 className="text-lg font-bold tracking-tight text-navy-700">
           <WaveLabel text="近期对局" />
         </h2>
@@ -28,7 +37,7 @@ export function RecentMatches({
           <WaveLabel text={`最近 ${recent.length} 场`} />
         </span>
       </div>
-      <ul>
+      <ul className="min-h-0 flex-1 overflow-y-auto">
         {recent.length === 0 ? (
           <li className="px-5 py-8 text-center text-sm text-ink-muted">
             <WaveLabel text="暂无对局" />
@@ -42,7 +51,7 @@ export function RecentMatches({
             return (
               <li
                 key={`${p.index}-${p.date}`}
-                className="recent-row flex items-center gap-3 px-5 py-2.5"
+                className={`recent-row flex items-center gap-3 px-5 ${compact ? "py-2" : "py-1.5"}`}
               >
                 <span
                   className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-[11px] font-bold ${
@@ -57,9 +66,11 @@ export function RecentMatches({
                   <p className="truncate text-sm font-bold text-navy-700">
                     <WaveLabel text={p.hero} />
                   </p>
-                  <p className="truncate text-[11px] text-ink-muted">
-                    <WaveLabel text={`#${p.index} · ${p.dateLabel}`} />
-                  </p>
+                  {!compact ? (
+                    <p className="truncate text-[11px] text-ink-muted">
+                      <WaveLabel text={`#${p.index} · ${p.dateLabel}`} />
+                    </p>
+                  ) : null}
                 </div>
                 {delta != null ? (
                   <span
