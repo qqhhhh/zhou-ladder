@@ -35,6 +35,9 @@ export function DateRangeFilter({
     customFrom ?? minDate ?? "",
   );
   const [toDraft, setToDraft] = useState(customTo ?? maxDate ?? "");
+  const [lastEdited, setLastEdited] = useState<"days" | "range">(
+    isCustom ? "range" : "days",
+  );
 
   useEffect(() => {
     if (!isCustom && !presetKeys.has(currentDays)) setDraft(currentDays);
@@ -60,13 +63,18 @@ export function DateRangeFilter({
       active ? "border-brand" : "border-[#e9edf7]"
     }`;
 
-  const applyManual = () => {
-    const n = Number(draft);
-    if (!Number.isFinite(n) || n <= 0) return;
-    onRangeChange(parseRange({ days: String(Math.floor(n)) }));
-  };
+  const daysValue = Number(draft);
+  const canApplyDays =
+    draft.trim() !== "" && Number.isInteger(daysValue) && daysValue > 0;
+  const canApplyRange = Boolean(fromDraft.trim() || toDraft.trim());
 
-  const applyCustom = () => {
+  const apply = (mode = lastEdited) => {
+    if (mode === "days") {
+      if (!canApplyDays) return;
+      onRangeChange(parseRange({ days: String(daysValue) }));
+      return;
+    }
+
     const from = fromDraft.trim() || null;
     const to = toDraft.trim() || null;
     if (!from && !to) return;
@@ -98,23 +106,21 @@ export function DateRangeFilter({
             inputMode="numeric"
             placeholder="天数"
             value={draft}
-            onChange={(e) => setDraft(e.target.value)}
+            onChange={(e) => {
+              setDraft(e.target.value);
+              setLastEdited("days");
+            }}
             onKeyDown={(e) => {
-              if (e.key === "Enter") applyManual();
+              if (e.key === "Enter") {
+                setLastEdited("days");
+                apply("days");
+              }
             }}
             className={`w-14 rounded-md border bg-white px-1.5 py-0.5 text-center text-xs font-bold tabular-nums text-navy-700 outline-none ${
               isManual ? "border-brand" : "border-[#e9edf7]"
             }`}
           />
           <WaveLabel text="天" />
-          <button
-            type="button"
-            onClick={applyManual}
-            disabled={!draft || Number(draft) <= 0}
-            className="rounded-full bg-brand px-2 py-0.5 text-[10px] font-bold text-white disabled:opacity-40"
-          >
-            <WaveLabel text="应用" />
-          </button>
         </label>
       </div>
 
@@ -126,9 +132,15 @@ export function DateRangeFilter({
             value={fromDraft}
             min={minDate}
             max={maxDate}
-            onChange={(e) => setFromDraft(e.target.value)}
+            onChange={(e) => {
+              setFromDraft(e.target.value);
+              setLastEdited("range");
+            }}
             onKeyDown={(e) => {
-              if (e.key === "Enter") applyCustom();
+              if (e.key === "Enter") {
+                setLastEdited("range");
+                apply("range");
+              }
             }}
             className={dateInputClass(isCustom)}
           />
@@ -140,17 +152,23 @@ export function DateRangeFilter({
             value={toDraft}
             min={minDate}
             max={maxDate}
-            onChange={(e) => setToDraft(e.target.value)}
+            onChange={(e) => {
+              setToDraft(e.target.value);
+              setLastEdited("range");
+            }}
             onKeyDown={(e) => {
-              if (e.key === "Enter") applyCustom();
+              if (e.key === "Enter") {
+                setLastEdited("range");
+                apply("range");
+              }
             }}
             className={dateInputClass(isCustom)}
           />
         </label>
         <button
           type="button"
-          onClick={applyCustom}
-          disabled={!fromDraft.trim() && !toDraft.trim()}
+          onClick={() => apply()}
+          disabled={lastEdited === "days" ? !canApplyDays : !canApplyRange}
           className="rounded-full bg-brand px-3 py-1.5 text-xs font-bold text-white disabled:opacity-40"
         >
           <WaveLabel text="应用" />
