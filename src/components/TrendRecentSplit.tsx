@@ -11,8 +11,45 @@ type Focus = "recent" | "chart" | null;
 /** Hover-recent / default width ≈ screenshot (~1/3). Chart-hover = half of that. */
 const RECENT_EXPANDED_RATIO = 1 / 3;
 const MD_MIN = 768;
+const ANIM_MS = 580;
+/** Same end-decelerate curve as before: cubic-bezier(0.05, 0.7, 0.1, 1) */
+const EASE_X1 = 0.05;
+const EASE_Y1 = 0.7;
+const EASE_X2 = 0.1;
+const EASE_Y2 = 1;
 
-/** 桌面：左走势 · 右近期（默认/悬停=截图约1/3，悬停走势=一半）；移动上下无动画。 */
+function cubic(t: number, a: number, b: number) {
+  const mt = 1 - t;
+  return 3 * mt * mt * t * a + 3 * mt * t * t * b + t * t * t;
+}
+
+function cubicDeriv(t: number, a: number, b: number) {
+  const mt = 1 - t;
+  return 3 * mt * mt * a + 6 * mt * t * (b - a) + 3 * t * t * (1 - b);
+}
+
+/** CSS cubic-bezier progress: time fraction → eased value. */
+function cubicBezierEase(t: number) {
+  if (t <= 0) return 0;
+  if (t >= 1) return 1;
+  let guess = t;
+  for (let i = 0; i < 8; i++) {
+    const x = cubic(guess, EASE_X1, EASE_X2) - t;
+    const dx = cubicDeriv(guess, EASE_X1, EASE_X2);
+    if (Math.abs(dx) < 1e-6) break;
+    guess -= x / dx;
+  }
+  return cubic(guess, EASE_Y1, EASE_Y2);
+}
+
+function targetRecentWidth(shellW: number, focus: Focus) {
+  const expanded = Math.round(shellW * RECENT_EXPANDED_RATIO);
+  return focus === "chart"
+    ? Math.max(140, Math.round(expanded / 2))
+    : expanded;
+}
+
+/** 桌面：左走势 · 右近期；宽度用 rAF 跟分割线实时驱动，图表每帧跟分割线 X 重绘。 */
 export function TrendRecentSplit({
   chartPoints,
   chartDisplay,
@@ -28,6 +65,10 @@ export function TrendRecentSplit({
   const [isDesktop, setIsDesktop] = useState(false);
   const shellRef = useRef<HTMLDivElement>(null);
   const [shellW, setShellW] = useState(0);
+  /** Live recent-pane width (px); chart = shellW - this. Drives both layout and Recharts. */
+  const [recentW, setRecentW] = useState(0);
+  const recentWRef = useRef(0);
+  const rafRef = useRef<number | null>(null);
 
   useEffect(() => {
     const mq = window.matchMedia(`(min-width: ${MD_MIN}px)`);
@@ -50,32 +91,64 @@ export function TrendRecentSplit({
     return () => ro.disconnect();
   }, [isDesktop]);
 
-  const recentExpanded =
-    shellW > 0 ? Math.round(shellW * RECENT_EXPANDED_RATIO) : 0;
-  const recentW =
-    !isDesktop || shellW === 0
-      ? undefined
-      : focus === "chart"
-        ? Math.max(140, Math.round(recentExpanded / 2))
-        : recentExpanded;
-  const chartW =
-    !isDesktop || shellW === 0 || recentW == null
-      ? undefined
-      : shellW - recentW;
+  // Keep ref in sync for rAF closures
+  useEffect(() => {
+    recentWRef.current = recentW;
+  }, [recentW]);
 
-  // Strong end decelerate: sprint early, coast into the stop (less stiff than expo snap).
-  const ease = "cubic-bezier(0.05, 0.7, 0.1, 1)";
-  const paneTransition = isDesktop
-    ? ({
-        transition: `flex-basis 580ms ${ease}`,
-        willChange: "flex-basis",
-      } as const)
-    : undefined;
+  // Animate recentW → target whenever focus or shellW changes (desktop only)
+  useEffect(() => {
+    if (!isDesktop || shellW <= 0) {
+      if (rafRef.current != null) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+      return;
+    }
+
+    const to = targetRecentWidth(shellW, focus);
+    const from = recentWRef.current > 0 ? recentWRef.current : to;
+    if (Math.abs(from - to) < 0.5) {
+      recentWRef.current = to;
+      setRecentW(to);
+      return;
+    }
+
+    if (rafRef.current != null) cancelAnimationFrame(rafRef.current);
+    const start = performance.now();
+
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - start) / ANIM_MS);
+      const eased = cubicBezierEase(t);
+      const next = from + (to - from) * eased;
+      recentWRef.current = next;
+      setRecentW(next);
+      if (t < 1) {
+        rafRef.current = requestAnimationFrame(tick);
+      } else {
+        recentWRef.current = to;
+        setRecentW(to);
+        rafRef.current = null;
+      }
+    };
+
+    rafRef.current = requestAnimationFrame(tick);
+    return () => {
+      if (rafRef.current != null) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+    };
+  }, [focus, shellW, isDesktop]);
+
+  const chartW =
+    isDesktop && shellW > 0 && recentW > 0 ? shellW - recentW : undefined;
 
   const onEnter = (pane: Focus) => {
     if (!isDesktop) return;
     setFocus(pane);
   };
+
   return (
     <div
       ref={shellRef}
@@ -93,7 +166,6 @@ export function TrendRecentSplit({
               : "58%"
             : "auto",
           width: isDesktop ? undefined : "100%",
-          ...paneTransition,
         }}
         onMouseEnter={() => onEnter("chart")}
       >
@@ -102,6 +174,7 @@ export function TrendRecentSplit({
             points={chartDisplay}
             summary={summary}
             compact={false}
+            layoutWidth={chartW}
           />
         </div>
       </div>
@@ -113,12 +186,11 @@ export function TrendRecentSplit({
           flexGrow: 0,
           flexShrink: 0,
           flexBasis: isDesktop
-            ? recentW != null
+            ? recentW > 0
               ? recentW
               : "42%"
             : "auto",
           width: isDesktop ? undefined : "100%",
-          ...paneTransition,
         }}
         onMouseEnter={() => onEnter("recent")}
       >

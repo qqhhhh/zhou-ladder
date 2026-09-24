@@ -89,12 +89,15 @@ export function WinChart({
   points,
   summary,
   compact = false,
+  layoutWidth,
 }: {
   points: ChartPoint[];
   summary?: SummaryStats;
   rangeLabel?: string;
   /** Narrow pane: hide bulky header stats, keep chart. */
   compact?: boolean;
+  /** Pixel width from the split divider — updates every animation frame. */
+  layoutWidth?: number;
 }) {
   if (points.length === 0) {
     return (
@@ -218,8 +221,11 @@ export function WinChart({
         </div>
       </div>
 
-      <div className="mt-2 min-h-[220px] w-full max-w-full flex-1 overflow-hidden">
-        <ResponsiveContainer width="100%" height="100%">
+      <div
+        className="mt-2 min-h-[220px] w-full max-w-full flex-1 overflow-hidden"
+        data-layout-w={layoutWidth != null ? Math.round(layoutWidth) : undefined}
+      >
+        <ResponsiveContainer width="100%" height="100%" debounce={0}>
           <ComposedChart
             data={points}
             margin={{ top: 12, right: 0, left: 0, bottom: 4 }}
