@@ -267,6 +267,7 @@ export function Dashboard({
           chartDisplay={chartDisplay}
           summary={summary}
           overlayScore={overlayScore}
+          rangeKey={range.key}
         />
 
         <HeroTable rows={heroRows} />
