@@ -111,12 +111,16 @@ export function SummaryCards({
   summary,
   rangeLabel,
   ladderScore = null,
+  rankLabel = null,
 }: {
   summary: SummaryStats;
   rangeLabel: string;
-  /** Trusted overlay total; null = hide card */
+  /** Trusted overlay total; null = show — */
   ladderScore?: number | null;
+  /** e.g. 冠绝一世 排名141 */
+  rankLabel?: string | null;
 }) {
+  const showLadder = ladderScore != null || !!rankLabel;
   const items = [
     {
       key: "games",
@@ -179,13 +183,13 @@ export function SummaryCards({
       icon: <IconKda />,
       tone: "text-navy-700",
     },
-    ...(ladderScore != null
+    ...(showLadder
       ? [
           {
             key: "ladder",
             label: "当前天梯分数",
-            value: String(ladderScore),
-            hint: "近期英雄有分·可信",
+            value: ladderScore != null ? String(ladderScore) : "—",
+            hint: rankLabel ? `段位 ${rankLabel}` : "段位 —",
             icon: <IconScore />,
             tone: "text-navy-700",
           },
@@ -196,7 +200,7 @@ export function SummaryCards({
   return (
     <section
       aria-label="关键指标"
-      className={`grid grid-cols-2 gap-3 md:gap-5 ${ladderScore != null ? "md:grid-cols-5" : "md:grid-cols-4"}`}
+      className={`grid grid-cols-2 gap-3 md:gap-5 ${showLadder ? "md:grid-cols-5" : "md:grid-cols-4"}`}
     >
       {items.map((item) => (
         <div

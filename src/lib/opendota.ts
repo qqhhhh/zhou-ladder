@@ -185,7 +185,7 @@ export function formatRankTier(
   const label = names[medal] ?? `段位${medal}`;
   if (medal === 8) {
     return leaderboardRank != null
-      ? `${label} #${leaderboardRank}`
+      ? `${label} 排名${leaderboardRank}`
       : label;
   }
   return stars > 0 ? `${label} ${stars}` : label;

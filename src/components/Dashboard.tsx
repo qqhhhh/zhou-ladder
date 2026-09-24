@@ -4,10 +4,10 @@ import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from
 import { usePathname } from "next/navigation";
 import { subDays } from "date-fns";
 import { HeroTable } from "@/components/HeroTable";
-import { MetaCards } from "@/components/MetaCards";
 import { PlayerHeader } from "@/components/PlayerHeader";
 import { RecentMatches } from "@/components/RecentMatches";
 import { SummaryCards } from "@/components/SummaryCards";
+import { formatRankTier } from "@/lib/opendota";
 import { WinChart } from "@/components/WinChart";
 import type { OpenDotaHero, OpenDotaPlayer } from "@/lib/types";
 import type { CompactMatch } from "@/lib/stats";
@@ -261,6 +261,7 @@ export function Dashboard({
           summary={summary}
           rangeLabel={range.label}
           ladderScore={ladderScore}
+          rankLabel={formatRankTier(player.rank_tier, player.leaderboard_rank)}
         />
 
         <WinChart
@@ -271,14 +272,7 @@ export function Dashboard({
 
         <HeroTable rows={heroRows} />
 
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-          <RecentMatches points={chartPoints} overlayScore={overlayScore} />
-          <MetaCards
-            player={player}
-            fetchedAt={fetchedAt}
-            rangeLabel={range.label}
-          />
-        </div>
+        <RecentMatches points={chartPoints} overlayScore={overlayScore} />
 
         <footer className="pb-2 pt-1 text-center text-xs text-ink-muted">
           <p>© oldboys.games · Zhou / 鲷哥</p>
