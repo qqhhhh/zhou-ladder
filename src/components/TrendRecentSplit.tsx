@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ChartPoint, SummaryStats } from "@/lib/types";
 import type { OverlayScorePayload } from "@/lib/parseOverlayScore";
 import { WinChart } from "@/components/WinChart";
@@ -8,7 +8,11 @@ import { RecentMatches } from "@/components/RecentMatches";
 
 type Focus = "recent" | "chart" | null;
 
-/** 左：走势图 · 右：近期对局；悬停哪边哪边冲刺变宽后放缓；两侧同高同底。 */
+/** Current default recent share of the row (before this change). */
+const RECENT_BASE_RATIO = 0.42;
+const SHRINK_PX = 120;
+
+/** 左走势 · 右近期对局；放大=现默认宽，缩小时再窄 120px。 */
 export function TrendRecentSplit({
   chartPoints,
   chartDisplay,
@@ -21,24 +25,46 @@ export function TrendRecentSplit({
   overlayScore: OverlayScorePayload | null;
 }) {
   const [focus, setFocus] = useState<Focus>(null);
+  const shellRef = useRef<HTMLDivElement>(null);
+  const [shellW, setShellW] = useState(0);
 
-  // left = chart, right = recent
-  const chartPct =
-    focus === "chart" ? 72 : focus === "recent" ? 32 : 58;
-  const recentPct = 100 - chartPct;
+  useEffect(() => {
+    const el = shellRef.current;
+    if (!el) return;
+    const measure = () => setShellW(el.clientWidth);
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
-  // 冲刺后放缓（ease-out expo-ish）
+  // 放大宽 = 现在非放大默认宽；缩小 = 再窄 120px；默认与放大同宽
+  const recentBase = shellW > 0 ? Math.round(shellW * RECENT_BASE_RATIO) : 0;
+  const recentW =
+    shellW === 0
+      ? undefined
+      : focus === "chart"
+        ? Math.max(160, recentBase - SHRINK_PX)
+        : recentBase;
+  const chartW =
+    shellW === 0 || recentW == null ? undefined : shellW - recentW;
+
   const ease = "cubic-bezier(0.16, 1, 0.3, 1)";
   const paneTransition = {
-    transition: `flex-basis 420ms ${ease}`,
+    transition: `flex-basis 420ms ${ease}, width 420ms ${ease}`,
   } as const;
 
   return (
-    <div className="flex min-h-0 flex-col gap-3 md:h-[420px] md:flex-row md:items-stretch md:gap-0 md:overflow-hidden md:rounded-[20px] md:border md:border-[#e9edf7] md:bg-white md:shadow-[14px_17px_40px_4px_rgba(112,144,176,0.08)]">
-      {/* 左：走势 */}
+    <div
+      ref={shellRef}
+      className="flex min-h-0 flex-col md:h-[420px] md:flex-row md:items-stretch md:overflow-hidden md:rounded-[20px] md:border md:border-[#e9edf7] md:bg-white md:shadow-[14px_17px_40px_4px_rgba(112,144,176,0.08)]"
+    >
       <div
         className="flex min-h-0 min-w-0 flex-col md:h-full md:border-r md:border-[#e9edf7] md:bg-white"
-        style={{ flex: `0 0 ${chartPct}%`, ...paneTransition }}
+        style={{
+          flex: chartW != null ? `0 0 ${chartW}px` : "1 1 58%",
+          ...paneTransition,
+        }}
         onMouseEnter={() => setFocus("chart")}
         onMouseLeave={() => setFocus(null)}
       >
@@ -51,10 +77,12 @@ export function TrendRecentSplit({
         </div>
       </div>
 
-      {/* 右：近期对局 — 同高，悬停不加行数、不改高度 */}
       <div
         className="flex min-h-0 min-w-0 flex-col md:h-full md:bg-white"
-        style={{ flex: `0 0 ${recentPct}%`, ...paneTransition }}
+        style={{
+          flex: recentW != null ? `0 0 ${recentW}px` : "1 1 42%",
+          ...paneTransition,
+        }}
         onMouseEnter={() => setFocus("recent")}
         onMouseLeave={() => setFocus(null)}
       >

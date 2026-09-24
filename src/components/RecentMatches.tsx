@@ -23,7 +23,7 @@ export function RecentMatches({
 
   return (
     <div id="recent" className="panel scroll-mt-24 flex h-full flex-col overflow-hidden">
-      <div className="flex items-center justify-between px-5 pb-2 pt-5">
+      <div className="flex items-center justify-between px-5 pb-1 pt-4">
         <h2 className="text-lg font-bold tracking-tight text-navy-700">
           <WaveLabel text="近期对局" />
         </h2>
@@ -45,7 +45,7 @@ export function RecentMatches({
             return (
               <li
                 key={`${p.index}-${p.date}`}
-                className="recent-row flex items-center gap-3 px-5 py-2.5"
+                className="recent-row flex items-center gap-3 px-5 py-1.5"
               >
                 <span
                   className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-[11px] font-bold ${

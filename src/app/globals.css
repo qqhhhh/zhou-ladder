@@ -215,12 +215,8 @@ footer {
 }
 
 .recent-row {
-  border-bottom: 1px solid var(--line);
-  transition: background 0.15s ease;
-}
-
-.recent-row:last-child {
   border-bottom: none;
+  transition: background 0.15s ease;
 }
 
 .recent-row:hover {
