@@ -8,12 +8,11 @@ import { RecentMatches } from "@/components/RecentMatches";
 
 type Focus = "recent" | "chart" | null;
 
-/** Current default recent share of the row (before this change). */
-const RECENT_BASE_RATIO = 0.42;
-const SHRINK_PX = 120;
+/** Hover-recent / default width ≈ screenshot (~1/3). Chart-hover = half of that. */
+const RECENT_EXPANDED_RATIO = 1 / 3;
 const MD_MIN = 768;
 
-/** 桌面：左走势 · 右近期对局（悬停冲刺放缓）；移动：上下排列、无动画。 */
+/** 桌面：左走势 · 右近期（默认/悬停=截图约1/3，悬停走势=一半）；移动上下无动画。 */
 export function TrendRecentSplit({
   chartPoints,
   chartDisplay,
@@ -51,13 +50,14 @@ export function TrendRecentSplit({
     return () => ro.disconnect();
   }, [isDesktop]);
 
-  const recentBase = shellW > 0 ? Math.round(shellW * RECENT_BASE_RATIO) : 0;
+  const recentExpanded =
+    shellW > 0 ? Math.round(shellW * RECENT_EXPANDED_RATIO) : 0;
   const recentW =
     !isDesktop || shellW === 0
       ? undefined
       : focus === "chart"
-        ? Math.max(160, recentBase - SHRINK_PX)
-        : recentBase;
+        ? Math.max(140, Math.round(recentExpanded / 2))
+        : recentExpanded;
   const chartW =
     !isDesktop || shellW === 0 || recentW == null
       ? undefined
