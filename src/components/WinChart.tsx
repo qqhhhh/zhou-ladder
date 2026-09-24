@@ -95,7 +95,7 @@ export function WinChart({
   return (
     <section
       id="trend"
-      className="panel scroll-mt-24 flex h-full flex-col py-5 pl-5 pr-2 md:py-6 md:pl-6 md:pr-2"
+      className="panel scroll-mt-24 flex h-full flex-col overflow-hidden py-5 pl-5 pr-0 md:py-6 md:pl-6 md:pr-0"
     >
       <div className="mb-1 flex flex-wrap items-end justify-between gap-3">
         <div className="min-w-0">
@@ -198,7 +198,7 @@ export function WinChart({
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart
             data={points}
-            margin={{ top: 12, right: 0, left: -8, bottom: 4 }}
+            margin={{ top: 12, right: 2, left: -8, bottom: 4 }}
           >
             <defs>
               <linearGradient id="netGrad" x1="0" y1="0" x2="1" y2="0">
@@ -220,6 +220,7 @@ export function WinChart({
               tick={{ fill: "#a3aed0", fontSize: 11 }}
               tickLine={false}
               axisLine={false}
+              scale="point"
               padding={{ left: 0, right: 0 }}
             />
             <YAxis

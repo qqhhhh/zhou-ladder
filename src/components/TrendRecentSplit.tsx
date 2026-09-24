@@ -63,10 +63,11 @@ export function TrendRecentSplit({
       ? undefined
       : shellW - recentW;
 
-  const ease = "cubic-bezier(0.16, 1, 0.3, 1)";
+  // Strong end decelerate: sprint early, coast into the stop (less stiff than expo snap).
+  const ease = "cubic-bezier(0.05, 0.7, 0.1, 1)";
   const paneTransition = isDesktop
     ? ({
-        transition: `flex-basis 420ms ${ease}, width 420ms ${ease}`,
+        transition: `flex-basis 580ms ${ease}, width 580ms ${ease}`,
       } as const)
     : undefined;
 
