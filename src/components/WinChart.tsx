@@ -1,5 +1,6 @@
 "use client";
 
+import { useLayoutEffect, useRef, useState } from "react";
 import {
   Area,
   CartesianGrid,
@@ -13,6 +14,8 @@ import {
 import type { ChartPoint, SummaryStats } from "@/lib/types";
 import { WaveLabel } from "@/components/WaveLabel";
 
+/** Left padding of the panel (pl-5=20, md:pl-6=24). Chart box ends at the divider. */
+const PANEL_LEFT_PAD = 24;
 
 function EndPointDot({
   cx,
@@ -87,6 +90,114 @@ function CustomTooltip({
   );
 }
 
+type PlotBodyProps = {
+  points: ChartPoint[];
+  syncToDivider: boolean;
+  width?: number;
+  height?: number;
+};
+
+function PlotBody({ points, syncToDivider, width, height }: PlotBodyProps) {
+  const anim = !syncToDivider;
+  const lastIndex = points.length - 1;
+  return (
+    <ComposedChart
+      width={width}
+      height={height}
+      data={points}
+      margin={{ top: 8, right: 0, left: -4, bottom: 0 }}
+    >
+      <defs>
+        <linearGradient id="netGrad" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="#4318FF" />
+          <stop offset="100%" stopColor="#868CFF" />
+        </linearGradient>
+        <linearGradient id="netArea" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#4318FF" stopOpacity={0.22} />
+          <stop offset="100%" stopColor="#4318FF" stopOpacity={0} />
+        </linearGradient>
+      </defs>
+      <CartesianGrid stroke="#e9edf7" strokeDasharray="4 8" vertical={false} />
+      <XAxis
+        type="number"
+        dataKey="index"
+        domain={[points[0].index, points[lastIndex].index]}
+        ticks={points.map((p) => p.index)}
+        tick={{ fill: "#a3aed0", fontSize: 11 }}
+        tickLine={false}
+        axisLine={false}
+        padding={{ left: 0, right: 0 }}
+        allowDecimals={false}
+      />
+      <YAxis
+        yAxisId="net"
+        tick={{ fill: "#a3aed0", fontSize: 11 }}
+        tickLine={false}
+        axisLine={false}
+        width={40}
+      />
+      <YAxis yAxisId="wr" orientation="right" domain={[0, 100]} width={0} hide />
+      <Tooltip
+        content={<CustomTooltip />}
+        cursor={{ stroke: "rgba(66,42,251,0.2)", strokeWidth: 1 }}
+      />
+      <Area
+        yAxisId="net"
+        type="monotone"
+        dataKey="cumulativeNetWins"
+        name="累计净胜"
+        stroke="none"
+        fill="url(#netArea)"
+        fillOpacity={1}
+        isAnimationActive={anim}
+        animationDuration={900}
+        animationEasing="ease-out"
+      />
+      <Line
+        yAxisId="net"
+        type="monotone"
+        dataKey="cumulativeNetWins"
+        name="累计净胜"
+        stroke="url(#netGrad)"
+        strokeWidth={3}
+        dot={(dotProps: { cx?: number; cy?: number; index?: number }) => (
+          <EndPointDot
+            cx={dotProps.cx}
+            cy={dotProps.cy}
+            index={dotProps.index}
+            lastIndex={lastIndex}
+          />
+        )}
+        isAnimationActive={anim}
+        animationDuration={1100}
+        animationEasing="ease-out"
+        activeDot={{
+          r: 5,
+          fill: "#422AFB",
+          stroke: "#fff",
+          strokeWidth: 2,
+          className: "chart-active-dot",
+        }}
+      />
+      <Line
+        yAxisId="wr"
+        type="monotone"
+        dataKey="rollingWinrate"
+        name="滚动胜率%"
+        stroke="#a3aed0"
+        strokeWidth={1.5}
+        strokeDasharray="4 5"
+        dot={false}
+        connectNulls
+        isAnimationActive={anim}
+        animationDuration={1300}
+        animationEasing="ease-out"
+        activeDot={{ r: 3.5, fill: "#707eae" }}
+      />
+    </ComposedChart>
+  );
+}
+
 export function WinChart({
   points,
   summary,
@@ -96,11 +207,31 @@ export function WinChart({
   points: ChartPoint[];
   summary?: SummaryStats;
   rangeLabel?: string;
-  /** Narrow pane: hide bulky header stats, keep chart. */
   compact?: boolean;
-  /** Pixel width from the split divider — updates every animation frame. */
+  /** Chart pane width (px); updates every divider animation frame. */
   layoutWidth?: number;
 }) {
+  const boxRef = useRef<HTMLDivElement>(null);
+  const [boxH, setBoxH] = useState(220);
+  const syncToDivider = layoutWidth != null && layoutWidth > 0;
+  // Same frame as divider: left pad stays, right edge = divider.
+  const chartW = syncToDivider
+    ? Math.max(1, Math.round(layoutWidth - PANEL_LEFT_PAD))
+    : 0;
+
+  useLayoutEffect(() => {
+    const el = boxRef.current;
+    if (!el) return;
+    const apply = () => {
+      const h = el.clientHeight;
+      if (h > 0) setBoxH((prev) => (prev === h ? prev : h));
+    };
+    apply();
+    const ro = new ResizeObserver(apply);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [compact, points.length]);
+
   if (points.length === 0) {
     return (
       <div
@@ -113,16 +244,12 @@ export function WinChart({
   }
 
   const last = points[points.length - 1];
-  // Range net wins = final cumulative (series starts at 0 within the filter)
   const netWins = summary?.netWins ?? last.cumulativeNetWins;
   const rollingWr =
     last.rollingWinrate != null
       ? last.rollingWinrate
       : (summary?.winrate ?? 0);
   const overallWr = summary?.winrate ?? 0;
-  // Pane width includes left padding (pl-5/md:pl-6 ≈ 24px); chart box is the rest to the divider.
-  const chartBoxW =
-    layoutWidth != null ? Math.max(1, Math.round(layoutWidth - 24)) : undefined;
 
   return (
     <section
@@ -134,7 +261,9 @@ export function WinChart({
           <h2 className="text-lg font-bold tracking-tight text-navy-700">
             <WaveLabel text="走势图" />
           </h2>
-          <div className={`mt-3 flex-col gap-1.5 ${compact ? "hidden" : "flex"}`}>
+          <div
+            className={`mt-3 flex-col gap-1.5 ${compact ? "hidden" : "flex"}`}
+          >
             <div className="flex items-baseline gap-2">
               <span className="text-sm font-medium text-ink-muted">
                 <WaveLabel text="累计净胜" />
@@ -210,7 +339,9 @@ export function WinChart({
               </span>
             </p>
           ) : null}
-          <div className={`mt-2 flex-wrap items-center gap-3 text-xs text-ink-muted ${compact ? "hidden" : "flex"}`}>
+          <div
+            className={`mt-2 flex-wrap items-center gap-3 text-xs text-ink-muted ${compact ? "hidden" : "flex"}`}
+          >
             <span className="inline-flex items-center gap-1.5">
               <span
                 className="inline-block h-0.5 w-4 rounded-full"
@@ -227,114 +358,26 @@ export function WinChart({
       </div>
 
       <div
+        ref={boxRef}
         className="mt-2 min-h-[220px] w-full max-w-full flex-1 overflow-hidden"
-        data-layout-w={layoutWidth != null ? Math.round(layoutWidth) : undefined}
       >
-        <ResponsiveContainer width={chartBoxW ?? "100%"} height="100%" debounce={0}>
-          <ComposedChart
-            data={points}
-            margin={{ top: 8, right: 0, left: -4, bottom: 0 }}
-          >
-            <defs>
-              <linearGradient id="netGrad" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor="#4318FF" />
-                <stop offset="100%" stopColor="#868CFF" />
-              </linearGradient>
-              <linearGradient id="netArea" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#4318FF" stopOpacity={0.22} />
-                <stop offset="100%" stopColor="#4318FF" stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid
-              stroke="#e9edf7"
-              strokeDasharray="4 8"
-              vertical={false}
-            />
-            <XAxis
-              type="number"
-              dataKey="index"
-              domain={[points[0].index, points[points.length - 1].index]}
-              ticks={points.map((p) => p.index)}
-              tick={{ fill: "#a3aed0", fontSize: 11 }}
-              tickLine={false}
-              axisLine={false}
-              padding={{ left: 0, right: 0 }}
-              allowDecimals={false}
-            />
-            <YAxis
-              yAxisId="net"
-              tick={{ fill: "#a3aed0", fontSize: 11 }}
-              tickLine={false}
-              axisLine={false}
-              width={40}
-            />
-            <YAxis yAxisId="wr" orientation="right" domain={[0, 100]} width={0} hide />
-            <Tooltip
-              content={<CustomTooltip />}
-              cursor={{ stroke: "rgba(66,42,251,0.2)", strokeWidth: 1 }}
-            />
-            <Area
-              yAxisId="net"
-              type="monotone"
-              dataKey="cumulativeNetWins"
-              name="累计净胜"
-              stroke="none"
-              fill="url(#netArea)"
-              fillOpacity={1}
-              isAnimationActive
-              animationDuration={900}
-              animationEasing="ease-out"
-            />
-            <Line
-              yAxisId="net"
-              type="monotone"
-              dataKey="cumulativeNetWins"
-              name="累计净胜"
-              stroke="url(#netGrad)"
-              strokeWidth={3}
-              dot={(dotProps: {
-                cx?: number;
-                cy?: number;
-                index?: number;
-              }) => (
-                <EndPointDot
-                  cx={dotProps.cx}
-                  cy={dotProps.cy}
-                  index={dotProps.index}
-                  lastIndex={points.length - 1}
-                />
-              )}
-              isAnimationActive
-              animationDuration={1100}
-              animationEasing="ease-out"
-              activeDot={{
-                r: 5,
-                fill: "#422AFB",
-                stroke: "#fff",
-                strokeWidth: 2,
-                className: "chart-active-dot",
-              }}
-            />
-            <Line
-              yAxisId="wr"
-              type="monotone"
-              dataKey="rollingWinrate"
-              name="滚动胜率%"
-              stroke="#a3aed0"
-              strokeWidth={1.5}
-              strokeDasharray="4 5"
-              dot={false}
-              connectNulls
-              isAnimationActive
-              animationDuration={1300}
-              animationEasing="ease-out"
-              activeDot={{ r: 3.5, fill: "#707eae" }}
-            />
-          </ComposedChart>
-        </ResponsiveContainer>
+        {syncToDivider ? (
+          <PlotBody
+            points={points}
+            syncToDivider
+            width={chartW}
+            height={boxH}
+          />
+        ) : (
+          <ResponsiveContainer width="100%" height="100%" debounce={0}>
+            <PlotBody points={points} syncToDivider={false} />
+          </ResponsiveContainer>
+        )}
       </div>
 
-      <div className={`mt-4 grid-cols-3 gap-3 border-t border-[#e9edf7] pt-4 ${compact ? "hidden" : "grid"}`}>
+      <div
+        className={`mt-4 grid-cols-3 gap-3 border-t border-[#e9edf7] pt-4 ${compact ? "hidden" : "grid"}`}
+      >
         <div>
           <p className="text-[10px] font-medium tracking-wide text-ink-muted">
             <WaveLabel text="场次" />
