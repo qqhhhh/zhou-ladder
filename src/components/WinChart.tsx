@@ -196,6 +196,7 @@ export function WinChart({
   compact = false,
   layoutWidth,
   widthAnimating = false,
+  enterKey = "",
 }: {
   points: ChartPoint[];
   summary?: SummaryStats;
@@ -205,6 +206,8 @@ export function WinChart({
   layoutWidth?: number;
   /** True only while hover split width is tweening. */
   widthAnimating?: boolean;
+  /** Date-range key — remount plot so CSS enter actually runs. */
+  enterKey?: string;
 }) {
   const boxRef = useRef<HTMLDivElement>(null);
   const [boxH, setBoxH] = useState(220);
@@ -213,13 +216,7 @@ export function WinChart({
   const chartW = liveWidth
     ? Math.max(1, Math.round(layoutWidth - PANEL_LEFT_PAD))
     : 0;
-  const dataKey = [
-    points.length,
-    points[0]?.match_id ?? points[0]?.date ?? "",
-    points[points.length - 1]?.match_id ?? points[points.length - 1]?.date ?? "",
-    points[points.length - 1]?.cumulativeNetWins ?? 0,
-    points[points.length - 1]?.rollingWinrate ?? "",
-  ].join(":");
+  const plotKey = `${enterKey}:${points.length}:${points[points.length - 1]?.match_id ?? points[points.length - 1]?.date ?? ""}:${points[points.length - 1]?.cumulativeNetWins ?? 0}`;
 
   useLayoutEffect(() => {
     const el = boxRef.current;
@@ -364,11 +361,11 @@ export function WinChart({
         className="mt-2 min-h-[220px] w-full max-w-full flex-1 overflow-hidden"
       >
         <div
-          key={dataKey}
+          key={widthAnimating ? "width-sync" : plotKey}
           className={
             widthAnimating
-              ? "h-full w-full"
-              : "chart-data-enter h-full w-full"
+              ? "h-full min-h-[220px] w-full"
+              : "chart-data-enter h-full min-h-[220px] w-full"
           }
         >
           {liveWidth && widthAnimating ? (

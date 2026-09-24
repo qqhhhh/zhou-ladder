@@ -55,11 +55,13 @@ export function TrendRecentSplit({
   chartDisplay,
   summary,
   overlayScore,
+  rangeKey,
 }: {
   chartPoints: ChartPoint[];
   chartDisplay: ChartPoint[];
   summary: SummaryStats;
   overlayScore: OverlayScorePayload | null;
+  rangeKey: string;
 }) {
   const [focus, setFocus] = useState<Focus>("recent");
   const [isDesktop, setIsDesktop] = useState(false);
@@ -181,6 +183,7 @@ export function TrendRecentSplit({
             compact={false}
             layoutWidth={chartW}
             widthAnimating={widthAnimating}
+            enterKey={rangeKey}
           />
         </div>
       </div>

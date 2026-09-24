@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { subDays } from "date-fns";
 import { HeroTable } from "@/components/HeroTable";
@@ -93,7 +93,6 @@ export function Dashboard({
   const [range, setRange] = useState<RangeState>(() =>
     parseRange({ days: initialDays }),
   );
-  const [, startTransition] = useTransition();
   const fetchGen = useRef(0);
 
   const ensureRangeLoaded = useCallback(async (r: RangeState) => {
@@ -221,7 +220,7 @@ export function Dashboard({
   );
 
   const applyRange = (next: RangeState) => {
-    startTransition(() => setRange(next));
+    setRange(next);
     replaceRangeQuery(next, basePath);
     void ensureRangeLoaded(next);
   };
@@ -269,6 +268,7 @@ export function Dashboard({
           chartDisplay={chartDisplay}
           summary={summary}
           overlayScore={overlayScore}
+          rangeKey={range.key}
         />
 
         <div className="panel flex flex-wrap items-center justify-between gap-3 px-4 py-3 md:px-5">
