@@ -31,6 +31,7 @@ const OVERLAY_ALIASES: Record<string, string[]> = {
   斯文: ["斯温"],
   斯温: ["斯温"],
   小鱼人: ["斯拉克"],
+  小鱼: ["斯拉克"],
   斯拉克: ["斯拉克"],
   敌法: ["敌法师"],
   敌法师: ["敌法师"],
@@ -39,6 +40,7 @@ const OVERLAY_ALIASES: Record<string, string[]> = {
   混沌骑士: ["混沌骑士"],
   斧王: ["斧王"],
   噬魂鬼: ["噬魂鬼"],
+  小狗: ["噬魂鬼"],
 };
 
 function norm(s: string): string {
